@@ -9,14 +9,15 @@ import lombok.*;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Getter
 @Setter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
-@EqualsAndHashCode(onlyExplicitlyIncluded = true)
 @Entity
 @Table(
         name = "route_points",
@@ -47,9 +48,17 @@ public class RoutePoint {
     @NotEmpty
     @Valid
     @Builder.Default
-    @OneToMany(mappedBy = "routePoint", cascade = CascadeType.ALL, orphanRemoval = true)
-    @OrderBy("id ASC")
-    private List<Order> orders = new ArrayList<>();
+    @ManyToMany(fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+    @JoinTable(
+            name = "route_point_orders",
+            joinColumns = @JoinColumn(name = "route_point_id"),
+            inverseJoinColumns = @JoinColumn(name = "order_id"),
+            uniqueConstraints = @UniqueConstraint(
+                    name = "uk_route_point_order_unique",
+                    columnNames = {"route_point_id", "order_id"}
+            )
+    )
+    private Set<Order> orders = new HashSet<>();
 
     @NotNull
     private LocalDateTime plannedStartTime;

@@ -26,10 +26,12 @@ public class DriverService {
         return save(command, new Driver());
     }
 
+    @Transactional(readOnly = true)
     public Driver getById(Long id) {
         return repository.findById(id).orElseThrow(() -> new NotFoundException(Driver.class, id));
     }
 
+    @Transactional(readOnly = true)
     public List<Driver> getAll() {
         return repository.findAll();
     }

@@ -8,6 +8,8 @@ import jakarta.validation.constraints.Positive;
 import lombok.*;
 
 import java.math.BigDecimal;
+import java.util.HashSet;
+import java.util.Set;
 
 @Getter
 @Setter
@@ -38,10 +40,6 @@ public class Order {
     @Positive
     @Column(precision = 12, scale = 3)
     private BigDecimal weightInKg;
-
-    @NotNull
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    private RoutePoint routePoint;
 
     @AssertTrue(message = "max_temperature must be greater than or equal to min_temperature")
     public boolean isTemperatureRangeValid() {
