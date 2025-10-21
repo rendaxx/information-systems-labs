@@ -75,7 +75,7 @@ CREATE TABLE route_point_orders (
     PRIMARY KEY (route_point_id, order_id),
     CONSTRAINT fk_rpo_rp FOREIGN KEY (route_point_id) REFERENCES route_points(id),
     CONSTRAINT fk_rpo_o  FOREIGN KEY (order_id) REFERENCES orders(id)
-)
+);
 
 ALTER TABLE retail_points
     ADD CONSTRAINT chk_retail_points_type
