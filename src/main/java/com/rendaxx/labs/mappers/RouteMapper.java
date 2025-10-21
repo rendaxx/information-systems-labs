@@ -8,11 +8,9 @@ import com.rendaxx.labs.dtos.SaveRoutePointDto;
 import com.rendaxx.labs.exceptions.NotFoundException;
 import com.rendaxx.labs.repository.RoutePointRepository;
 import com.rendaxx.labs.repository.VehicleRepository;
-import org.mapstruct.BeanMapping;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
-import org.mapstruct.NullValuePropertyMappingStrategy;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.ArrayList;

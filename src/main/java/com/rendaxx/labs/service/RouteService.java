@@ -1,8 +1,6 @@
 package com.rendaxx.labs.service;
 
-import com.rendaxx.labs.domain.Order;
 import com.rendaxx.labs.domain.Route;
-import com.rendaxx.labs.domain.RoutePoint;
 import com.rendaxx.labs.dtos.SaveRouteDto;
 import com.rendaxx.labs.exceptions.NotFoundException;
 import com.rendaxx.labs.mappers.RouteMapper;

@@ -1,6 +1,5 @@
 package com.rendaxx.labs.service;
 
-import com.rendaxx.labs.domain.Order;
 import com.rendaxx.labs.domain.RoutePoint;
 import com.rendaxx.labs.dtos.SaveRoutePointDto;
 import com.rendaxx.labs.exceptions.NotFoundException;
@@ -13,7 +12,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor

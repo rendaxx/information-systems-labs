@@ -9,17 +9,13 @@ import com.rendaxx.labs.exceptions.NotFoundException;
 import com.rendaxx.labs.repository.OrderRepository;
 import com.rendaxx.labs.repository.RetailPointRepository;
 import com.rendaxx.labs.repository.RouteRepository;
-import org.mapstruct.BeanMapping;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
-import org.mapstruct.NullValuePropertyMappingStrategy;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 @Mapper(uses = OrderMapper.class)
 public abstract class RoutePointMapper {
