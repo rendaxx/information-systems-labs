@@ -4,20 +4,21 @@ import com.rendaxx.labs.domain.Order;
 import com.rendaxx.labs.domain.RetailPoint;
 import com.rendaxx.labs.domain.Route;
 import com.rendaxx.labs.domain.RoutePoint;
+import com.rendaxx.labs.dtos.RoutePointDto;
 import com.rendaxx.labs.dtos.SaveRoutePointDto;
 import com.rendaxx.labs.exceptions.NotFoundException;
 import com.rendaxx.labs.repository.OrderRepository;
 import com.rendaxx.labs.repository.RetailPointRepository;
 import com.rendaxx.labs.repository.RouteRepository;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import java.util.HashSet;
-import java.util.Set;
-
-@Mapper(uses = OrderMapper.class)
+@Mapper(uses = {OrderMapper.class, RetailPointMapper.class})
 public abstract class RoutePointMapper {
 
     @Autowired
@@ -30,7 +31,7 @@ public abstract class RoutePointMapper {
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "plannedStartTime", source = "dto.plannedStartTime")
     @Mapping(target = "plannedEndTime", source = "dto.plannedEndTime")
-    public abstract void update(
+    abstract void update(
             @MappingTarget RoutePoint routePoint,
             SaveRoutePointDto dto,
             Route route,
@@ -48,4 +49,10 @@ public abstract class RoutePointMapper {
         Set<Order> orders = new HashSet<>(orderRepository.findAllById(dto.getOrderIds()));
         update(routePoint, dto, route, retailPoint, orders);
     }
+
+    @Mapping(target = "routeId", source = "route.id")
+    @Mapping(target = "retailPointId", source = "retailPoint.id")
+    public abstract RoutePointDto toDto(RoutePoint routePoint);
+
+    public abstract List<RoutePointDto> toDto(List<RoutePoint> routePoints);
 }
