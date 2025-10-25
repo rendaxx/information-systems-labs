@@ -11,13 +11,18 @@ import lombok.experimental.FieldDefaults;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.List;
+import java.util.Objects;
 
 @Service
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 @Transactional
 public class RouteService {
+
+    private static final int MILEAGE_SCALE = 3;
 
     RouteMapper mapper;
     RouteRepository repository;
@@ -50,6 +55,14 @@ public class RouteService {
         for (int i = 0; i < route.getRoutePoints().size(); i++) {
             route.getRoutePoints().get(i).setOrderNumber(i);
         }
+    }
+
+    @Transactional(readOnly = true)
+    public BigDecimal getAverageMileageInKm() {
+        BigDecimal averageMileage = repository.findAverageMileageInKm();
+        return Objects
+                .requireNonNullElse(averageMileage, BigDecimal.ZERO)
+                .setScale(MILEAGE_SCALE, RoundingMode.HALF_UP);
     }
 
     private Route save(SaveRouteDto command, Route route) {

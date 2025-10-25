@@ -16,7 +16,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 public abstract class VehicleMapper {
 
     @Autowired
-    DriverRepository driverRepository;
+    private DriverRepository driverRepository;
 
     @Mapping(target = "id", ignore = true)
     abstract void update(@MappingTarget Vehicle vehicle, SaveVehicleDto dto, Driver driver);

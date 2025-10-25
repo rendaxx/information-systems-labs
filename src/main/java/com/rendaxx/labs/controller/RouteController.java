@@ -5,6 +5,7 @@ import com.rendaxx.labs.dtos.SaveRouteDto;
 import com.rendaxx.labs.mappers.RouteMapper;
 import com.rendaxx.labs.service.RouteService;
 import jakarta.validation.Valid;
+import java.math.BigDecimal;
 import java.util.List;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -56,5 +57,10 @@ public class RouteController {
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void delete(@PathVariable Long id) {
         routeService.delete(id);
+    }
+
+    @GetMapping("/average-mileage")
+    public BigDecimal getAverageMileage() {
+        return routeService.getAverageMileageInKm();
     }
 }
