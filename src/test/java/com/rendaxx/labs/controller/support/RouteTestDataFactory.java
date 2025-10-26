@@ -182,7 +182,7 @@ public class RouteTestDataFactory {
             .build();
     }
 
-    private Point createPoint(double longitude, double latitude) {
+    public Point createPoint(double longitude, double latitude) {
         return GEOMETRY_FACTORY.createPoint(new Coordinate(longitude, latitude));
     }
 

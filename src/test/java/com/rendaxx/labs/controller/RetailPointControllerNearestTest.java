@@ -49,8 +49,6 @@ class RetailPointControllerNearestTest {
         .withUsername("retail_points_user")
         .withPassword("retail_points_pass");
 
-    private static final GeometryFactory GEOMETRY_FACTORY = new GeometryFactory(new PrecisionModel(), 4326);
-
     @DynamicPropertySource
     static void configureDatasourceProperties(DynamicPropertyRegistry registry) {
         registry.add("spring.datasource.url", POSTGRES::getJdbcUrl);
@@ -164,7 +162,7 @@ class RetailPointControllerNearestTest {
         RetailPoint point = RetailPoint.builder()
             .name("Retail-" + longitude + "-" + latitude)
             .address("Address-" + longitude + "-" + latitude)
-            .location(GEOMETRY_FACTORY.createPoint(new Coordinate(longitude, latitude)))
+            .location(testDataFactory.createPoint(longitude, latitude))
             .type(PointType.SHOP)
             .timezone("UTC")
             .build();
