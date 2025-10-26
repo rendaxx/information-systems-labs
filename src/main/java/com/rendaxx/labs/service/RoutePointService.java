@@ -1,6 +1,7 @@
 package com.rendaxx.labs.service;
 
 import com.rendaxx.labs.domain.RoutePoint;
+import com.rendaxx.labs.dtos.RoutePointDto;
 import com.rendaxx.labs.dtos.SaveRoutePointDto;
 import com.rendaxx.labs.exceptions.NotFoundException;
 import com.rendaxx.labs.mappers.RoutePointMapper;
@@ -24,23 +25,26 @@ public class RoutePointService {
 
     RouteService routeService;
 
-    public RoutePoint create(SaveRoutePointDto command) {
-        return save(command, new RoutePoint());
+    public RoutePointDto create(SaveRoutePointDto command) {
+        RoutePoint routePoint = save(command, new RoutePoint());
+        return mapper.toDto(routePoint);
     }
 
     @Transactional(readOnly = true)
-    public RoutePoint getById(Long id) {
-        return repository.findById(id).orElseThrow(() -> new NotFoundException(RoutePoint.class, id));
-    }
-
-    @Transactional(readOnly = true)
-    public List<RoutePoint> getAll() {
-        return repository.findAll();
-    }
-
-    public RoutePoint update(Long id, SaveRoutePointDto command) {
+    public RoutePointDto getById(Long id) {
         RoutePoint routePoint = repository.findById(id).orElseThrow(() -> new NotFoundException(RoutePoint.class, id));
-        return save(command, routePoint);
+        return mapper.toDto(routePoint);
+    }
+
+    @Transactional(readOnly = true)
+    public List<RoutePointDto> getAll() {
+        return mapper.toDto(repository.findAll());
+    }
+
+    public RoutePointDto update(Long id, SaveRoutePointDto command) {
+        RoutePoint routePoint = repository.findById(id).orElseThrow(() -> new NotFoundException(RoutePoint.class, id));
+        RoutePoint savedRoutePoint = save(command, routePoint);
+        return mapper.toDto(savedRoutePoint);
     }
 
     public void delete(Long id) {

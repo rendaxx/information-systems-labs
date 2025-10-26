@@ -2,7 +2,6 @@ package com.rendaxx.labs.controller;
 
 import com.rendaxx.labs.dtos.OrderDto;
 import com.rendaxx.labs.dtos.SaveOrderDto;
-import com.rendaxx.labs.mappers.OrderMapper;
 import com.rendaxx.labs.service.OrderService;
 import jakarta.validation.Valid;
 import java.util.List;
@@ -29,27 +28,26 @@ import org.springframework.web.bind.annotation.RestController;
 public class OrderController {
 
     OrderService orderService;
-    OrderMapper orderMapper;
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public OrderDto create(@RequestBody @Valid SaveOrderDto dto) {
-        return orderMapper.toDto(orderService.create(dto));
+        return orderService.create(dto);
     }
 
     @GetMapping("/{id}")
     public OrderDto getById(@PathVariable Long id) {
-        return orderMapper.toDto(orderService.getById(id));
+        return orderService.getById(id);
     }
 
     @GetMapping
     public List<OrderDto> getAll() {
-        return orderMapper.toDto(orderService.getAll());
+        return orderService.getAll();
     }
 
     @PutMapping("/{id}")
     public OrderDto update(@PathVariable Long id, @RequestBody @Valid SaveOrderDto dto) {
-        return orderMapper.toDto(orderService.update(id, dto));
+        return orderService.update(id, dto);
     }
 
     @DeleteMapping("/{id}")

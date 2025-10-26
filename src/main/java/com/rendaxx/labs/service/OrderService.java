@@ -1,6 +1,7 @@
 package com.rendaxx.labs.service;
 
 import com.rendaxx.labs.domain.Order;
+import com.rendaxx.labs.dtos.OrderDto;
 import com.rendaxx.labs.dtos.SaveOrderDto;
 import com.rendaxx.labs.exceptions.NotFoundException;
 import com.rendaxx.labs.mappers.OrderMapper;
@@ -22,23 +23,26 @@ public class OrderService {
     OrderMapper mapper;
     OrderRepository repository;
 
-    public Order create(SaveOrderDto command) {
-        return save(command, new Order());
+    public OrderDto create(SaveOrderDto command) {
+        Order order = save(command, new Order());
+        return mapper.toDto(order);
     }
 
     @Transactional(readOnly = true)
-    public Order getById(Long id) {
-        return repository.findById(id).orElseThrow(() -> new NotFoundException(Order.class, id));
-    }
-
-    @Transactional(readOnly = true)
-    public List<Order> getAll() {
-        return repository.findAll();
-    }
-
-    public Order update(Long id, SaveOrderDto command) {
+    public OrderDto getById(Long id) {
         Order order = repository.findById(id).orElseThrow(() -> new NotFoundException(Order.class, id));
-        return save(command, order);
+        return mapper.toDto(order);
+    }
+
+    @Transactional(readOnly = true)
+    public List<OrderDto> getAll() {
+        return mapper.toDto(repository.findAll());
+    }
+
+    public OrderDto update(Long id, SaveOrderDto command) {
+        Order order = repository.findById(id).orElseThrow(() -> new NotFoundException(Order.class, id));
+        Order savedOrder = save(command, order);
+        return mapper.toDto(savedOrder);
     }
 
     public void delete(Long id) {

@@ -2,7 +2,6 @@ package com.rendaxx.labs.controller;
 
 import com.rendaxx.labs.dtos.RetailPointDto;
 import com.rendaxx.labs.dtos.SaveRetailPointDto;
-import com.rendaxx.labs.mappers.RetailPointMapper;
 import com.rendaxx.labs.service.RetailPointService;
 import jakarta.validation.Valid;
 import java.util.List;
@@ -29,27 +28,26 @@ import org.springframework.web.bind.annotation.RestController;
 public class RetailPointController {
 
     RetailPointService retailPointService;
-    RetailPointMapper retailPointMapper;
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public RetailPointDto create(@RequestBody @Valid SaveRetailPointDto dto) {
-        return retailPointMapper.toDto(retailPointService.create(dto));
+        return retailPointService.create(dto);
     }
 
     @GetMapping("/{id}")
     public RetailPointDto getById(@PathVariable Long id) {
-        return retailPointMapper.toDto(retailPointService.getById(id));
+        return retailPointService.getById(id);
     }
 
     @GetMapping
     public List<RetailPointDto> getAll() {
-        return retailPointMapper.toDto(retailPointService.getAll());
+        return retailPointService.getAll();
     }
 
     @PutMapping("/{id}")
     public RetailPointDto update(@PathVariable Long id, @RequestBody @Valid SaveRetailPointDto dto) {
-        return retailPointMapper.toDto(retailPointService.update(id, dto));
+        return retailPointService.update(id, dto);
     }
 
     @DeleteMapping("/{id}")

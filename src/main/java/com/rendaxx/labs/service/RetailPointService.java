@@ -1,6 +1,7 @@
 package com.rendaxx.labs.service;
 
 import com.rendaxx.labs.domain.RetailPoint;
+import com.rendaxx.labs.dtos.RetailPointDto;
 import com.rendaxx.labs.dtos.SaveRetailPointDto;
 import com.rendaxx.labs.exceptions.NotFoundException;
 import com.rendaxx.labs.mappers.RetailPointMapper;
@@ -22,23 +23,26 @@ public class RetailPointService {
     RetailPointMapper mapper;
     RetailPointRepository repository;
 
-    public RetailPoint create(SaveRetailPointDto command) {
-        return save(command, new RetailPoint());
+    public RetailPointDto create(SaveRetailPointDto command) {
+        RetailPoint retailPoint = save(command, new RetailPoint());
+        return mapper.toDto(retailPoint);
     }
 
     @Transactional(readOnly = true)
-    public RetailPoint getById(Long id) {
-        return repository.findById(id).orElseThrow(() -> new NotFoundException(RetailPoint.class, id));
-    }
-
-    @Transactional(readOnly = true)
-    public List<RetailPoint> getAll() {
-        return repository.findAll();
-    }
-
-    public RetailPoint update(Long id, SaveRetailPointDto command) {
+    public RetailPointDto getById(Long id) {
         RetailPoint retailPoint = repository.findById(id).orElseThrow(() -> new NotFoundException(RetailPoint.class, id));
-        return save(command, retailPoint);
+        return mapper.toDto(retailPoint);
+    }
+
+    @Transactional(readOnly = true)
+    public List<RetailPointDto> getAll() {
+        return mapper.toDto(repository.findAll());
+    }
+
+    public RetailPointDto update(Long id, SaveRetailPointDto command) {
+        RetailPoint retailPoint = repository.findById(id).orElseThrow(() -> new NotFoundException(RetailPoint.class, id));
+        RetailPoint savedRetailPoint = save(command, retailPoint);
+        return mapper.toDto(savedRetailPoint);
     }
 
     public void delete(Long id) {

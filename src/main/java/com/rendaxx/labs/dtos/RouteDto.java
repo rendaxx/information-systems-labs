@@ -13,7 +13,6 @@ import java.util.List;
 public class RouteDto {
     Long id;
     List<RoutePointDto> routePoints;
-    Long vehicleId;
     VehicleDto vehicle;
     LocalDateTime creationTime;
     LocalDateTime plannedStartTime;

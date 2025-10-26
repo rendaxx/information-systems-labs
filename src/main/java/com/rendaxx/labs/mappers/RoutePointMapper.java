@@ -51,7 +51,6 @@ public abstract class RoutePointMapper {
     }
 
     @Mapping(target = "routeId", source = "route.id")
-    @Mapping(target = "retailPointId", source = "retailPoint.id")
     public abstract RoutePointDto toDto(RoutePoint routePoint);
 
     public abstract List<RoutePointDto> toDto(List<RoutePoint> routePoints);

@@ -4,7 +4,6 @@ import com.rendaxx.labs.domain.PointType;
 import lombok.AccessLevel;
 import lombok.Data;
 import lombok.experimental.FieldDefaults;
-import org.locationtech.jts.geom.Point;
 
 @Data
 @FieldDefaults(level = AccessLevel.PRIVATE)
@@ -12,7 +11,7 @@ public class RetailPointDto {
     Long id;
     String name;
     String address;
-    Point location;
+    PointDto location;
     PointType type;
     String timezone;
 }

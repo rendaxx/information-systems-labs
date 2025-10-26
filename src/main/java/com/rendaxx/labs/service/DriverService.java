@@ -1,6 +1,7 @@
 package com.rendaxx.labs.service;
 
 import com.rendaxx.labs.domain.Driver;
+import com.rendaxx.labs.dtos.DriverDto;
 import com.rendaxx.labs.dtos.SaveDriverDto;
 import com.rendaxx.labs.exceptions.NotFoundException;
 import com.rendaxx.labs.mappers.DriverMapper;
@@ -22,23 +23,26 @@ public class DriverService {
     DriverMapper mapper;
     DriverRepository repository;
 
-    public Driver create(SaveDriverDto command) {
-        return save(command, new Driver());
+    public DriverDto create(SaveDriverDto command) {
+        Driver driver = save(command, new Driver());
+        return mapper.toDto(driver);
     }
 
     @Transactional(readOnly = true)
-    public Driver getById(Long id) {
-        return repository.findById(id).orElseThrow(() -> new NotFoundException(Driver.class, id));
-    }
-
-    @Transactional(readOnly = true)
-    public List<Driver> getAll() {
-        return repository.findAll();
-    }
-
-    public Driver update(Long id, SaveDriverDto command) {
+    public DriverDto getById(Long id) {
         Driver driver = repository.findById(id).orElseThrow(() -> new NotFoundException(Driver.class, id));
-        return save(command, driver);
+        return mapper.toDto(driver);
+    }
+
+    @Transactional(readOnly = true)
+    public List<DriverDto> getAll() {
+        return mapper.toDto(repository.findAll());
+    }
+
+    public DriverDto update(Long id, SaveDriverDto command) {
+        Driver driver = repository.findById(id).orElseThrow(() -> new NotFoundException(Driver.class, id));
+        Driver savedDriver = save(command, driver);
+        return mapper.toDto(savedDriver);
     }
 
     public void delete(Long id) {

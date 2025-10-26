@@ -2,7 +2,6 @@ package com.rendaxx.labs.controller;
 
 import com.rendaxx.labs.dtos.DriverDto;
 import com.rendaxx.labs.dtos.SaveDriverDto;
-import com.rendaxx.labs.mappers.DriverMapper;
 import com.rendaxx.labs.service.DriverService;
 import jakarta.validation.Valid;
 import java.util.List;
@@ -29,27 +28,26 @@ import org.springframework.web.bind.annotation.RestController;
 public class DriverController {
 
     DriverService driverService;
-    DriverMapper driverMapper;
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public DriverDto create(@RequestBody @Valid SaveDriverDto dto) {
-        return driverMapper.toDto(driverService.create(dto));
+        return driverService.create(dto);
     }
 
     @GetMapping("/{id}")
     public DriverDto getById(@PathVariable Long id) {
-        return driverMapper.toDto(driverService.getById(id));
+        return driverService.getById(id);
     }
 
     @GetMapping
     public List<DriverDto> getAll() {
-        return driverMapper.toDto(driverService.getAll());
+        return driverService.getAll();
     }
 
     @PutMapping("/{id}")
     public DriverDto update(@PathVariable Long id, @RequestBody @Valid SaveDriverDto dto) {
-        return driverMapper.toDto(driverService.update(id, dto));
+        return driverService.update(id, dto);
     }
 
     @DeleteMapping("/{id}")

@@ -1,6 +1,7 @@
 package com.rendaxx.labs.service;
 
 import com.rendaxx.labs.domain.Route;
+import com.rendaxx.labs.dtos.RouteDto;
 import com.rendaxx.labs.dtos.SaveRouteDto;
 import com.rendaxx.labs.exceptions.NotFoundException;
 import com.rendaxx.labs.mappers.RouteMapper;
@@ -13,6 +14,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Objects;
 
@@ -27,23 +29,26 @@ public class RouteService {
     RouteMapper mapper;
     RouteRepository repository;
 
-    public Route create(SaveRouteDto command) {
-        return save(command, new Route());
+    public RouteDto create(SaveRouteDto command) {
+        Route route = save(command, new Route());
+        return mapper.toDto(route);
     }
 
     @Transactional(readOnly = true)
-    public Route getById(Long id) {
-        return repository.findById(id).orElseThrow(() -> new NotFoundException(Route.class, id));
-    }
-
-    @Transactional(readOnly = true)
-    public List<Route> getAll() {
-        return repository.findAll();
-    }
-
-    public Route update(Long id, SaveRouteDto command) {
+    public RouteDto getById(Long id) {
         Route route = repository.findById(id).orElseThrow(() -> new NotFoundException(Route.class, id));
-        return save(command, route);
+        return mapper.toDto(route);
+    }
+
+    @Transactional(readOnly = true)
+    public List<RouteDto> getAll() {
+        return mapper.toDto(repository.findAll());
+    }
+
+    public RouteDto update(Long id, SaveRouteDto command) {
+        Route route = repository.findById(id).orElseThrow(() -> new NotFoundException(Route.class, id));
+        Route savedRoute = save(command, route);
+        return mapper.toDto(savedRoute);
     }
 
     public void delete(Long id) {
@@ -63,6 +68,17 @@ public class RouteService {
         return Objects
                 .requireNonNullElse(averageMileage, BigDecimal.ZERO)
                 .setScale(MILEAGE_SCALE, RoundingMode.HALF_UP);
+    }
+
+    @Transactional(readOnly = true)
+    public List<RouteDto> getWithinPeriod(LocalDateTime periodStart, LocalDateTime periodEnd) {
+        if (periodStart == null || periodEnd == null) {
+            throw new IllegalArgumentException("Period bounds must be provided");
+        }
+        if (periodStart.isAfter(periodEnd)) {
+            throw new IllegalArgumentException("Period start must not be after period end");
+        }
+        return mapper.toDto(repository.findWithinPeriodWithDetails(periodStart, periodEnd));
     }
 
     private Route save(SaveRouteDto command, Route route) {

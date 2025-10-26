@@ -4,16 +4,18 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import com.rendaxx.labs.controller.support.RouteTestDataFactory;
+import com.rendaxx.labs.repository.OrderRepository;
+import com.rendaxx.labs.repository.RetailPointRepository;
+import com.rendaxx.labs.repository.RouteRepository;
+import com.rendaxx.labs.repository.VehicleRepository;
 import java.math.BigDecimal;
-import java.sql.Timestamp;
-import java.sql.Types;
 import java.time.LocalDateTime;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
@@ -27,10 +29,8 @@ import org.testcontainers.utility.DockerImageName;
 @AutoConfigureMockMvc
 class RouteControllerAverageMileageTest {
 
-    private static final LocalDateTime PLANNED_START = LocalDateTime.of(2025, 1, 1, 0, 0);
-    private static final LocalDateTime PLANNED_END = LocalDateTime.of(2025, 1, 1, 2, 0);
-
-    private static final DockerImageName POSTGIS_IMAGE = DockerImageName.parse("postgis/postgis:16-3.4")
+    private static final DockerImageName POSTGIS_IMAGE = DockerImageName
+        .parse("postgis/postgis:16-3.4")
         .asCompatibleSubstituteFor("postgres");
 
     @Container
@@ -53,11 +53,23 @@ class RouteControllerAverageMileageTest {
     private MockMvc mockMvc;
 
     @Autowired
-    private JdbcTemplate jdbcTemplate;
+    private RouteRepository routeRepository;
+
+    @Autowired
+    private VehicleRepository vehicleRepository;
+
+    @Autowired
+    private RetailPointRepository retailPointRepository;
+
+    @Autowired
+    private OrderRepository orderRepository;
+
+    private RouteTestDataFactory testDataFactory;
 
     @BeforeEach
-    void cleanDatabase() {
-        jdbcTemplate.execute("TRUNCATE TABLE route_point_orders, route_points, routes RESTART IDENTITY CASCADE");
+    void setUp() {
+        testDataFactory = new RouteTestDataFactory(routeRepository, vehicleRepository, retailPointRepository, orderRepository);
+        testDataFactory.cleanDatabase();
     }
 
     @Test
@@ -69,7 +81,7 @@ class RouteControllerAverageMileageTest {
 
     @Test
     void averageMileageReturnsExactValueForSingleRoute() throws Exception {
-        insertRoute(new BigDecimal("123.456"));
+        testDataFactory.persistRoute(LocalDateTime.of(2025, 1, 1, 8, 0), LocalDateTime.of(2025, 1, 1, 10, 0), new BigDecimal("123.456"));
 
         mockMvc.perform(get("/api/routes/average-mileage"))
             .andExpect(status().isOk())
@@ -78,23 +90,12 @@ class RouteControllerAverageMileageTest {
 
     @Test
     void averageMileageRoundsHalfUpToThreeDecimalPlaces() throws Exception {
-        insertRoute(new BigDecimal("10.120"));
-        insertRoute(new BigDecimal("10.121"));
+        testDataFactory.persistRoute(LocalDateTime.of(2025, 2, 1, 9, 0), LocalDateTime.of(2025, 2, 1, 11, 0), new BigDecimal("10.120"));
+        testDataFactory.persistRoute(LocalDateTime.of(2025, 2, 2, 9, 0), LocalDateTime.of(2025, 2, 2, 11, 0), new BigDecimal("10.121"));
 
         mockMvc.perform(get("/api/routes/average-mileage"))
             .andExpect(status().isOk())
             .andExpect(content().string("10.121"));
     }
 
-    private void insertRoute(BigDecimal mileage) {
-        jdbcTemplate.update(
-            "INSERT INTO routes (vehicle_id, planned_start_time, planned_end_time, mileage_in_km) VALUES (?, ?, ?, ?)",
-            ps -> {
-                ps.setNull(1, Types.BIGINT);
-                ps.setTimestamp(2, Timestamp.valueOf(PLANNED_START));
-                ps.setTimestamp(3, Timestamp.valueOf(PLANNED_END));
-                ps.setBigDecimal(4, mileage);
-            }
-        );
-    }
 }

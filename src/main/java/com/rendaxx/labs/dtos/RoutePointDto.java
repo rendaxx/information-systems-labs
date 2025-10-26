@@ -13,7 +13,6 @@ import java.util.Set;
 public class RoutePointDto {
     Long id;
     Long routeId;
-    Long retailPointId;
     RetailPointDto retailPoint;
     OperationType operationType;
     Set<OrderDto> orders;

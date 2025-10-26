@@ -2,7 +2,6 @@ package com.rendaxx.labs.controller;
 
 import com.rendaxx.labs.dtos.SaveVehicleDto;
 import com.rendaxx.labs.dtos.VehicleDto;
-import com.rendaxx.labs.mappers.VehicleMapper;
 import com.rendaxx.labs.service.VehicleService;
 import jakarta.validation.Valid;
 import java.util.List;
@@ -29,27 +28,26 @@ import org.springframework.web.bind.annotation.RestController;
 public class VehicleController {
 
     VehicleService vehicleService;
-    VehicleMapper vehicleMapper;
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public VehicleDto create(@RequestBody @Valid SaveVehicleDto dto) {
-        return vehicleMapper.toDto(vehicleService.create(dto));
+        return vehicleService.create(dto);
     }
 
     @GetMapping("/{id}")
     public VehicleDto getById(@PathVariable Long id) {
-        return vehicleMapper.toDto(vehicleService.getById(id));
+        return vehicleService.getById(id);
     }
 
     @GetMapping
     public List<VehicleDto> getAll() {
-        return vehicleMapper.toDto(vehicleService.getAll());
+        return vehicleService.getAll();
     }
 
     @PutMapping("/{id}")
     public VehicleDto update(@PathVariable Long id, @RequestBody @Valid SaveVehicleDto dto) {
-        return vehicleMapper.toDto(vehicleService.update(id, dto));
+        return vehicleService.update(id, dto);
     }
 
     @DeleteMapping("/{id}")

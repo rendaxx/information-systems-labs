@@ -2,7 +2,6 @@ package com.rendaxx.labs.controller;
 
 import com.rendaxx.labs.dtos.RoutePointDto;
 import com.rendaxx.labs.dtos.SaveRoutePointDto;
-import com.rendaxx.labs.mappers.RoutePointMapper;
 import com.rendaxx.labs.service.RoutePointService;
 import jakarta.validation.Valid;
 import java.util.List;
@@ -29,27 +28,26 @@ import org.springframework.web.bind.annotation.RestController;
 public class RoutePointController {
 
     RoutePointService routePointService;
-    RoutePointMapper routePointMapper;
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public RoutePointDto create(@RequestBody @Valid SaveRoutePointDto dto) {
-        return routePointMapper.toDto(routePointService.create(dto));
+        return routePointService.create(dto);
     }
 
     @GetMapping("/{id}")
     public RoutePointDto getById(@PathVariable Long id) {
-        return routePointMapper.toDto(routePointService.getById(id));
+        return routePointService.getById(id);
     }
 
     @GetMapping
     public List<RoutePointDto> getAll() {
-        return routePointMapper.toDto(routePointService.getAll());
+        return routePointService.getAll();
     }
 
     @PutMapping("/{id}")
     public RoutePointDto update(@PathVariable Long id, @RequestBody @Valid SaveRoutePointDto dto) {
-        return routePointMapper.toDto(routePointService.update(id, dto));
+        return routePointService.update(id, dto);
     }
 
     @DeleteMapping("/{id}")

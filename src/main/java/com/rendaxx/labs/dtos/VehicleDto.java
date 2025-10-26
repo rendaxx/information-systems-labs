@@ -10,7 +10,6 @@ import java.math.BigDecimal;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class VehicleDto {
     Long id;
-    Long driverId;
     DriverDto driver;
     String gosNumber;
     BigDecimal tonnageInTons;

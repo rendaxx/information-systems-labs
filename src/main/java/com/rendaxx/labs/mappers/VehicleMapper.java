@@ -28,7 +28,6 @@ public abstract class VehicleMapper {
         update(vehicle, dto, driver);
     }
 
-    @Mapping(target = "driverId", source = "driver.id")
     public abstract VehicleDto toDto(Vehicle vehicle);
 
     public abstract List<VehicleDto> toDto(List<Vehicle> vehicles);

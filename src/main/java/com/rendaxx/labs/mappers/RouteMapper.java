@@ -65,7 +65,6 @@ public abstract class RouteMapper {
         update(route, dto, routePoints, vehicle);
     }
 
-    @Mapping(target = "vehicleId", source = "vehicle.id")
     public abstract RouteDto toDto(Route route);
 
     public abstract List<RouteDto> toDto(List<Route> routes);
