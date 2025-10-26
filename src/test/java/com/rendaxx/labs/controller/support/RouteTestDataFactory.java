@@ -67,6 +67,84 @@ public class RouteTestDataFactory {
         return routeRepository.save(route);
     }
 
+    public Route persistRouteWithRetailPoint(
+        RetailPoint retailPoint,
+        LocalDateTime plannedStart,
+        LocalDateTime plannedEnd,
+        BigDecimal mileage
+    ) {
+        Vehicle vehicle = vehicleRepository.save(buildVehicle());
+
+        Route route = Route.builder()
+            .vehicle(vehicle)
+            .creationTime(plannedStart.minusHours(1))
+            .plannedStartTime(plannedStart)
+            .plannedEndTime(plannedEnd)
+            .mileageInKm(mileage)
+            .build();
+
+        RoutePoint routePoint = RoutePoint.builder()
+            .route(route)
+            .retailPoint(retailPoint)
+            .operationType(OperationType.LOAD)
+            .plannedStartTime(plannedStart)
+            .plannedEndTime(plannedEnd)
+            .orderNumber(0)
+            .build();
+        routePoint.getOrders().add(buildOrder());
+        route.getRoutePoints().add(routePoint);
+
+        return routeRepository.save(route);
+    }
+
+    public RetailPoint persistRetailPoint() {
+        return retailPointRepository.save(buildRetailPoint());
+    }
+
+    public Route persistRouteWithRepeatedRetailPoint(
+        RetailPoint retailPoint,
+        LocalDateTime firstStart,
+        LocalDateTime firstEnd,
+        LocalDateTime secondStart,
+        LocalDateTime secondEnd,
+        BigDecimal mileage
+    ) {
+        Vehicle vehicle = vehicleRepository.save(buildVehicle());
+
+        Route route = Route.builder()
+            .vehicle(vehicle)
+            .creationTime(firstStart.minusHours(1))
+            .plannedStartTime(firstStart)
+            .plannedEndTime(secondEnd)
+            .mileageInKm(mileage)
+            .build();
+
+        RoutePoint firstPoint = RoutePoint.builder()
+            .route(route)
+            .retailPoint(retailPoint)
+            .operationType(OperationType.LOAD)
+            .plannedStartTime(firstStart)
+            .plannedEndTime(firstEnd)
+            .orderNumber(0)
+            .build();
+        firstPoint.getOrders().add(buildOrder());
+
+        RoutePoint secondPoint = RoutePoint.builder()
+            .route(route)
+            .retailPoint(retailPoint)
+            .operationType(OperationType.LOAD)
+            .plannedStartTime(secondStart)
+            .plannedEndTime(secondEnd)
+            .orderNumber(1)
+            .build();
+        secondPoint.getOrders().add(buildOrder());
+
+        route.getRoutePoints().add(firstPoint);
+        route.getRoutePoints().add(secondPoint);
+
+        return routeRepository.save(route);
+    }
+
     public void cleanDatabase() {
         routeRepository.deleteAll();
         orderRepository.deleteAll();
@@ -107,4 +185,5 @@ public class RouteTestDataFactory {
     private Point createPoint(double longitude, double latitude) {
         return GEOMETRY_FACTORY.createPoint(new Coordinate(longitude, latitude));
     }
+
 }

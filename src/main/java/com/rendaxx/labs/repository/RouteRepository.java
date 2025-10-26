@@ -20,4 +20,7 @@ public interface RouteRepository extends JpaRepository<Route, Long> {
         @Param("periodStart") LocalDateTime periodStart,
         @Param("periodEnd") LocalDateTime periodEnd
     );
+
+    @Query("select distinct r from Route r join r.routePoints rp where rp.retailPoint.id = :retailPointId")
+    List<Route> findAllByRetailPointId(@Param("retailPointId") Long retailPointId);
 }

@@ -81,6 +81,14 @@ public class RouteService {
         return mapper.toDto(repository.findWithinPeriodWithDetails(periodStart, periodEnd));
     }
 
+    @Transactional(readOnly = true)
+    public List<RouteDto> getByRetailPointId(Long retailPointId) {
+        if (retailPointId == null) {
+            throw new IllegalArgumentException("Retail point id must be provided");
+        }
+        return mapper.toDto(repository.findAllByRetailPointId(retailPointId));
+    }
+
     private Route save(SaveRouteDto command, Route route) {
         mapper.update(route, command);
         return repository.save(route);

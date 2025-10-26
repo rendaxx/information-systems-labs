@@ -76,4 +76,9 @@ public class RouteController {
     ) {
         return routeService.getWithinPeriod(periodStart, periodEnd);
     }
+
+    @GetMapping("/retail-point/{retailPointId}")
+    public List<RouteDto> getByRetailPointId(@PathVariable Long retailPointId) {
+        return routeService.getByRetailPointId(retailPointId);
+    }
 }
