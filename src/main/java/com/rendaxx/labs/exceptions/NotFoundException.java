@@ -4,8 +4,8 @@ import lombok.Getter;
 
 @Getter
 public class NotFoundException extends RuntimeException {
-    private Class<?> entityClass;
-    private Object id;
+    private final Class<?> entityClass;
+    private final Object id;
 
     public NotFoundException(Class<?> entityClass, Object id) {
         this.entityClass = entityClass;
