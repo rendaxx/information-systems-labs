@@ -5,10 +5,13 @@ import com.rendaxx.labs.dtos.SaveRetailPointDto;
 import com.rendaxx.labs.service.RetailPointService;
 import jakarta.validation.Valid;
 import java.util.List;
+import java.util.Map;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import org.springframework.http.HttpStatus;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -42,8 +45,8 @@ public class RetailPointController {
     }
 
     @GetMapping
-    public List<RetailPointDto> getAll() {
-        return retailPointService.getAll();
+    public Page<RetailPointDto> getAll(Pageable pageable, @RequestParam Map<String, String> filters) {
+        return retailPointService.getAll(pageable, filters);
     }
 
     @PutMapping("/{id}")

@@ -11,15 +11,19 @@ import com.rendaxx.labs.exceptions.NotFoundException;
 import com.rendaxx.labs.mappers.RetailPointMapper;
 import com.rendaxx.labs.mappers.RoutePointMapper;
 import com.rendaxx.labs.repository.RoutePointRepository;
+import com.rendaxx.labs.service.specification.EqualitySpecificationBuilder;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.Collections;
-import java.util.List;
-import org.springframework.data.domain.PageRequest;
 
 @Service
 @RequiredArgsConstructor
@@ -33,6 +37,7 @@ public class RoutePointService {
 
     RouteService routeService;
     EntityChangePublisher changePublisher;
+    EqualitySpecificationBuilder specificationBuilder;
 
     private static final String DESTINATION = "/topic/route-points";
 
@@ -50,8 +55,9 @@ public class RoutePointService {
     }
 
     @Transactional(readOnly = true)
-    public List<RoutePointDto> getAll() {
-        return mapper.toDto(repository.findAll());
+    public Page<RoutePointDto> getAll(Pageable pageable, Map<String, String> filters) {
+        Specification<RoutePoint> specification = specificationBuilder.build(filters);
+        return repository.findAll(specification, pageable).map(mapper::toDto);
     }
 
     public RoutePointDto update(Long id, SaveRoutePointDto command) {

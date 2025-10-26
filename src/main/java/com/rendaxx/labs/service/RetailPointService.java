@@ -8,16 +8,19 @@ import com.rendaxx.labs.events.EntityChangeType;
 import com.rendaxx.labs.exceptions.NotFoundException;
 import com.rendaxx.labs.mappers.RetailPointMapper;
 import com.rendaxx.labs.repository.RetailPointRepository;
+import com.rendaxx.labs.service.specification.EqualitySpecificationBuilder;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
-import java.util.Collections;
-import java.util.List;
-
 import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
@@ -28,6 +31,7 @@ public class RetailPointService {
     RetailPointMapper mapper;
     RetailPointRepository repository;
     EntityChangePublisher changePublisher;
+    EqualitySpecificationBuilder specificationBuilder;
 
     private static final String DESTINATION = "/topic/retail-points";
 
@@ -45,8 +49,9 @@ public class RetailPointService {
     }
 
     @Transactional(readOnly = true)
-    public List<RetailPointDto> getAll() {
-        return mapper.toDto(repository.findAll());
+    public Page<RetailPointDto> getAll(Pageable pageable, Map<String, String> filters) {
+        Specification<RetailPoint> specification = specificationBuilder.build(filters);
+        return repository.findAll(specification, pageable).map(mapper::toDto);
     }
 
     @Transactional(readOnly = true, propagation = Propagation.REQUIRED)

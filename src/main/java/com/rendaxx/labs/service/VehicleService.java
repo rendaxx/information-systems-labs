@@ -8,13 +8,16 @@ import com.rendaxx.labs.events.EntityChangeType;
 import com.rendaxx.labs.exceptions.NotFoundException;
 import com.rendaxx.labs.mappers.VehicleMapper;
 import com.rendaxx.labs.repository.VehicleRepository;
+import com.rendaxx.labs.service.specification.EqualitySpecificationBuilder;
+import java.util.Map;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -25,6 +28,7 @@ public class VehicleService {
     VehicleMapper mapper;
     VehicleRepository repository;
     EntityChangePublisher changePublisher;
+    EqualitySpecificationBuilder specificationBuilder;
 
     private static final String DESTINATION = "/topic/vehicles";
 
@@ -42,8 +46,9 @@ public class VehicleService {
     }
 
     @Transactional(readOnly = true)
-    public List<VehicleDto> getAll() {
-        return mapper.toDto(repository.findAll());
+    public Page<VehicleDto> getAll(Pageable pageable, Map<String, String> filters) {
+        Specification<Vehicle> specification = specificationBuilder.build(filters);
+        return repository.findAll(specification, pageable).map(mapper::toDto);
     }
 
     public VehicleDto update(Long id, SaveVehicleDto command) {

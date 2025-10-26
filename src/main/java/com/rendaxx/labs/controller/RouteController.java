@@ -7,11 +7,14 @@ import jakarta.validation.Valid;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import org.springframework.http.HttpStatus;
 import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -45,8 +48,8 @@ public class RouteController {
     }
 
     @GetMapping
-    public List<RouteDto> getAll() {
-        return routeService.getAll();
+    public Page<RouteDto> getAll(Pageable pageable, @RequestParam Map<String, String> filters) {
+        return routeService.getAll(pageable, filters);
     }
 
     @PutMapping("/{id}")
