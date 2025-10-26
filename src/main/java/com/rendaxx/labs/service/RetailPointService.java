@@ -12,7 +12,10 @@ import lombok.experimental.FieldDefaults;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Collections;
 import java.util.List;
+
+import org.springframework.transaction.annotation.Propagation;
 
 @Service
 @RequiredArgsConstructor
@@ -37,6 +40,24 @@ public class RetailPointService {
     @Transactional(readOnly = true)
     public List<RetailPointDto> getAll() {
         return mapper.toDto(repository.findAll());
+    }
+
+    @Transactional(readOnly = true, propagation = Propagation.REQUIRED)
+    public List<RetailPointDto> getNearestRetailPoints(Long retailPointId, int limit) {
+        if (retailPointId == null) {
+            throw new IllegalArgumentException("Retail point id must be provided");
+        }
+        if (limit <= 0) {
+            throw new IllegalArgumentException("Limit must be positive");
+        }
+        RetailPoint origin = repository.findById(retailPointId)
+            .orElseThrow(() -> new NotFoundException(RetailPoint.class, retailPointId));
+
+        List<RetailPoint> nearest = repository.findNearestRetailPoints(origin.getId(), limit);
+        if (nearest.isEmpty()) {
+            return Collections.emptyList();
+        }
+        return mapper.toDto(nearest);
     }
 
     public RetailPointDto update(Long id, SaveRetailPointDto command) {
