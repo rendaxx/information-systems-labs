@@ -1,5 +1,6 @@
 package com.rendaxx.labs.controller;
 
+import com.rendaxx.labs.dtos.RetailPointDto;
 import com.rendaxx.labs.dtos.RoutePointDto;
 import com.rendaxx.labs.dtos.SaveRoutePointDto;
 import com.rendaxx.labs.service.RoutePointService;
@@ -17,6 +18,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -54,5 +56,10 @@ public class RoutePointController {
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void delete(@PathVariable Long id) {
         routePointService.delete(id);
+    }
+
+    @GetMapping("/top-retail-points")
+    public List<RetailPointDto> getTopRetailPoints(@RequestParam("limit") int limit) {
+        return routePointService.getTopRetailPoints(limit);
     }
 }
