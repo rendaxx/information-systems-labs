@@ -3,6 +3,8 @@ package com.rendaxx.labs.service;
 import com.rendaxx.labs.domain.RetailPoint;
 import com.rendaxx.labs.dtos.RetailPointDto;
 import com.rendaxx.labs.dtos.SaveRetailPointDto;
+import com.rendaxx.labs.events.EntityChangePublisher;
+import com.rendaxx.labs.events.EntityChangeType;
 import com.rendaxx.labs.exceptions.NotFoundException;
 import com.rendaxx.labs.mappers.RetailPointMapper;
 import com.rendaxx.labs.repository.RetailPointRepository;
@@ -25,10 +27,15 @@ public class RetailPointService {
 
     RetailPointMapper mapper;
     RetailPointRepository repository;
+    EntityChangePublisher changePublisher;
+
+    private static final String DESTINATION = "/topic/retail-points";
 
     public RetailPointDto create(SaveRetailPointDto command) {
         RetailPoint retailPoint = save(command, new RetailPoint());
-        return mapper.toDto(retailPoint);
+        RetailPointDto dto = mapper.toDto(retailPoint);
+        changePublisher.publish(DESTINATION, retailPoint.getId(), dto, EntityChangeType.CREATED);
+        return dto;
     }
 
     @Transactional(readOnly = true)
@@ -63,12 +70,15 @@ public class RetailPointService {
     public RetailPointDto update(Long id, SaveRetailPointDto command) {
         RetailPoint retailPoint = repository.findById(id).orElseThrow(() -> new NotFoundException(RetailPoint.class, id));
         RetailPoint savedRetailPoint = save(command, retailPoint);
-        return mapper.toDto(savedRetailPoint);
+        RetailPointDto dto = mapper.toDto(savedRetailPoint);
+        changePublisher.publish(DESTINATION, savedRetailPoint.getId(), dto, EntityChangeType.UPDATED);
+        return dto;
     }
 
     public void delete(Long id) {
         RetailPoint retailPoint = repository.findById(id).orElseThrow(() -> new NotFoundException(RetailPoint.class, id));
         repository.delete(retailPoint);
+        changePublisher.publish(DESTINATION, retailPoint.getId(), null, EntityChangeType.DELETED);
     }
 
     private RetailPoint save(SaveRetailPointDto command, RetailPoint retailPoint) {

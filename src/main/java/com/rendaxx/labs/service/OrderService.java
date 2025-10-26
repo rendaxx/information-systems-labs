@@ -3,6 +3,8 @@ package com.rendaxx.labs.service;
 import com.rendaxx.labs.domain.Order;
 import com.rendaxx.labs.dtos.OrderDto;
 import com.rendaxx.labs.dtos.SaveOrderDto;
+import com.rendaxx.labs.events.EntityChangePublisher;
+import com.rendaxx.labs.events.EntityChangeType;
 import com.rendaxx.labs.exceptions.NotFoundException;
 import com.rendaxx.labs.mappers.OrderMapper;
 import com.rendaxx.labs.repository.OrderRepository;
@@ -22,10 +24,15 @@ public class OrderService {
 
     OrderMapper mapper;
     OrderRepository repository;
+    EntityChangePublisher changePublisher;
+
+    private static final String DESTINATION = "/topic/orders";
 
     public OrderDto create(SaveOrderDto command) {
         Order order = save(command, new Order());
-        return mapper.toDto(order);
+        OrderDto dto = mapper.toDto(order);
+        changePublisher.publish(DESTINATION, order.getId(), dto, EntityChangeType.CREATED);
+        return dto;
     }
 
     @Transactional(readOnly = true)
@@ -42,12 +49,15 @@ public class OrderService {
     public OrderDto update(Long id, SaveOrderDto command) {
         Order order = repository.findById(id).orElseThrow(() -> new NotFoundException(Order.class, id));
         Order savedOrder = save(command, order);
-        return mapper.toDto(savedOrder);
+        OrderDto dto = mapper.toDto(savedOrder);
+        changePublisher.publish(DESTINATION, savedOrder.getId(), dto, EntityChangeType.UPDATED);
+        return dto;
     }
 
     public void delete(Long id) {
         Order order = repository.findById(id).orElseThrow(() -> new NotFoundException(Order.class, id));
         repository.delete(order);
+        changePublisher.publish(DESTINATION, order.getId(), null, EntityChangeType.DELETED);
     }
 
     private Order save(SaveOrderDto command, Order order) {

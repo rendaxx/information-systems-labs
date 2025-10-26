@@ -5,6 +5,8 @@ import com.rendaxx.labs.domain.RoutePoint;
 import com.rendaxx.labs.dtos.RetailPointDto;
 import com.rendaxx.labs.dtos.RoutePointDto;
 import com.rendaxx.labs.dtos.SaveRoutePointDto;
+import com.rendaxx.labs.events.EntityChangePublisher;
+import com.rendaxx.labs.events.EntityChangeType;
 import com.rendaxx.labs.exceptions.NotFoundException;
 import com.rendaxx.labs.mappers.RetailPointMapper;
 import com.rendaxx.labs.mappers.RoutePointMapper;
@@ -30,10 +32,15 @@ public class RoutePointService {
     RetailPointMapper retailPointMapper;
 
     RouteService routeService;
+    EntityChangePublisher changePublisher;
+
+    private static final String DESTINATION = "/topic/route-points";
 
     public RoutePointDto create(SaveRoutePointDto command) {
         RoutePoint routePoint = save(command, new RoutePoint());
-        return mapper.toDto(routePoint);
+        RoutePointDto dto = mapper.toDto(routePoint);
+        changePublisher.publish(DESTINATION, routePoint.getId(), dto, EntityChangeType.CREATED);
+        return dto;
     }
 
     @Transactional(readOnly = true)
@@ -50,14 +57,18 @@ public class RoutePointService {
     public RoutePointDto update(Long id, SaveRoutePointDto command) {
         RoutePoint routePoint = repository.findById(id).orElseThrow(() -> new NotFoundException(RoutePoint.class, id));
         RoutePoint savedRoutePoint = save(command, routePoint);
-        return mapper.toDto(savedRoutePoint);
+        RoutePointDto dto = mapper.toDto(savedRoutePoint);
+        changePublisher.publish(DESTINATION, savedRoutePoint.getId(), dto, EntityChangeType.UPDATED);
+        return dto;
     }
 
     public void delete(Long id) {
         RoutePoint routePoint = repository.findById(id).orElseThrow(() -> new NotFoundException(RoutePoint.class, id));
-        routePoint.getRoute().getRoutePoints().removeIf(rp -> rp.getId().equals(routePoint.getId()));
+        Long routePointId = routePoint.getId();
+        routePoint.getRoute().getRoutePoints().removeIf(rp -> rp.getId().equals(routePointId));
         routeService.recalculateRoutePointOrderNumber(routePoint.getRoute());
         repository.delete(routePoint);
+        changePublisher.publish(DESTINATION, routePointId, null, EntityChangeType.DELETED);
     }
 
     @Transactional(readOnly = true)

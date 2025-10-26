@@ -3,6 +3,8 @@ package com.rendaxx.labs.service;
 import com.rendaxx.labs.domain.Vehicle;
 import com.rendaxx.labs.dtos.SaveVehicleDto;
 import com.rendaxx.labs.dtos.VehicleDto;
+import com.rendaxx.labs.events.EntityChangePublisher;
+import com.rendaxx.labs.events.EntityChangeType;
 import com.rendaxx.labs.exceptions.NotFoundException;
 import com.rendaxx.labs.mappers.VehicleMapper;
 import com.rendaxx.labs.repository.VehicleRepository;
@@ -22,10 +24,15 @@ public class VehicleService {
 
     VehicleMapper mapper;
     VehicleRepository repository;
+    EntityChangePublisher changePublisher;
+
+    private static final String DESTINATION = "/topic/vehicles";
 
     public VehicleDto create(SaveVehicleDto command) {
         Vehicle vehicle = save(command, new Vehicle());
-        return mapper.toDto(vehicle);
+        VehicleDto dto = mapper.toDto(vehicle);
+        changePublisher.publish(DESTINATION, vehicle.getId(), dto, EntityChangeType.CREATED);
+        return dto;
     }
 
     @Transactional(readOnly = true)
@@ -42,12 +49,15 @@ public class VehicleService {
     public VehicleDto update(Long id, SaveVehicleDto command) {
         Vehicle vehicle = repository.findById(id).orElseThrow(() -> new NotFoundException(Vehicle.class, id));
         Vehicle savedVehicle = save(command, vehicle);
-        return mapper.toDto(savedVehicle);
+        VehicleDto dto = mapper.toDto(savedVehicle);
+        changePublisher.publish(DESTINATION, savedVehicle.getId(), dto, EntityChangeType.UPDATED);
+        return dto;
     }
 
     public void delete(Long id) {
         Vehicle vehicle = repository.findById(id).orElseThrow(() -> new NotFoundException(Vehicle.class, id));
         repository.delete(vehicle);
+        changePublisher.publish(DESTINATION, vehicle.getId(), null, EntityChangeType.DELETED);
     }
 
     private Vehicle save(SaveVehicleDto command, Vehicle vehicle) {

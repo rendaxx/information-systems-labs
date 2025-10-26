@@ -3,6 +3,8 @@ package com.rendaxx.labs.service;
 import com.rendaxx.labs.domain.Route;
 import com.rendaxx.labs.dtos.RouteDto;
 import com.rendaxx.labs.dtos.SaveRouteDto;
+import com.rendaxx.labs.events.EntityChangePublisher;
+import com.rendaxx.labs.events.EntityChangeType;
 import com.rendaxx.labs.exceptions.NotFoundException;
 import com.rendaxx.labs.mappers.RouteMapper;
 import com.rendaxx.labs.repository.RouteRepository;
@@ -28,10 +30,15 @@ public class RouteService {
 
     RouteMapper mapper;
     RouteRepository repository;
+    EntityChangePublisher changePublisher;
+
+    private static final String DESTINATION = "/topic/routes";
 
     public RouteDto create(SaveRouteDto command) {
         Route route = save(command, new Route());
-        return mapper.toDto(route);
+        RouteDto dto = mapper.toDto(route);
+        changePublisher.publish(DESTINATION, route.getId(), dto, EntityChangeType.CREATED);
+        return dto;
     }
 
     @Transactional(readOnly = true)
@@ -48,12 +55,15 @@ public class RouteService {
     public RouteDto update(Long id, SaveRouteDto command) {
         Route route = repository.findById(id).orElseThrow(() -> new NotFoundException(Route.class, id));
         Route savedRoute = save(command, route);
-        return mapper.toDto(savedRoute);
+        RouteDto dto = mapper.toDto(savedRoute);
+        changePublisher.publish(DESTINATION, savedRoute.getId(), dto, EntityChangeType.UPDATED);
+        return dto;
     }
 
     public void delete(Long id) {
         Route route = repository.findById(id).orElseThrow(() -> new NotFoundException(Route.class, id));
         repository.delete(route);
+        changePublisher.publish(DESTINATION, route.getId(), null, EntityChangeType.DELETED);
     }
 
     public void recalculateRoutePointOrderNumber(Route route) {

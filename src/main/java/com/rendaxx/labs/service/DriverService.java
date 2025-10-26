@@ -3,6 +3,8 @@ package com.rendaxx.labs.service;
 import com.rendaxx.labs.domain.Driver;
 import com.rendaxx.labs.dtos.DriverDto;
 import com.rendaxx.labs.dtos.SaveDriverDto;
+import com.rendaxx.labs.events.EntityChangePublisher;
+import com.rendaxx.labs.events.EntityChangeType;
 import com.rendaxx.labs.exceptions.NotFoundException;
 import com.rendaxx.labs.mappers.DriverMapper;
 import com.rendaxx.labs.repository.DriverRepository;
@@ -22,10 +24,15 @@ public class DriverService {
 
     DriverMapper mapper;
     DriverRepository repository;
+    EntityChangePublisher changePublisher;
+
+    private static final String DESTINATION = "/topic/drivers";
 
     public DriverDto create(SaveDriverDto command) {
         Driver driver = save(command, new Driver());
-        return mapper.toDto(driver);
+        DriverDto dto = mapper.toDto(driver);
+        changePublisher.publish(DESTINATION, driver.getId(), dto, EntityChangeType.CREATED);
+        return dto;
     }
 
     @Transactional(readOnly = true)
@@ -42,12 +49,15 @@ public class DriverService {
     public DriverDto update(Long id, SaveDriverDto command) {
         Driver driver = repository.findById(id).orElseThrow(() -> new NotFoundException(Driver.class, id));
         Driver savedDriver = save(command, driver);
-        return mapper.toDto(savedDriver);
+        DriverDto dto = mapper.toDto(savedDriver);
+        changePublisher.publish(DESTINATION, savedDriver.getId(), dto, EntityChangeType.UPDATED);
+        return dto;
     }
 
     public void delete(Long id) {
         Driver driver = repository.findById(id).orElseThrow(() -> new NotFoundException(Driver.class, id));
         repository.delete(driver);
+        changePublisher.publish(DESTINATION, driver.getId(), null, EntityChangeType.DELETED);
     }
 
     private Driver save(SaveDriverDto command, Driver driver) {
