@@ -1,0 +1,11 @@
+{
+  "name": "@rendaxx/web",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "echo \"TODO: implement web frontend\"",
+    "build": "echo \"TODO: implement web frontend build\"",
+    "test": "echo \"TODO: implement web frontend tests\""
+  }
+}

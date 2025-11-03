@@ -1,0 +1,11 @@
+plugins {
+    id 'java-library'
+}
+
+description = 'Generated Java API client for information-systems backend'
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(17)
+    }
+}

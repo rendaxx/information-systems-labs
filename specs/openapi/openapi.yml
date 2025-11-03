@@ -1,0 +1,7 @@
+openapi: 3.1.0
+info:
+  title: Information Systems Labs API
+  version: 0.0.1
+  description: Placeholder OpenAPI specification.
+paths: {}
+components: {}

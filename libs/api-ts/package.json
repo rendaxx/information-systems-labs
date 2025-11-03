@@ -1,0 +1,11 @@
+{
+  "name": "@rendaxx/api-ts",
+  "version": "0.0.0",
+  "description": "Generated TypeScript client for the information systems backend",
+  "private": false,
+  "type": "module",
+  "scripts": {
+    "build": "echo \"TODO: generate TypeScript SDK\"",
+    "lint": "echo \"TODO: lint TypeScript SDK\""
+  }
+}

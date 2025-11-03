@@ -1,0 +1,9 @@
+{
+  "name": "information-systems-labs",
+  "version": "0.0.0",
+  "private": true,
+  "workspaces": [
+    "apps/web",
+    "libs/api-ts"
+  ]
+}
