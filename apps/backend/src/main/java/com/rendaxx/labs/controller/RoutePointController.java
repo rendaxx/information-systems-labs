@@ -10,7 +10,6 @@ import com.rendaxx.labs.controller.support.PageRequestFactory;
 import com.rendaxx.labs.dtos.RetailPointDto;
 import com.rendaxx.labs.dtos.RoutePointDto;
 import com.rendaxx.labs.dtos.SaveRoutePointDto;
-import com.rendaxx.labs.mappers.api.PageResponseMapper;
 import com.rendaxx.labs.mappers.api.RetailPointApiMapper;
 import com.rendaxx.labs.mappers.api.RoutePointApiMapper;
 import com.rendaxx.labs.service.RoutePointService;
@@ -36,7 +35,6 @@ public class RoutePointController implements RoutePointsApi {
     RoutePointService routePointService;
     RoutePointApiMapper routePointApiMapper;
     RetailPointApiMapper retailPointApiMapper;
-    PageResponseMapper pageResponseMapper;
     PageRequestFactory pageRequestFactory;
     FilterParameterMapper filterParameterMapper;
 
@@ -53,10 +51,15 @@ public class RoutePointController implements RoutePointsApi {
     }
 
     @Override
-    public ResponseEntity<PageRoutePointApiDto> listRoutePoints(Integer page, Integer size, java.util.List<String> sort, Map<String, String> filter) {
+    public ResponseEntity<PageRoutePointApiDto> listRoutePoints(
+            Integer page,
+            Integer size,
+            List<String> sort,
+            Map<String, String> filter
+    ) {
         Pageable pageable = pageRequestFactory.build(page, size, sort);
         Page<RoutePointDto> result = routePointService.getAll(pageable, filterParameterMapper.toFilters(filter));
-        return ResponseEntity.ok(pageResponseMapper.toRoutePointPage(result));
+        return ResponseEntity.ok(routePointApiMapper.toRoutePointPage(result));
     }
 
     @Override

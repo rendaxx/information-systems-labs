@@ -9,9 +9,10 @@ import com.rendaxx.labs.controller.support.PageRequestFactory;
 import com.rendaxx.labs.dtos.DriverDto;
 import com.rendaxx.labs.dtos.SaveDriverDto;
 import com.rendaxx.labs.mappers.api.DriverApiMapper;
-import com.rendaxx.labs.mappers.api.PageResponseMapper;
 import com.rendaxx.labs.service.DriverService;
 import jakarta.validation.Valid;
+
+import java.util.List;
 import java.util.Map;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -31,7 +32,6 @@ public class DriverController implements DriversApi {
 
     DriverService driverService;
     DriverApiMapper driverApiMapper;
-    PageResponseMapper pageResponseMapper;
     PageRequestFactory pageRequestFactory;
     FilterParameterMapper filterParameterMapper;
 
@@ -48,10 +48,15 @@ public class DriverController implements DriversApi {
     }
 
     @Override
-    public ResponseEntity<PageDriverApiDto> listDrivers(Integer page, Integer size, java.util.List<String> sort, Map<String, String> filter) {
+    public ResponseEntity<PageDriverApiDto> listDrivers(
+            Integer page,
+            Integer size,
+            List<String> sort,
+            Map<String, String> filter
+    ) {
         Pageable pageable = pageRequestFactory.build(page, size, sort);
         Page<DriverDto> result = driverService.getAll(pageable, filterParameterMapper.toFilters(filter));
-        return ResponseEntity.ok(pageResponseMapper.toDriverPage(result));
+        return ResponseEntity.ok(driverApiMapper.toDriverPage(result));
     }
 
     @Override

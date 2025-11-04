@@ -8,7 +8,6 @@ import com.rendaxx.labs.controller.support.FilterParameterMapper;
 import com.rendaxx.labs.controller.support.PageRequestFactory;
 import com.rendaxx.labs.dtos.RetailPointDto;
 import com.rendaxx.labs.dtos.SaveRetailPointDto;
-import com.rendaxx.labs.mappers.api.PageResponseMapper;
 import com.rendaxx.labs.mappers.api.RetailPointApiMapper;
 import com.rendaxx.labs.service.RetailPointService;
 import jakarta.validation.Valid;
@@ -32,7 +31,6 @@ public class RetailPointController implements RetailPointsApi {
 
     RetailPointService retailPointService;
     RetailPointApiMapper retailPointApiMapper;
-    PageResponseMapper pageResponseMapper;
     PageRequestFactory pageRequestFactory;
     FilterParameterMapper filterParameterMapper;
 
@@ -49,10 +47,10 @@ public class RetailPointController implements RetailPointsApi {
     }
 
     @Override
-    public ResponseEntity<PageRetailPointApiDto> listRetailPoints(Integer page, Integer size, java.util.List<String> sort, Map<String, String> filter) {
+    public ResponseEntity<PageRetailPointApiDto> listRetailPoints(Integer page, Integer size, List<String> sort, Map<String, String> filter) {
         Pageable pageable = pageRequestFactory.build(page, size, sort);
         Page<RetailPointDto> result = retailPointService.getAll(pageable, filterParameterMapper.toFilters(filter));
-        return ResponseEntity.ok(pageResponseMapper.toRetailPointPage(result));
+        return ResponseEntity.ok(retailPointApiMapper.toRetailPointPage(result));
     }
 
     @Override

@@ -1,36 +1,26 @@
 package com.rendaxx.labs.mappers.api;
 
 import com.rendaxx.labs.api.v1.model.DriverApiDto;
+import com.rendaxx.labs.api.v1.model.PageDriverApiDto;
 import com.rendaxx.labs.api.v1.model.SaveDriverApiDto;
 import com.rendaxx.labs.dtos.DriverDto;
 import com.rendaxx.labs.dtos.SaveDriverDto;
+import com.rendaxx.labs.mappers.api.support.JsonNullableMapper;
+import com.rendaxx.labs.mappers.api.support.PageSortMapper;
 import java.util.List;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
-import org.openapitools.jackson.nullable.JsonNullable;
+import org.springframework.data.domain.Page;
 
 @Mapper
-public interface DriverApiMapper {
+public interface DriverApiMapper extends JsonNullableMapper, PageSortMapper {
 
-    @Mapping(target = "middleName", expression = "java(toNullable(dto.getMiddleName()))")
     DriverApiDto toApi(DriverDto dto);
 
     List<DriverApiDto> toApi(List<DriverDto> dto);
 
-    @Mapping(target = "middleName", expression = "java(fromNullable(dto.getMiddleName()))")
     SaveDriverDto toDto(SaveDriverApiDto dto);
 
-    default JsonNullable<String> toNullable(String value) {
-        if (value == null) {
-            return JsonNullable.undefined();
-        }
-        return JsonNullable.of(value);
-    }
-
-    default String fromNullable(JsonNullable<String> value) {
-        if (value == null || !value.isPresent()) {
-            return null;
-        }
-        return value.orElse(null);
-    }
+    @Mapping(target = "page", source = "number")
+    PageDriverApiDto toDriverPage(Page<DriverDto> page);
 }

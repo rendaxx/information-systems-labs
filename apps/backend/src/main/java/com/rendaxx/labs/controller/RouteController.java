@@ -8,7 +8,6 @@ import com.rendaxx.labs.controller.support.FilterParameterMapper;
 import com.rendaxx.labs.controller.support.PageRequestFactory;
 import com.rendaxx.labs.dtos.RouteDto;
 import com.rendaxx.labs.dtos.SaveRouteDto;
-import com.rendaxx.labs.mappers.api.PageResponseMapper;
 import com.rendaxx.labs.mappers.api.RouteApiMapper;
 import com.rendaxx.labs.service.RouteService;
 import jakarta.validation.Valid;
@@ -34,7 +33,6 @@ public class RouteController implements RoutesApi {
 
     RouteService routeService;
     RouteApiMapper routeApiMapper;
-    PageResponseMapper pageResponseMapper;
     PageRequestFactory pageRequestFactory;
     FilterParameterMapper filterParameterMapper;
 
@@ -51,10 +49,10 @@ public class RouteController implements RoutesApi {
     }
 
     @Override
-    public ResponseEntity<PageRouteApiDto> listRoutes(Integer page, Integer size, java.util.List<String> sort, Map<String, String> filter) {
+    public ResponseEntity<PageRouteApiDto> listRoutes(Integer page, Integer size, List<String> sort, Map<String, String> filter) {
         Pageable pageable = pageRequestFactory.build(page, size, sort);
         Page<RouteDto> result = routeService.getAll(pageable, filterParameterMapper.toFilters(filter));
-        return ResponseEntity.ok(pageResponseMapper.toRoutePage(result));
+        return ResponseEntity.ok(routeApiMapper.toRoutePage(result));
     }
 
     @Override

@@ -9,9 +9,10 @@ import com.rendaxx.labs.controller.support.PageRequestFactory;
 import com.rendaxx.labs.dtos.OrderDto;
 import com.rendaxx.labs.dtos.SaveOrderDto;
 import com.rendaxx.labs.mappers.api.OrderApiMapper;
-import com.rendaxx.labs.mappers.api.PageResponseMapper;
 import com.rendaxx.labs.service.OrderService;
 import jakarta.validation.Valid;
+
+import java.util.List;
 import java.util.Map;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -31,7 +32,6 @@ public class OrderController implements OrdersApi {
 
     OrderService orderService;
     OrderApiMapper orderApiMapper;
-    PageResponseMapper pageResponseMapper;
     PageRequestFactory pageRequestFactory;
     FilterParameterMapper filterParameterMapper;
 
@@ -50,11 +50,11 @@ public class OrderController implements OrdersApi {
     }
 
     @Override
-    public ResponseEntity<PageOrderApiDto> listOrders(Integer page, Integer size, java.util.List<String> sort, Map<String, String> filter) {
+    public ResponseEntity<PageOrderApiDto> listOrders(Integer page, Integer size, List<String> sort, Map<String, String> filter) {
         Pageable pageable = pageRequestFactory.build(page, size, sort);
         Map<String, String> filters = filterParameterMapper.toFilters(filter);
         Page<OrderDto> result = orderService.getAll(pageable, filters);
-        return ResponseEntity.ok(pageResponseMapper.toOrderPage(result));
+        return ResponseEntity.ok(orderApiMapper.toOrderPage(result));
     }
 
     @Override
