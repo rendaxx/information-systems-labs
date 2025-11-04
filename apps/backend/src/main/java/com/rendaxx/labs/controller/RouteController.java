@@ -1,7 +1,15 @@
 package com.rendaxx.labs.controller;
 
+import com.rendaxx.labs.api.v1.api.RoutesApi;
+import com.rendaxx.labs.api.v1.model.PageRouteApiDto;
+import com.rendaxx.labs.api.v1.model.RouteApiDto;
+import com.rendaxx.labs.api.v1.model.SaveRouteApiDto;
+import com.rendaxx.labs.controller.support.FilterParameterMapper;
+import com.rendaxx.labs.controller.support.PageRequestFactory;
 import com.rendaxx.labs.dtos.RouteDto;
 import com.rendaxx.labs.dtos.SaveRouteDto;
+import com.rendaxx.labs.mappers.api.PageResponseMapper;
+import com.rendaxx.labs.mappers.api.RouteApiMapper;
 import com.rendaxx.labs.service.RouteService;
 import jakarta.validation.Valid;
 import java.math.BigDecimal;
@@ -11,77 +19,72 @@ import java.util.Map;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
-import org.springframework.http.HttpStatus;
-import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/api/routes")
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 @Validated
-public class RouteController {
+public class RouteController implements RoutesApi {
 
     RouteService routeService;
+    RouteApiMapper routeApiMapper;
+    PageResponseMapper pageResponseMapper;
+    PageRequestFactory pageRequestFactory;
+    FilterParameterMapper filterParameterMapper;
 
-    @PostMapping
-    @ResponseStatus(HttpStatus.CREATED)
-    public RouteDto create(@RequestBody @Valid SaveRouteDto dto) {
-        return routeService.create(dto);
+    @Override
+    public ResponseEntity<RouteApiDto> createRoute(@Valid SaveRouteApiDto saveRouteApiDto) {
+        SaveRouteDto command = routeApiMapper.toDto(saveRouteApiDto);
+        RouteDto created = routeService.create(command);
+        return ResponseEntity.status(HttpStatus.CREATED).body(routeApiMapper.toApi(created));
     }
 
-    @GetMapping("/{id}")
-    public RouteDto getById(@PathVariable Long id) {
-        return routeService.getById(id);
+    @Override
+    public ResponseEntity<RouteApiDto> getRoute(Long id) {
+        return ResponseEntity.ok(routeApiMapper.toApi(routeService.getById(id)));
     }
 
-    @GetMapping
-    public Page<RouteDto> getAll(Pageable pageable, @RequestParam Map<String, String> filters) {
-        return routeService.getAll(pageable, filters);
+    @Override
+    public ResponseEntity<PageRouteApiDto> listRoutes(Integer page, Integer size, java.util.List<String> sort, Map<String, String> filter) {
+        Pageable pageable = pageRequestFactory.build(page, size, sort);
+        Page<RouteDto> result = routeService.getAll(pageable, filterParameterMapper.toFilters(filter));
+        return ResponseEntity.ok(pageResponseMapper.toRoutePage(result));
     }
 
-    @PutMapping("/{id}")
-    public RouteDto update(@PathVariable Long id, @RequestBody @Valid SaveRouteDto dto) {
-        return routeService.update(id, dto);
+    @Override
+    public ResponseEntity<RouteApiDto> updateRoute(Long id, @Valid SaveRouteApiDto saveRouteApiDto) {
+        SaveRouteDto command = routeApiMapper.toDto(saveRouteApiDto);
+        RouteDto updated = routeService.update(id, command);
+        return ResponseEntity.ok(routeApiMapper.toApi(updated));
     }
 
-    @DeleteMapping("/{id}")
-    @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void delete(@PathVariable Long id) {
+    @Override
+    public ResponseEntity<Void> deleteRoute(Long id) {
         routeService.delete(id);
+        return ResponseEntity.noContent().build();
     }
 
-    @GetMapping("/average-mileage")
-    public BigDecimal getAverageMileage() {
-        return routeService.getAverageMileageInKm();
+    @Override
+    public ResponseEntity<Double> getAverageRouteMileage() {
+        BigDecimal average = routeService.getAverageMileageInKm();
+        return ResponseEntity.ok(average == null ? null : average.doubleValue());
     }
 
-    @GetMapping("/within-period")
-    public List<RouteDto> getWithinPeriod(
-        @RequestParam("periodStart")
-        @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
-        LocalDateTime periodStart,
-        @RequestParam("periodEnd")
-        @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
-        LocalDateTime periodEnd
-    ) {
-        return routeService.getWithinPeriod(periodStart, periodEnd);
+    @Override
+    public ResponseEntity<List<RouteApiDto>> getRoutesWithinPeriod(LocalDateTime periodStart, LocalDateTime periodEnd) {
+        List<RouteDto> routes = routeService.getWithinPeriod(periodStart, periodEnd);
+        return ResponseEntity.ok(routeApiMapper.toApi(routes));
     }
 
-    @GetMapping("/retail-point/{retailPointId}")
-    public List<RouteDto> getByRetailPointId(@PathVariable Long retailPointId) {
-        return routeService.getByRetailPointId(retailPointId);
+    @Override
+    public ResponseEntity<List<RouteApiDto>> getRoutesByRetailPoint(Long retailPointId) {
+        List<RouteDto> routes = routeService.getByRetailPointId(retailPointId);
+        return ResponseEntity.ok(routeApiMapper.toApi(routes));
     }
 }

@@ -1,7 +1,15 @@
 package com.rendaxx.labs.controller;
 
+import com.rendaxx.labs.api.v1.api.RetailPointsApi;
+import com.rendaxx.labs.api.v1.model.PageRetailPointApiDto;
+import com.rendaxx.labs.api.v1.model.RetailPointApiDto;
+import com.rendaxx.labs.api.v1.model.SaveRetailPointApiDto;
+import com.rendaxx.labs.controller.support.FilterParameterMapper;
+import com.rendaxx.labs.controller.support.PageRequestFactory;
 import com.rendaxx.labs.dtos.RetailPointDto;
 import com.rendaxx.labs.dtos.SaveRetailPointDto;
+import com.rendaxx.labs.mappers.api.PageResponseMapper;
+import com.rendaxx.labs.mappers.api.RetailPointApiMapper;
 import com.rendaxx.labs.service.RetailPointService;
 import jakarta.validation.Valid;
 import java.util.List;
@@ -9,62 +17,60 @@ import java.util.Map;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
-import org.springframework.http.HttpStatus;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/api/retail-points")
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 @Validated
-public class RetailPointController {
+public class RetailPointController implements RetailPointsApi {
 
     RetailPointService retailPointService;
+    RetailPointApiMapper retailPointApiMapper;
+    PageResponseMapper pageResponseMapper;
+    PageRequestFactory pageRequestFactory;
+    FilterParameterMapper filterParameterMapper;
 
-    @PostMapping
-    @ResponseStatus(HttpStatus.CREATED)
-    public RetailPointDto create(@RequestBody @Valid SaveRetailPointDto dto) {
-        return retailPointService.create(dto);
+    @Override
+    public ResponseEntity<RetailPointApiDto> createRetailPoint(@Valid SaveRetailPointApiDto saveRetailPointApiDto) {
+        SaveRetailPointDto command = retailPointApiMapper.toDto(saveRetailPointApiDto);
+        RetailPointDto created = retailPointService.create(command);
+        return ResponseEntity.status(HttpStatus.CREATED).body(retailPointApiMapper.toApi(created));
     }
 
-    @GetMapping("/{id}")
-    public RetailPointDto getById(@PathVariable Long id) {
-        return retailPointService.getById(id);
+    @Override
+    public ResponseEntity<RetailPointApiDto> getRetailPoint(Long id) {
+        return ResponseEntity.ok(retailPointApiMapper.toApi(retailPointService.getById(id)));
     }
 
-    @GetMapping
-    public Page<RetailPointDto> getAll(Pageable pageable, @RequestParam Map<String, String> filters) {
-        return retailPointService.getAll(pageable, filters);
+    @Override
+    public ResponseEntity<PageRetailPointApiDto> listRetailPoints(Integer page, Integer size, java.util.List<String> sort, Map<String, String> filter) {
+        Pageable pageable = pageRequestFactory.build(page, size, sort);
+        Page<RetailPointDto> result = retailPointService.getAll(pageable, filterParameterMapper.toFilters(filter));
+        return ResponseEntity.ok(pageResponseMapper.toRetailPointPage(result));
     }
 
-    @PutMapping("/{id}")
-    public RetailPointDto update(@PathVariable Long id, @RequestBody @Valid SaveRetailPointDto dto) {
-        return retailPointService.update(id, dto);
+    @Override
+    public ResponseEntity<RetailPointApiDto> updateRetailPoint(Long id, @Valid SaveRetailPointApiDto saveRetailPointApiDto) {
+        SaveRetailPointDto command = retailPointApiMapper.toDto(saveRetailPointApiDto);
+        RetailPointDto updated = retailPointService.update(id, command);
+        return ResponseEntity.ok(retailPointApiMapper.toApi(updated));
     }
 
-    @DeleteMapping("/{id}")
-    @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void delete(@PathVariable Long id) {
+    @Override
+    public ResponseEntity<Void> deleteRetailPoint(Long id) {
         retailPointService.delete(id);
+        return ResponseEntity.noContent().build();
     }
 
-    @GetMapping("/{id}/nearest")
-    public List<RetailPointDto> getNearestRetailPoints(
-            @PathVariable("id") Long id,
-            @RequestParam("limit") int limit
-    ) {
-        return retailPointService.getNearestRetailPoints(id, limit);
+    @Override
+    public ResponseEntity<List<RetailPointApiDto>> getNearestRetailPoints(Long id, Integer limit) {
+        List<RetailPointDto> nearest = retailPointService.getNearestRetailPoints(id, limit);
+        return ResponseEntity.ok(retailPointApiMapper.toApi(nearest));
     }
 }

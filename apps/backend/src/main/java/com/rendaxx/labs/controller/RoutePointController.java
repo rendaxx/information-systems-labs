@@ -1,8 +1,18 @@
 package com.rendaxx.labs.controller;
 
+import com.rendaxx.labs.api.v1.api.RoutePointsApi;
+import com.rendaxx.labs.api.v1.model.PageRoutePointApiDto;
+import com.rendaxx.labs.api.v1.model.RetailPointApiDto;
+import com.rendaxx.labs.api.v1.model.RoutePointApiDto;
+import com.rendaxx.labs.api.v1.model.SaveRoutePointApiDto;
+import com.rendaxx.labs.controller.support.FilterParameterMapper;
+import com.rendaxx.labs.controller.support.PageRequestFactory;
 import com.rendaxx.labs.dtos.RetailPointDto;
 import com.rendaxx.labs.dtos.RoutePointDto;
 import com.rendaxx.labs.dtos.SaveRoutePointDto;
+import com.rendaxx.labs.mappers.api.PageResponseMapper;
+import com.rendaxx.labs.mappers.api.RetailPointApiMapper;
+import com.rendaxx.labs.mappers.api.RoutePointApiMapper;
 import com.rendaxx.labs.service.RoutePointService;
 import jakarta.validation.Valid;
 import java.util.List;
@@ -10,59 +20,61 @@ import java.util.Map;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
-import org.springframework.http.HttpStatus;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/api/route-points")
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 @Validated
-public class RoutePointController {
+public class RoutePointController implements RoutePointsApi {
 
     RoutePointService routePointService;
+    RoutePointApiMapper routePointApiMapper;
+    RetailPointApiMapper retailPointApiMapper;
+    PageResponseMapper pageResponseMapper;
+    PageRequestFactory pageRequestFactory;
+    FilterParameterMapper filterParameterMapper;
 
-    @PostMapping
-    @ResponseStatus(HttpStatus.CREATED)
-    public RoutePointDto create(@RequestBody @Valid SaveRoutePointDto dto) {
-        return routePointService.create(dto);
+    @Override
+    public ResponseEntity<RoutePointApiDto> createRoutePoint(@Valid SaveRoutePointApiDto saveRoutePointApiDto) {
+        SaveRoutePointDto command = routePointApiMapper.toDto(saveRoutePointApiDto);
+        RoutePointDto created = routePointService.create(command);
+        return ResponseEntity.status(HttpStatus.CREATED).body(routePointApiMapper.toApi(created));
     }
 
-    @GetMapping("/{id}")
-    public RoutePointDto getById(@PathVariable Long id) {
-        return routePointService.getById(id);
+    @Override
+    public ResponseEntity<RoutePointApiDto> getRoutePoint(Long id) {
+        return ResponseEntity.ok(routePointApiMapper.toApi(routePointService.getById(id)));
     }
 
-    @GetMapping
-    public Page<RoutePointDto> getAll(Pageable pageable, @RequestParam Map<String, String> filters) {
-        return routePointService.getAll(pageable, filters);
+    @Override
+    public ResponseEntity<PageRoutePointApiDto> listRoutePoints(Integer page, Integer size, java.util.List<String> sort, Map<String, String> filter) {
+        Pageable pageable = pageRequestFactory.build(page, size, sort);
+        Page<RoutePointDto> result = routePointService.getAll(pageable, filterParameterMapper.toFilters(filter));
+        return ResponseEntity.ok(pageResponseMapper.toRoutePointPage(result));
     }
 
-    @PutMapping("/{id}")
-    public RoutePointDto update(@PathVariable Long id, @RequestBody @Valid SaveRoutePointDto dto) {
-        return routePointService.update(id, dto);
+    @Override
+    public ResponseEntity<RoutePointApiDto> updateRoutePoint(Long id, @Valid SaveRoutePointApiDto saveRoutePointApiDto) {
+        SaveRoutePointDto command = routePointApiMapper.toDto(saveRoutePointApiDto);
+        RoutePointDto updated = routePointService.update(id, command);
+        return ResponseEntity.ok(routePointApiMapper.toApi(updated));
     }
 
-    @DeleteMapping("/{id}")
-    @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void delete(@PathVariable Long id) {
+    @Override
+    public ResponseEntity<Void> deleteRoutePoint(Long id) {
         routePointService.delete(id);
+        return ResponseEntity.noContent().build();
     }
 
-    @GetMapping("/top-retail-points")
-    public List<RetailPointDto> getTopRetailPoints(@RequestParam("limit") int limit) {
-        return routePointService.getTopRetailPoints(limit);
+    @Override
+    public ResponseEntity<List<RetailPointApiDto>> getTopRetailPoints(Integer limit) {
+        List<RetailPointDto> topRetailPoints = routePointService.getTopRetailPoints(limit);
+        return ResponseEntity.ok(retailPointApiMapper.toApi(topRetailPoints));
     }
 }

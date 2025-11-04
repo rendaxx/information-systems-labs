@@ -1,7 +1,1021 @@
-openapi: 3.1.0
+openapi: 3.0.3
 info:
   title: Information Systems Labs API
-  version: 0.0.1
-  description: Placeholder OpenAPI specification.
-paths: {}
-components: {}
+  version: 1.0.0
+  description: |
+    REST API for managing routes, vehicles, retail points, drivers, orders and related resources.
+servers:
+  - url: http://localhost:8080
+    description: Local development server
+paths:
+  /api/orders:
+    post:
+      tags: [Orders]
+      summary: Create an order
+      operationId: createOrder
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SaveOrder'
+      responses:
+        '201':
+          description: Order created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Order'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+    get:
+      tags: [Orders]
+      summary: List orders
+      operationId: listOrders
+      parameters:
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/Size'
+        - $ref: '#/components/parameters/Sort'
+        - $ref: '#/components/parameters/Filter'
+      responses:
+        '200':
+          description: Paged list of orders
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PageOrder'
+  /api/orders/{id}:
+    parameters:
+      - $ref: '#/components/parameters/Id'
+    get:
+      tags: [Orders]
+      summary: Get order by id
+      operationId: getOrder
+      responses:
+        '200':
+          description: Order found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Order'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    put:
+      tags: [Orders]
+      summary: Update order
+      operationId: updateOrder
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SaveOrder'
+      responses:
+        '200':
+          description: Order updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Order'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    delete:
+      tags: [Orders]
+      summary: Delete order
+      operationId: deleteOrder
+      responses:
+        '204':
+          description: Order removed
+        '404':
+          $ref: '#/components/responses/NotFound'
+  /api/drivers:
+    post:
+      tags: [Drivers]
+      summary: Create a driver
+      operationId: createDriver
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SaveDriver'
+      responses:
+        '201':
+          description: Driver created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Driver'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+    get:
+      tags: [Drivers]
+      summary: List drivers
+      operationId: listDrivers
+      parameters:
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/Size'
+        - $ref: '#/components/parameters/Sort'
+        - $ref: '#/components/parameters/Filter'
+      responses:
+        '200':
+          description: Paged list of drivers
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PageDriver'
+  /api/drivers/{id}:
+    parameters:
+      - $ref: '#/components/parameters/Id'
+    get:
+      tags: [Drivers]
+      summary: Get driver by id
+      operationId: getDriver
+      responses:
+        '200':
+          description: Driver found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Driver'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    put:
+      tags: [Drivers]
+      summary: Update driver
+      operationId: updateDriver
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SaveDriver'
+      responses:
+        '200':
+          description: Driver updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Driver'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    delete:
+      tags: [Drivers]
+      summary: Delete driver
+      operationId: deleteDriver
+      responses:
+        '204':
+          description: Driver removed
+        '404':
+          $ref: '#/components/responses/NotFound'
+  /api/vehicles:
+    post:
+      tags: [Vehicles]
+      summary: Create a vehicle
+      operationId: createVehicle
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SaveVehicle'
+      responses:
+        '201':
+          description: Vehicle created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Vehicle'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+    get:
+      tags: [Vehicles]
+      summary: List vehicles
+      operationId: listVehicles
+      parameters:
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/Size'
+        - $ref: '#/components/parameters/Sort'
+        - $ref: '#/components/parameters/Filter'
+      responses:
+        '200':
+          description: Paged list of vehicles
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PageVehicle'
+  /api/vehicles/{id}:
+    parameters:
+      - $ref: '#/components/parameters/Id'
+    get:
+      tags: [Vehicles]
+      summary: Get vehicle by id
+      operationId: getVehicle
+      responses:
+        '200':
+          description: Vehicle found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Vehicle'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    put:
+      tags: [Vehicles]
+      summary: Update vehicle
+      operationId: updateVehicle
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SaveVehicle'
+      responses:
+        '200':
+          description: Vehicle updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Vehicle'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    delete:
+      tags: [Vehicles]
+      summary: Delete vehicle
+      operationId: deleteVehicle
+      responses:
+        '204':
+          description: Vehicle removed
+        '404':
+          $ref: '#/components/responses/NotFound'
+  /api/retail-points:
+    post:
+      tags: [Retail Points]
+      summary: Create a retail point
+      operationId: createRetailPoint
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SaveRetailPoint'
+      responses:
+        '201':
+          description: Retail point created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RetailPoint'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+    get:
+      tags: [Retail Points]
+      summary: List retail points
+      operationId: listRetailPoints
+      parameters:
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/Size'
+        - $ref: '#/components/parameters/Sort'
+        - $ref: '#/components/parameters/Filter'
+      responses:
+        '200':
+          description: Paged list of retail points
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PageRetailPoint'
+  /api/retail-points/{id}:
+    parameters:
+      - $ref: '#/components/parameters/Id'
+    get:
+      tags: [Retail Points]
+      summary: Get retail point by id
+      operationId: getRetailPoint
+      responses:
+        '200':
+          description: Retail point found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RetailPoint'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    put:
+      tags: [Retail Points]
+      summary: Update retail point
+      operationId: updateRetailPoint
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SaveRetailPoint'
+      responses:
+        '200':
+          description: Retail point updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RetailPoint'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    delete:
+      tags: [Retail Points]
+      summary: Delete retail point
+      operationId: deleteRetailPoint
+      responses:
+        '204':
+          description: Retail point removed
+        '404':
+          $ref: '#/components/responses/NotFound'
+  /api/retail-points/{id}/nearest:
+    parameters:
+      - $ref: '#/components/parameters/Id'
+      - $ref: '#/components/parameters/Limit'
+    get:
+      tags: [Retail Points]
+      summary: Get nearest retail points
+      operationId: getNearestRetailPoints
+      responses:
+        '200':
+          description: List of nearest retail points
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/RetailPoint'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+  /api/route-points:
+    post:
+      tags: [Route Points]
+      summary: Create a route point
+      operationId: createRoutePoint
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SaveRoutePoint'
+      responses:
+        '201':
+          description: Route point created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RoutePoint'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+    get:
+      tags: [Route Points]
+      summary: List route points
+      operationId: listRoutePoints
+      parameters:
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/Size'
+        - $ref: '#/components/parameters/Sort'
+        - $ref: '#/components/parameters/Filter'
+      responses:
+        '200':
+          description: Paged list of route points
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PageRoutePoint'
+  /api/route-points/{id}:
+    parameters:
+      - $ref: '#/components/parameters/Id'
+    get:
+      tags: [Route Points]
+      summary: Get route point by id
+      operationId: getRoutePoint
+      responses:
+        '200':
+          description: Route point found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RoutePoint'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    put:
+      tags: [Route Points]
+      summary: Update route point
+      operationId: updateRoutePoint
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SaveRoutePoint'
+      responses:
+        '200':
+          description: Route point updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RoutePoint'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    delete:
+      tags: [Route Points]
+      summary: Delete route point
+      operationId: deleteRoutePoint
+      responses:
+        '204':
+          description: Route point removed
+        '404':
+          $ref: '#/components/responses/NotFound'
+  /api/route-points/top-retail-points:
+    parameters:
+      - $ref: '#/components/parameters/Limit'
+    get:
+      tags: [Route Points]
+      summary: Get top retail points by visit count
+      operationId: getTopRetailPoints
+      responses:
+        '200':
+          description: List of most visited retail points
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/RetailPoint'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+  /api/routes:
+    post:
+      tags: [Routes]
+      summary: Create a route
+      operationId: createRoute
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SaveRoute'
+      responses:
+        '201':
+          description: Route created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Route'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+    get:
+      tags: [Routes]
+      summary: List routes
+      operationId: listRoutes
+      parameters:
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/Size'
+        - $ref: '#/components/parameters/Sort'
+        - $ref: '#/components/parameters/Filter'
+      responses:
+        '200':
+          description: Paged list of routes
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PageRoute'
+  /api/routes/{id}:
+    parameters:
+      - $ref: '#/components/parameters/Id'
+    get:
+      tags: [Routes]
+      summary: Get route by id
+      operationId: getRoute
+      responses:
+        '200':
+          description: Route found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Route'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    put:
+      tags: [Routes]
+      summary: Update route
+      operationId: updateRoute
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SaveRoute'
+      responses:
+        '200':
+          description: Route updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Route'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    delete:
+      tags: [Routes]
+      summary: Delete route
+      operationId: deleteRoute
+      responses:
+        '204':
+          description: Route removed
+        '404':
+          $ref: '#/components/responses/NotFound'
+  /api/routes/average-mileage:
+    get:
+      tags: [Routes]
+      summary: Get average route mileage in kilometers
+      operationId: getAverageRouteMileage
+      responses:
+        '200':
+          description: Average mileage
+          content:
+            application/json:
+              schema:
+                type: number
+                format: double
+  /api/routes/within-period:
+    get:
+      tags: [Routes]
+      summary: Get routes within period
+      operationId: getRoutesWithinPeriod
+      parameters:
+        - $ref: '#/components/parameters/PeriodStart'
+        - $ref: '#/components/parameters/PeriodEnd'
+      responses:
+        '200':
+          description: Routes within period
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Route'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+  /api/routes/retail-point/{retailPointId}:
+    parameters:
+      - name: retailPointId
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+    get:
+      tags: [Routes]
+      summary: Get routes by retail point id
+      operationId: getRoutesByRetailPoint
+      responses:
+        '200':
+          description: Routes related to the retail point
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Route'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+components:
+  parameters:
+    Id:
+      name: id
+      in: path
+      required: true
+      schema:
+        type: integer
+        format: int64
+    Page:
+      name: page
+      in: query
+      schema:
+        type: integer
+        format: int32
+        default: 0
+        minimum: 0
+    Size:
+      name: size
+      in: query
+      schema:
+        type: integer
+        format: int32
+        default: 20
+        minimum: 1
+    Sort:
+      name: sort
+      in: query
+      schema:
+        type: array
+        items:
+          type: string
+      style: form
+      explode: false
+    Filter:
+      name: filter
+      in: query
+      style: deepObject
+      explode: true
+      schema:
+        type: object
+        additionalProperties:
+          type: string
+    Limit:
+      name: limit
+      in: query
+      required: true
+      schema:
+        type: integer
+        format: int32
+        minimum: 1
+    PeriodStart:
+      name: periodStart
+      in: query
+      required: true
+      schema:
+        type: string
+        format: date-time
+    PeriodEnd:
+      name: periodEnd
+      in: query
+      required: true
+      schema:
+        type: string
+        format: date-time
+  responses:
+    BadRequest:
+      description: Invalid request
+      content:
+        text/plain:
+          schema:
+            type: string
+    NotFound:
+      description: Resource not found
+      content:
+        text/plain:
+          schema:
+            type: string
+  schemas:
+    Driver:
+      type: object
+      required: [id, firstName, lastName, passport]
+      properties:
+        id:
+          type: integer
+          format: int64
+        firstName:
+          type: string
+        middleName:
+          type: string
+          nullable: true
+        lastName:
+          type: string
+        passport:
+          type: string
+    SaveDriver:
+      type: object
+      required: [firstName, lastName, passport]
+      properties:
+        firstName:
+          type: string
+        middleName:
+          type: string
+          nullable: true
+        lastName:
+          type: string
+        passport:
+          type: string
+    Order:
+      type: object
+      required: [id, goodsType, minTemperature, maxTemperature, volumeInCubicMeters, weightInKg]
+      properties:
+        id:
+          type: integer
+          format: int64
+        goodsType:
+          type: string
+        minTemperature:
+          type: integer
+          format: int32
+        maxTemperature:
+          type: integer
+          format: int32
+        volumeInCubicMeters:
+          type: number
+          format: double
+        weightInKg:
+          type: number
+          format: double
+    SaveOrder:
+      type: object
+      required: [goodsType, minTemperature, maxTemperature, volumeInCubicMeters, weightInKg]
+      properties:
+        goodsType:
+          type: string
+        minTemperature:
+          type: integer
+          format: int32
+        maxTemperature:
+          type: integer
+          format: int32
+        volumeInCubicMeters:
+          type: number
+          format: double
+        weightInKg:
+          type: number
+          format: double
+    Point:
+      type: object
+      required: [longitude, latitude]
+      properties:
+        longitude:
+          type: number
+          format: double
+        latitude:
+          type: number
+          format: double
+    RetailPoint:
+      type: object
+      required: [id, name, address, location, type, timezone]
+      properties:
+        id:
+          type: integer
+          format: int64
+        name:
+          type: string
+        address:
+          type: string
+        location:
+          $ref: '#/components/schemas/Point'
+        type:
+          $ref: '#/components/schemas/PointType'
+        timezone:
+          type: string
+    SaveRetailPoint:
+      type: object
+      required: [name, address, location, type, timezone]
+      properties:
+        name:
+          type: string
+        address:
+          type: string
+        location:
+          $ref: '#/components/schemas/Point'
+        type:
+          $ref: '#/components/schemas/PointType'
+        timezone:
+          type: string
+    Vehicle:
+      type: object
+      required: [id, driver, gosNumber, tonnageInTons, bodyHeightInMeters, bodyWidthInMeters, bodyLengthInCubicMeters]
+      properties:
+        id:
+          type: integer
+          format: int64
+        driver:
+          $ref: '#/components/schemas/Driver'
+        gosNumber:
+          type: string
+        tonnageInTons:
+          type: number
+          format: double
+        bodyHeightInMeters:
+          type: number
+          format: double
+        bodyWidthInMeters:
+          type: number
+          format: double
+        bodyLengthInCubicMeters:
+          type: number
+          format: double
+    SaveVehicle:
+      type: object
+      required: [driverId, gosNumber, tonnageInTons, bodyHeightInMeters, bodyWidthInMeters, bodyLengthInCubicMeters]
+      properties:
+        driverId:
+          type: integer
+          format: int64
+        gosNumber:
+          type: string
+        tonnageInTons:
+          type: number
+          format: double
+        bodyHeightInMeters:
+          type: number
+          format: double
+        bodyWidthInMeters:
+          type: number
+          format: double
+        bodyLengthInCubicMeters:
+          type: number
+          format: double
+    Route:
+      type: object
+      required: [id, routePoints, vehicle, creationTime, plannedStartTime, plannedEndTime, mileageInKm]
+      properties:
+        id:
+          type: integer
+          format: int64
+        routePoints:
+          type: array
+          items:
+            $ref: '#/components/schemas/RoutePoint'
+        vehicle:
+          $ref: '#/components/schemas/Vehicle'
+        creationTime:
+          type: string
+          format: date-time
+        plannedStartTime:
+          type: string
+          format: date-time
+        plannedEndTime:
+          type: string
+          format: date-time
+        mileageInKm:
+          type: number
+          format: double
+    SaveRoute:
+      type: object
+      required: [routePoints, vehicleId, creationTime, plannedStartTime, plannedEndTime, mileageInKm]
+      properties:
+        routePoints:
+          type: array
+          items:
+            $ref: '#/components/schemas/SaveRoutePoint'
+        vehicleId:
+          type: integer
+          format: int64
+        creationTime:
+          type: string
+          format: date-time
+        plannedStartTime:
+          type: string
+          format: date-time
+        plannedEndTime:
+          type: string
+          format: date-time
+        mileageInKm:
+          type: number
+          format: double
+    RoutePoint:
+      type: object
+      required: [id, routeId, retailPoint, operationType, orders, plannedStartTime, plannedEndTime, orderNumber]
+      properties:
+        id:
+          type: integer
+          format: int64
+        routeId:
+          type: integer
+          format: int64
+        retailPoint:
+          $ref: '#/components/schemas/RetailPoint'
+        operationType:
+          $ref: '#/components/schemas/OperationType'
+        orders:
+          type: array
+          items:
+            $ref: '#/components/schemas/Order'
+        plannedStartTime:
+          type: string
+          format: date-time
+        plannedEndTime:
+          type: string
+          format: date-time
+        orderNumber:
+          type: integer
+          format: int32
+    SaveRoutePoint:
+      type: object
+      required: [routeId, retailPointId, operationType, orderIds, plannedStartTime, plannedEndTime, orderNumber]
+      properties:
+        id:
+          type: integer
+          format: int64
+          nullable: true
+        routeId:
+          type: integer
+          format: int64
+        retailPointId:
+          type: integer
+          format: int64
+        operationType:
+          $ref: '#/components/schemas/OperationType'
+        orderIds:
+          type: array
+          items:
+            type: integer
+            format: int64
+        plannedStartTime:
+          type: string
+          format: date-time
+        plannedEndTime:
+          type: string
+          format: date-time
+        orderNumber:
+          type: integer
+          format: int32
+    PageOrder:
+      allOf:
+        - $ref: '#/components/schemas/PageMetadata'
+        - type: object
+          properties:
+            content:
+              type: array
+              items:
+                $ref: '#/components/schemas/Order'
+    PageDriver:
+      allOf:
+        - $ref: '#/components/schemas/PageMetadata'
+        - type: object
+          properties:
+            content:
+              type: array
+              items:
+                $ref: '#/components/schemas/Driver'
+    PageVehicle:
+      allOf:
+        - $ref: '#/components/schemas/PageMetadata'
+        - type: object
+          properties:
+            content:
+              type: array
+              items:
+                $ref: '#/components/schemas/Vehicle'
+    PageRetailPoint:
+      allOf:
+        - $ref: '#/components/schemas/PageMetadata'
+        - type: object
+          properties:
+            content:
+              type: array
+              items:
+                $ref: '#/components/schemas/RetailPoint'
+    PageRoutePoint:
+      allOf:
+        - $ref: '#/components/schemas/PageMetadata'
+        - type: object
+          properties:
+            content:
+              type: array
+              items:
+                $ref: '#/components/schemas/RoutePoint'
+    PageRoute:
+      allOf:
+        - $ref: '#/components/schemas/PageMetadata'
+        - type: object
+          properties:
+            content:
+              type: array
+              items:
+                $ref: '#/components/schemas/Route'
+    PageMetadata:
+      type: object
+      required: [page, size, totalElements, totalPages, sort, first, last, empty]
+      properties:
+        page:
+          type: integer
+          format: int32
+        size:
+          type: integer
+          format: int32
+        totalElements:
+          type: integer
+          format: int64
+        totalPages:
+          type: integer
+          format: int32
+        sort:
+          type: array
+          items:
+            type: string
+        first:
+          type: boolean
+        last:
+          type: boolean
+        empty:
+          type: boolean
+    OperationType:
+      type: string
+      enum: [LOAD, UNLOAD, VISIT]
+    PointType:
+      type: string
+      enum: [SHOP, WAREHOUSE, GARAGE]
