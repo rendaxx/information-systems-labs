@@ -11,6 +11,11 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface RoutePointRepository extends JpaRepository<RoutePoint, Long>, JpaSpecificationExecutor<RoutePoint> {
-    @Query("select ret from RetailPoint ret join RoutePoint rp on rp.retailPoint = ret group by ret.id order by count(rp.id) desc, ret.id asc")
+    @Query(
+            """
+            select ret from RetailPoint ret
+            join RoutePoint rp on rp.retailPoint = ret
+            group by ret.id
+            order by count(rp.id) desc, ret.id asc""")
     List<RetailPoint> findMostVisitedRetailPoints(Pageable pageable);
 }

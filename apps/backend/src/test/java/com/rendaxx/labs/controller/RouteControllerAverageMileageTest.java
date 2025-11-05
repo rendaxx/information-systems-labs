@@ -29,15 +29,14 @@ import org.testcontainers.utility.DockerImageName;
 @AutoConfigureMockMvc
 class RouteControllerAverageMileageTest {
 
-    private static final DockerImageName POSTGIS_IMAGE = DockerImageName
-        .parse("postgis/postgis:16-3.4")
-        .asCompatibleSubstituteFor("postgres");
+    private static final DockerImageName POSTGIS_IMAGE =
+            DockerImageName.parse("postgis/postgis:16-3.4").asCompatibleSubstituteFor("postgres");
 
     @Container
     private static final PostgreSQLContainer<?> POSTGRES = new PostgreSQLContainer<>(POSTGIS_IMAGE)
-        .withDatabaseName("routes_db")
-        .withUsername("routes_user")
-        .withPassword("routes_pass");
+            .withDatabaseName("routes_db")
+            .withUsername("routes_user")
+            .withPassword("routes_pass");
 
     @DynamicPropertySource
     static void configureDatasourceProperties(DynamicPropertyRegistry registry) {
@@ -68,34 +67,37 @@ class RouteControllerAverageMileageTest {
 
     @BeforeEach
     void setUp() {
-        testDataFactory = new RouteTestDataFactory(routeRepository, vehicleRepository, retailPointRepository, orderRepository);
+        testDataFactory =
+                new RouteTestDataFactory(routeRepository, vehicleRepository, retailPointRepository, orderRepository);
         testDataFactory.cleanDatabase();
     }
 
     @Test
     void averageMileageReturnsZeroWhenNoRoutesExist() throws Exception {
         mockMvc.perform(get("/api/routes/average-mileage"))
-            .andExpect(status().isOk())
-            .andExpect(content().string("0.000"));
+                .andExpect(status().isOk())
+                .andExpect(content().string("0.000"));
     }
 
     @Test
     void averageMileageReturnsExactValueForSingleRoute() throws Exception {
-        testDataFactory.persistRoute(LocalDateTime.of(2025, 1, 1, 8, 0), LocalDateTime.of(2025, 1, 1, 10, 0), new BigDecimal("123.456"));
+        testDataFactory.persistRoute(
+                LocalDateTime.of(2025, 1, 1, 8, 0), LocalDateTime.of(2025, 1, 1, 10, 0), new BigDecimal("123.456"));
 
         mockMvc.perform(get("/api/routes/average-mileage"))
-            .andExpect(status().isOk())
-            .andExpect(content().string("123.456"));
+                .andExpect(status().isOk())
+                .andExpect(content().string("123.456"));
     }
 
     @Test
     void averageMileageRoundsHalfUpToThreeDecimalPlaces() throws Exception {
-        testDataFactory.persistRoute(LocalDateTime.of(2025, 2, 1, 9, 0), LocalDateTime.of(2025, 2, 1, 11, 0), new BigDecimal("10.120"));
-        testDataFactory.persistRoute(LocalDateTime.of(2025, 2, 2, 9, 0), LocalDateTime.of(2025, 2, 2, 11, 0), new BigDecimal("10.121"));
+        testDataFactory.persistRoute(
+                LocalDateTime.of(2025, 2, 1, 9, 0), LocalDateTime.of(2025, 2, 1, 11, 0), new BigDecimal("10.120"));
+        testDataFactory.persistRoute(
+                LocalDateTime.of(2025, 2, 2, 9, 0), LocalDateTime.of(2025, 2, 2, 11, 0), new BigDecimal("10.121"));
 
         mockMvc.perform(get("/api/routes/average-mileage"))
-            .andExpect(status().isOk())
-            .andExpect(content().string("10.121"));
+                .andExpect(status().isOk())
+                .andExpect(content().string("10.121"));
     }
-
 }

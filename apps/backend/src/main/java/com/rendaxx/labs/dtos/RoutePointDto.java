@@ -1,12 +1,11 @@
 package com.rendaxx.labs.dtos;
 
 import com.rendaxx.labs.domain.OperationType;
+import java.time.LocalDateTime;
+import java.util.Set;
 import lombok.AccessLevel;
 import lombok.Data;
 import lombok.experimental.FieldDefaults;
-
-import java.time.LocalDateTime;
-import java.util.Set;
 
 @Data
 @FieldDefaults(level = AccessLevel.PRIVATE)

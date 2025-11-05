@@ -11,13 +11,12 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface RetailPointRepository extends JpaRepository<RetailPoint, Long>, JpaSpecificationExecutor<RetailPoint> {
 
-    @Query(value = "SELECT rp.* FROM retail_points rp "
-            + "JOIN retail_points origin ON origin.id = :retailPointId "
-            + "WHERE rp.id <> origin.id "
-            + "ORDER BY origin.location <-> rp.location, rp.id "
-            + "LIMIT :limit", nativeQuery = true)
-    List<RetailPoint> findNearestRetailPoints(
-        @Param("retailPointId") Long retailPointId,
-        @Param("limit") int limit
-    );
+    @Query(
+            value = "SELECT rp.* FROM retail_points rp "
+                    + "JOIN retail_points origin ON origin.id = :retailPointId "
+                    + "WHERE rp.id <> origin.id "
+                    + "ORDER BY origin.location <-> rp.location, rp.id "
+                    + "LIMIT :limit",
+            nativeQuery = true)
+    List<RetailPoint> findNearestRetailPoints(@Param("retailPointId") Long retailPointId, @Param("limit") int limit);
 }

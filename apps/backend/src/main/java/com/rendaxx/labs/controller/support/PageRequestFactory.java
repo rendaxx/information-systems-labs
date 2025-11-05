@@ -27,9 +27,7 @@ public class PageRequestFactory {
         if (CollectionUtils.isEmpty(sortValues)) {
             return Sort.unsorted();
         }
-        List<Sort.Order> orders = sortValues.stream()
-                .map(this::toOrder)
-                .toList();
+        List<Sort.Order> orders = sortValues.stream().map(this::toOrder).toList();
         return Sort.by(orders);
     }
 

@@ -1,12 +1,23 @@
 package com.rendaxx.labs.domain;
 
-import jakarta.persistence.*;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
+import jakarta.persistence.UniqueConstraint;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
-import lombok.*;
-
 import java.math.BigDecimal;
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @Getter
 @Setter
@@ -14,7 +25,9 @@ import java.math.BigDecimal;
 @NoArgsConstructor
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 @Entity
-@Table(name = "vehicles", uniqueConstraints = {@UniqueConstraint(name = "uk_vehicles_gos_number", columnNames = "gos_number")})
+@Table(
+        name = "vehicles",
+        uniqueConstraints = {@UniqueConstraint(name = "uk_vehicles_gos_number", columnNames = "gos_number")})
 public class Vehicle {
 
     @Id

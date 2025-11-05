@@ -9,22 +9,23 @@ import com.rendaxx.labs.dtos.SaveRoutePointDto;
 import com.rendaxx.labs.exceptions.NotFoundException;
 import com.rendaxx.labs.repository.RoutePointRepository;
 import com.rendaxx.labs.repository.VehicleRepository;
-import org.mapstruct.Mapper;
-import org.mapstruct.Mapping;
-import org.mapstruct.MappingTarget;
-import org.springframework.beans.factory.annotation.Autowired;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
+import org.mapstruct.MappingTarget;
+import org.springframework.beans.factory.annotation.Autowired;
 
 @Mapper(uses = {RoutePointMapper.class, VehicleMapper.class})
 public abstract class RouteMapper {
 
     @Autowired
     private RoutePointRepository routePointRepository;
+
     @Autowired
     private VehicleRepository vehicleRepository;
 
@@ -34,21 +35,14 @@ public abstract class RouteMapper {
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "creationTime", ignore = true)
     @Mapping(target = "routePoints", source = "routePoints")
-    abstract void update(
-            @MappingTarget Route route,
-            SaveRouteDto dto,
-            List<RoutePoint> routePoints,
-            Vehicle vehicle
-    );
+    abstract void update(@MappingTarget Route route, SaveRouteDto dto, List<RoutePoint> routePoints, Vehicle vehicle);
 
     public void update(Route route, SaveRouteDto dto) {
         Map<Long, RoutePoint> routePointsById = routePointRepository
-                .findAllById(
-                        dto.getRoutePoints().stream()
-                                .map(SaveRoutePointDto::getId)
-                                .filter(Objects::nonNull)
-                                .collect(Collectors.toList())
-                )
+                .findAllById(dto.getRoutePoints().stream()
+                        .map(SaveRoutePointDto::getId)
+                        .filter(Objects::nonNull)
+                        .collect(Collectors.toList()))
                 .stream()
                 .collect(Collectors.toMap(RoutePoint::getId, Function.identity()));
         List<RoutePoint> routePoints = new ArrayList<>();

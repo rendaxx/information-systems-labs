@@ -47,14 +47,16 @@ public class RetailPointController implements RetailPointsApi {
     }
 
     @Override
-    public ResponseEntity<PageRetailPointApiDto> listRetailPoints(Integer page, Integer size, List<String> sort, Map<String, String> filter) {
+    public ResponseEntity<PageRetailPointApiDto> listRetailPoints(
+            Integer page, Integer size, List<String> sort, Map<String, String> filter) {
         Pageable pageable = pageRequestFactory.build(page, size, sort);
         Page<RetailPointDto> result = retailPointService.getAll(pageable, filterParameterMapper.toFilters(filter));
         return ResponseEntity.ok(retailPointApiMapper.toRetailPointPage(result));
     }
 
     @Override
-    public ResponseEntity<RetailPointApiDto> updateRetailPoint(Long id, @Valid SaveRetailPointApiDto saveRetailPointApiDto) {
+    public ResponseEntity<RetailPointApiDto> updateRetailPoint(
+            Long id, @Valid SaveRetailPointApiDto saveRetailPointApiDto) {
         SaveRetailPointDto command = retailPointApiMapper.toDto(saveRetailPointApiDto);
         RetailPointDto updated = retailPointService.update(id, command);
         return ResponseEntity.ok(retailPointApiMapper.toApi(updated));

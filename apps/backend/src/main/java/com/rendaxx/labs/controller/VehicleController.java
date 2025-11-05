@@ -11,7 +11,6 @@ import com.rendaxx.labs.dtos.VehicleDto;
 import com.rendaxx.labs.mappers.api.VehicleApiMapper;
 import com.rendaxx.labs.service.VehicleService;
 import jakarta.validation.Valid;
-
 import java.util.List;
 import java.util.Map;
 import lombok.AccessLevel;
@@ -48,7 +47,8 @@ public class VehicleController implements VehiclesApi {
     }
 
     @Override
-    public ResponseEntity<PageVehicleApiDto> listVehicles(Integer page, Integer size, List<String> sort, Map<String, String> filter) {
+    public ResponseEntity<PageVehicleApiDto> listVehicles(
+            Integer page, Integer size, List<String> sort, Map<String, String> filter) {
         Pageable pageable = pageRequestFactory.build(page, size, sort);
         Page<VehicleDto> result = vehicleService.getAll(pageable, filterParameterMapper.toFilters(filter));
         return ResponseEntity.ok(vehicleApiMapper.toVehiclePage(result));

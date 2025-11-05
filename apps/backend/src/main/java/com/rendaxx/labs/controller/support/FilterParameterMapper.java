@@ -13,7 +13,9 @@ public class FilterParameterMapper {
             return Collections.emptyMap();
         }
         return filter.entrySet().stream()
-                .filter(entry -> entry.getKey() != null && entry.getValue() != null && !entry.getValue().isBlank())
+                .filter(entry -> entry.getKey() != null
+                        && entry.getValue() != null
+                        && !entry.getValue().isBlank())
                 .collect(Collectors.toUnmodifiableMap(Map.Entry::getKey, Map.Entry::getValue));
     }
 }

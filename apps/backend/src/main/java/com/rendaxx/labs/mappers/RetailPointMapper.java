@@ -5,10 +5,10 @@ import com.rendaxx.labs.dtos.PointDto;
 import com.rendaxx.labs.dtos.RetailPointDto;
 import com.rendaxx.labs.dtos.SaveRetailPointDto;
 import java.util.List;
+import org.locationtech.jts.geom.Point;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
-import org.locationtech.jts.geom.Point;
 
 @Mapper
 public abstract class RetailPointMapper {

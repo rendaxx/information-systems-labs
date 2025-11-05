@@ -66,9 +66,9 @@ public class EqualitySpecificationBuilder {
             return Collections.emptyMap();
         }
         return filters.entrySet().stream()
-            .filter(entry -> !isReserved(entry.getKey()))
-            .filter(entry -> StringUtils.hasText(entry.getValue()))
-            .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (existing, ignored) -> existing));
+                .filter(entry -> !isReserved(entry.getKey()))
+                .filter(entry -> StringUtils.hasText(entry.getValue()))
+                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (existing, ignored) -> existing));
     }
 
     private boolean isReserved(String key) {

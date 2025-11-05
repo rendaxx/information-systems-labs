@@ -18,9 +18,7 @@ public interface RouteRepository extends JpaRepository<Route, Long>, JpaSpecific
 
     @Query("select distinct r from Route r where r.plannedStartTime >= :periodStart and r.plannedEndTime <= :periodEnd")
     List<Route> findWithinPeriodWithDetails(
-        @Param("periodStart") LocalDateTime periodStart,
-        @Param("periodEnd") LocalDateTime periodEnd
-    );
+            @Param("periodStart") LocalDateTime periodStart, @Param("periodEnd") LocalDateTime periodEnd);
 
     @Query("select distinct r from Route r join r.routePoints rp where rp.retailPoint.id = :retailPointId")
     List<Route> findAllByRetailPointId(@Param("retailPointId") Long retailPointId);

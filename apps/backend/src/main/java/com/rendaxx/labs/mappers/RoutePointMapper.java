@@ -23,8 +23,10 @@ public abstract class RoutePointMapper {
 
     @Autowired
     private RouteRepository routeRepository;
+
     @Autowired
     private RetailPointRepository retailPointRepository;
+
     @Autowired
     private OrderRepository orderRepository;
 
@@ -36,8 +38,7 @@ public abstract class RoutePointMapper {
             SaveRoutePointDto dto,
             Route route,
             RetailPoint retailPoint,
-            Set<Order> orders
-    );
+            Set<Order> orders);
 
     public void update(RoutePoint routePoint, SaveRoutePointDto dto) {
         Route route = routeRepository

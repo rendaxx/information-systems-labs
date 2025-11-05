@@ -32,15 +32,14 @@ import org.testcontainers.utility.DockerImageName;
 @AutoConfigureMockMvc
 class RoutePointControllerTopRetailPointsTest {
 
-    private static final DockerImageName POSTGIS_IMAGE = DockerImageName
-        .parse("postgis/postgis:16-3.4")
-        .asCompatibleSubstituteFor("postgres");
+    private static final DockerImageName POSTGIS_IMAGE =
+            DockerImageName.parse("postgis/postgis:16-3.4").asCompatibleSubstituteFor("postgres");
 
     @Container
     private static final PostgreSQLContainer<?> POSTGRES = new PostgreSQLContainer<>(POSTGIS_IMAGE)
-        .withDatabaseName("routes_db")
-        .withUsername("routes_user")
-        .withPassword("routes_pass");
+            .withDatabaseName("routes_db")
+            .withUsername("routes_user")
+            .withPassword("routes_pass");
 
     @DynamicPropertySource
     static void configureDatasourceProperties(DynamicPropertyRegistry registry) {
@@ -71,22 +70,23 @@ class RoutePointControllerTopRetailPointsTest {
 
     @BeforeEach
     void setUp() {
-        testDataFactory = new RouteTestDataFactory(routeRepository, vehicleRepository, retailPointRepository, orderRepository);
+        testDataFactory =
+                new RouteTestDataFactory(routeRepository, vehicleRepository, retailPointRepository, orderRepository);
         testDataFactory.cleanDatabase();
     }
 
     @Test
     void returnsEmptyListWhenNoRoutePointsExist() throws Exception {
         mockMvc.perform(get("/api/route-points/top-retail-points").param("limit", "5"))
-            .andExpect(status().isOk())
-            .andExpect(jsonPath("$.length()").value(0));
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.length()").value(0));
     }
 
     @Test
     void returnsBadRequestWhenLimitIsNotPositive() throws Exception {
         mockMvc.perform(get("/api/route-points/top-retail-points").param("limit", "0"))
-            .andExpect(status().isBadRequest())
-            .andExpect(content().string("Limit must be positive"));
+                .andExpect(status().isBadRequest())
+                .andExpect(content().string("Limit must be positive"));
     }
 
     @Test
@@ -100,10 +100,10 @@ class RoutePointControllerTopRetailPointsTest {
         createVisits(other, 1, LocalDateTime.of(2025, 8, 20, 8, 0));
 
         mockMvc.perform(get("/api/route-points/top-retail-points").param("limit", "2"))
-            .andExpect(status().isOk())
-            .andExpect(jsonPath("$.length()").value(2))
-            .andExpect(jsonPath("$[0].id").value(mostVisited.getId()))
-            .andExpect(jsonPath("$[1].id").value(secondMostVisited.getId()));
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.length()").value(2))
+                .andExpect(jsonPath("$[0].id").value(mostVisited.getId()))
+                .andExpect(jsonPath("$[1].id").value(secondMostVisited.getId()));
     }
 
     @Test
@@ -115,8 +115,10 @@ class RoutePointControllerTopRetailPointsTest {
         createVisits(second, 1, LocalDateTime.of(2025, 9, 2, 9, 0));
 
         mockMvc.perform(get("/api/route-points/top-retail-points").param("limit", "5"))
-            .andExpect(status().isOk())
-            .andExpect(jsonPath("$[*].id", contains(first.getId().intValue(), second.getId().intValue())));
+                .andExpect(status().isOk())
+                .andExpect(jsonPath(
+                        "$[*].id",
+                        contains(first.getId().intValue(), second.getId().intValue())));
     }
 
     private void createVisits(RetailPoint retailPoint, int count, LocalDateTime startTime) {
@@ -124,12 +126,7 @@ class RoutePointControllerTopRetailPointsTest {
             LocalDateTime plannedStart = startTime.plusDays(i);
             LocalDateTime plannedEnd = plannedStart.plusHours(1);
             testDataFactory.persistRouteWithRetailPoint(
-                retailPoint,
-                plannedStart,
-                plannedEnd,
-                new BigDecimal("10.000")
-            );
+                    retailPoint, plannedStart, plannedEnd, new BigDecimal("10.000"));
         }
     }
 }
-

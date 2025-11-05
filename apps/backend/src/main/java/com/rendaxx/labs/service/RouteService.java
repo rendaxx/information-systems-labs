@@ -81,8 +81,7 @@ public class RouteService {
     @Transactional(readOnly = true)
     public BigDecimal getAverageMileageInKm() {
         BigDecimal averageMileage = repository.findAverageMileageInKm();
-        return Objects
-                .requireNonNullElse(averageMileage, BigDecimal.ZERO)
+        return Objects.requireNonNullElse(averageMileage, BigDecimal.ZERO)
                 .setScale(MILEAGE_SCALE, RoundingMode.HALF_UP);
     }
 

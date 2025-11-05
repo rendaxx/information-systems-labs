@@ -1,10 +1,9 @@
 package com.rendaxx.labs.dtos;
 
+import java.math.BigDecimal;
 import lombok.AccessLevel;
 import lombok.Data;
 import lombok.experimental.FieldDefaults;
-
-import java.math.BigDecimal;
 
 @Data
 @FieldDefaults(level = AccessLevel.PRIVATE)

@@ -21,5 +21,6 @@ public interface RouteApiMapper extends PageSortMapper {
     SaveRouteDto toDto(SaveRouteApiDto dto);
 
     @Mapping(target = "page", source = "number")
+    @Mapping(target = "sort", expression = "java(toSortStrings(page.getSort()))")
     PageRouteApiDto toRoutePage(Page<RouteDto> page);
 }

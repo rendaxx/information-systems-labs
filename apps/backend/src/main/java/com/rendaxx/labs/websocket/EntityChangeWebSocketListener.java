@@ -18,7 +18,8 @@ public class EntityChangeWebSocketListener {
 
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public void onEntityChanged(EntityChangedEvent<?> event) {
-        EntityChangePayload<?> payload = new EntityChangePayload<>(event.entityId(), event.payload(), event.changeType());
+        EntityChangePayload<?> payload =
+                new EntityChangePayload<>(event.entityId(), event.payload(), event.changeType());
         messagingTemplate.convertAndSend(event.destination(), payload);
     }
 }

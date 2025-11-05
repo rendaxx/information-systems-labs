@@ -49,7 +49,8 @@ public class RouteController implements RoutesApi {
     }
 
     @Override
-    public ResponseEntity<PageRouteApiDto> listRoutes(Integer page, Integer size, List<String> sort, Map<String, String> filter) {
+    public ResponseEntity<PageRouteApiDto> listRoutes(
+            Integer page, Integer size, List<String> sort, Map<String, String> filter) {
         Pageable pageable = pageRequestFactory.build(page, size, sort);
         Page<RouteDto> result = routeService.getAll(pageable, filterParameterMapper.toFilters(filter));
         return ResponseEntity.ok(routeApiMapper.toRoutePage(result));

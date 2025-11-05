@@ -22,5 +22,6 @@ public interface RoutePointApiMapper extends JsonNullableMapper, PageSortMapper 
     SaveRoutePointDto toDto(SaveRoutePointApiDto dto);
 
     @Mapping(target = "page", source = "number")
+    @Mapping(target = "sort", expression = "java(toSortStrings(page.getSort()))")
     PageRoutePointApiDto toRoutePointPage(Page<RoutePointDto> page);
 }

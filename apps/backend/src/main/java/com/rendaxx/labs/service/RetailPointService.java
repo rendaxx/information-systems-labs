@@ -44,7 +44,8 @@ public class RetailPointService {
 
     @Transactional(readOnly = true)
     public RetailPointDto getById(Long id) {
-        RetailPoint retailPoint = repository.findById(id).orElseThrow(() -> new NotFoundException(RetailPoint.class, id));
+        RetailPoint retailPoint =
+                repository.findById(id).orElseThrow(() -> new NotFoundException(RetailPoint.class, id));
         return mapper.toDto(retailPoint);
     }
 
@@ -62,8 +63,9 @@ public class RetailPointService {
         if (limit <= 0) {
             throw new IllegalArgumentException("Limit must be positive");
         }
-        RetailPoint origin = repository.findById(retailPointId)
-            .orElseThrow(() -> new NotFoundException(RetailPoint.class, retailPointId));
+        RetailPoint origin = repository
+                .findById(retailPointId)
+                .orElseThrow(() -> new NotFoundException(RetailPoint.class, retailPointId));
 
         List<RetailPoint> nearest = repository.findNearestRetailPoints(origin.getId(), limit);
         if (nearest.isEmpty()) {
@@ -73,7 +75,8 @@ public class RetailPointService {
     }
 
     public RetailPointDto update(Long id, SaveRetailPointDto command) {
-        RetailPoint retailPoint = repository.findById(id).orElseThrow(() -> new NotFoundException(RetailPoint.class, id));
+        RetailPoint retailPoint =
+                repository.findById(id).orElseThrow(() -> new NotFoundException(RetailPoint.class, id));
         RetailPoint savedRetailPoint = save(command, retailPoint);
         RetailPointDto dto = mapper.toDto(savedRetailPoint);
         changePublisher.publish(DESTINATION, savedRetailPoint.getId(), dto, EntityChangeType.UPDATED);
@@ -81,7 +84,8 @@ public class RetailPointService {
     }
 
     public void delete(Long id) {
-        RetailPoint retailPoint = repository.findById(id).orElseThrow(() -> new NotFoundException(RetailPoint.class, id));
+        RetailPoint retailPoint =
+                repository.findById(id).orElseThrow(() -> new NotFoundException(RetailPoint.class, id));
         repository.delete(retailPoint);
         changePublisher.publish(DESTINATION, retailPoint.getId(), null, EntityChangeType.DELETED);
     }

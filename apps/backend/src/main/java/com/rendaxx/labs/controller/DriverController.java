@@ -11,7 +11,6 @@ import com.rendaxx.labs.dtos.SaveDriverDto;
 import com.rendaxx.labs.mappers.api.DriverApiMapper;
 import com.rendaxx.labs.service.DriverService;
 import jakarta.validation.Valid;
-
 import java.util.List;
 import java.util.Map;
 import lombok.AccessLevel;
@@ -49,11 +48,7 @@ public class DriverController implements DriversApi {
 
     @Override
     public ResponseEntity<PageDriverApiDto> listDrivers(
-            Integer page,
-            Integer size,
-            List<String> sort,
-            Map<String, String> filter
-    ) {
+            Integer page, Integer size, List<String> sort, Map<String, String> filter) {
         Pageable pageable = pageRequestFactory.build(page, size, sort);
         Page<DriverDto> result = driverService.getAll(pageable, filterParameterMapper.toFilters(filter));
         return ResponseEntity.ok(driverApiMapper.toDriverPage(result));

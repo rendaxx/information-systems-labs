@@ -21,5 +21,6 @@ public interface VehicleApiMapper extends PageSortMapper {
     SaveVehicleDto toDto(SaveVehicleApiDto dto);
 
     @Mapping(target = "page", source = "number")
+    @Mapping(target = "sort", expression = "java(toSortStrings(page.getSort()))")
     PageVehicleApiDto toVehiclePage(Page<VehicleDto> page);
 }

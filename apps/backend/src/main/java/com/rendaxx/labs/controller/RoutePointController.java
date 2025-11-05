@@ -52,18 +52,15 @@ public class RoutePointController implements RoutePointsApi {
 
     @Override
     public ResponseEntity<PageRoutePointApiDto> listRoutePoints(
-            Integer page,
-            Integer size,
-            List<String> sort,
-            Map<String, String> filter
-    ) {
+            Integer page, Integer size, List<String> sort, Map<String, String> filter) {
         Pageable pageable = pageRequestFactory.build(page, size, sort);
         Page<RoutePointDto> result = routePointService.getAll(pageable, filterParameterMapper.toFilters(filter));
         return ResponseEntity.ok(routePointApiMapper.toRoutePointPage(result));
     }
 
     @Override
-    public ResponseEntity<RoutePointApiDto> updateRoutePoint(Long id, @Valid SaveRoutePointApiDto saveRoutePointApiDto) {
+    public ResponseEntity<RoutePointApiDto> updateRoutePoint(
+            Long id, @Valid SaveRoutePointApiDto saveRoutePointApiDto) {
         SaveRoutePointDto command = routePointApiMapper.toDto(saveRoutePointApiDto);
         RoutePointDto updated = routePointService.update(id, command);
         return ResponseEntity.ok(routePointApiMapper.toApi(updated));

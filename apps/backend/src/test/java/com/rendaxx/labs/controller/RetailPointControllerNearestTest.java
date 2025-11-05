@@ -36,15 +36,14 @@ import org.testcontainers.utility.DockerImageName;
 @AutoConfigureMockMvc
 class RetailPointControllerNearestTest {
 
-    private static final DockerImageName POSTGIS_IMAGE = DockerImageName
-        .parse("postgis/postgis:16-3.4")
-        .asCompatibleSubstituteFor("postgres");
+    private static final DockerImageName POSTGIS_IMAGE =
+            DockerImageName.parse("postgis/postgis:16-3.4").asCompatibleSubstituteFor("postgres");
 
     @Container
     private static final PostgreSQLContainer<?> POSTGRES = new PostgreSQLContainer<>(POSTGIS_IMAGE)
-        .withDatabaseName("retail_points_db")
-        .withUsername("retail_points_user")
-        .withPassword("retail_points_pass");
+            .withDatabaseName("retail_points_db")
+            .withUsername("retail_points_user")
+            .withPassword("retail_points_pass");
 
     @DynamicPropertySource
     static void configureDatasourceProperties(DynamicPropertyRegistry registry) {
@@ -79,7 +78,8 @@ class RetailPointControllerNearestTest {
         orderRepository.deleteAll();
         retailPointRepository.deleteAll();
         vehicleRepository.deleteAll();
-        testDataFactory = new RouteTestDataFactory(routeRepository, vehicleRepository, retailPointRepository, orderRepository);
+        testDataFactory =
+                new RouteTestDataFactory(routeRepository, vehicleRepository, retailPointRepository, orderRepository);
     }
 
     @Test
@@ -87,14 +87,14 @@ class RetailPointControllerNearestTest {
         RetailPoint origin = persistRetailPoint(37.61, 55.75);
 
         mockMvc.perform(get("/api/retail-points/{id}/nearest", origin.getId()).param("limit", "0"))
-            .andExpect(status().isBadRequest())
-            .andExpect(content().string("Limit must be positive"));
+                .andExpect(status().isBadRequest())
+                .andExpect(content().string("Limit must be positive"));
     }
 
     @Test
     void returnsNotFoundWhenOriginRetailPointDoesNotExist() throws Exception {
         mockMvc.perform(get("/api/retail-points/{id}/nearest", 9999L).param("limit", "3"))
-            .andExpect(status().isNotFound());
+                .andExpect(status().isNotFound());
     }
 
     @Test
@@ -102,8 +102,8 @@ class RetailPointControllerNearestTest {
         RetailPoint origin = persistRetailPoint(37.61, 55.75);
 
         mockMvc.perform(get("/api/retail-points/{id}/nearest", origin.getId()).param("limit", "5"))
-            .andExpect(status().isOk())
-            .andExpect(jsonPath("$.length()").value(0));
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.length()").value(0));
     }
 
     @Test
@@ -117,27 +117,27 @@ class RetailPointControllerNearestTest {
 
         for (RetailPoint point : points) {
             testDataFactory.persistRouteWithRetailPoint(
-                point,
-                LocalDateTime.of(2025, 10, 1, 8, 0),
-                LocalDateTime.of(2025, 10, 1, 10, 0),
-                new BigDecimal("12.000")
-            );
+                    point,
+                    LocalDateTime.of(2025, 10, 1, 8, 0),
+                    LocalDateTime.of(2025, 10, 1, 10, 0),
+                    new BigDecimal("12.000"));
         }
 
         List<Long> expectedOrder = points.stream()
-            .sorted(Comparator.comparingDouble(point -> distance(origin, point)))
-            .map(RetailPoint::getId)
-            .limit(3)
-            .toList();
+                .sorted(Comparator.comparingDouble(point -> distance(origin, point)))
+                .map(RetailPoint::getId)
+                .limit(3)
+                .toList();
 
         mockMvc.perform(get("/api/retail-points/{id}/nearest", origin.getId()).param("limit", "3"))
-            .andExpect(status().isOk())
-            .andExpect(jsonPath("$.length()").value(3))
-            .andExpect(jsonPath("$[*].id", contains(
-                expectedOrder.get(0).intValue(),
-                expectedOrder.get(1).intValue(),
-                expectedOrder.get(2).intValue()
-            )));
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.length()").value(3))
+                .andExpect(jsonPath(
+                        "$[*].id",
+                        contains(
+                                expectedOrder.get(0).intValue(),
+                                expectedOrder.get(1).intValue(),
+                                expectedOrder.get(2).intValue())));
     }
 
     @Test
@@ -150,19 +150,19 @@ class RetailPointControllerNearestTest {
         int largerId = Math.max(first.getId().intValue(), second.getId().intValue());
 
         mockMvc.perform(get("/api/retail-points/{id}/nearest", origin.getId()).param("limit", "2"))
-            .andExpect(status().isOk())
-            .andExpect(jsonPath("$.length()").value(2))
-            .andExpect(jsonPath("$[*].id", contains(smallerId, largerId)));
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.length()").value(2))
+                .andExpect(jsonPath("$[*].id", contains(smallerId, largerId)));
     }
 
     private RetailPoint persistRetailPoint(double longitude, double latitude) {
         RetailPoint point = RetailPoint.builder()
-            .name("Retail-" + longitude + "-" + latitude)
-            .address("Address-" + longitude + "-" + latitude)
-            .location(testDataFactory.createPoint(longitude, latitude))
-            .type(PointType.SHOP)
-            .timezone("UTC")
-            .build();
+                .name("Retail-" + longitude + "-" + latitude)
+                .address("Address-" + longitude + "-" + latitude)
+                .location(testDataFactory.createPoint(longitude, latitude))
+                .type(PointType.SHOP)
+                .timezone("UTC")
+                .build();
         return retailPointRepository.save(point);
     }
 

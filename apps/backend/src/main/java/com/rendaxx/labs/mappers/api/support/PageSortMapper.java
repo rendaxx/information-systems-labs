@@ -11,7 +11,8 @@ public interface PageSortMapper {
             return List.of();
         }
         return sort.stream()
-            .map(order -> order.getProperty() + "," + order.getDirection().name().toLowerCase())
-            .collect(Collectors.toList());
+                .map(order ->
+                        order.getProperty() + "," + order.getDirection().name().toLowerCase())
+                .collect(Collectors.toList());
     }
 }

@@ -29,11 +29,10 @@ public class RouteTestDataFactory {
     private final OrderRepository orderRepository;
 
     public RouteTestDataFactory(
-        RouteRepository routeRepository,
-        VehicleRepository vehicleRepository,
-        RetailPointRepository retailPointRepository,
-        OrderRepository orderRepository
-    ) {
+            RouteRepository routeRepository,
+            VehicleRepository vehicleRepository,
+            RetailPointRepository retailPointRepository,
+            OrderRepository orderRepository) {
         this.routeRepository = routeRepository;
         this.vehicleRepository = vehicleRepository;
         this.retailPointRepository = retailPointRepository;
@@ -46,21 +45,21 @@ public class RouteTestDataFactory {
         Order order = buildOrder();
 
         Route route = Route.builder()
-            .vehicle(vehicle)
-            .creationTime(plannedStart.minusHours(1))
-            .plannedStartTime(plannedStart)
-            .plannedEndTime(plannedEnd)
-            .mileageInKm(mileage)
-            .build();
+                .vehicle(vehicle)
+                .creationTime(plannedStart.minusHours(1))
+                .plannedStartTime(plannedStart)
+                .plannedEndTime(plannedEnd)
+                .mileageInKm(mileage)
+                .build();
 
         RoutePoint routePoint = RoutePoint.builder()
-            .route(route)
-            .retailPoint(retailPoint)
-            .operationType(OperationType.LOAD)
-            .plannedStartTime(plannedStart)
-            .plannedEndTime(plannedEnd)
-            .orderNumber(0)
-            .build();
+                .route(route)
+                .retailPoint(retailPoint)
+                .operationType(OperationType.LOAD)
+                .plannedStartTime(plannedStart)
+                .plannedEndTime(plannedEnd)
+                .orderNumber(0)
+                .build();
         routePoint.getOrders().add(order);
         route.getRoutePoints().add(routePoint);
 
@@ -68,29 +67,25 @@ public class RouteTestDataFactory {
     }
 
     public Route persistRouteWithRetailPoint(
-        RetailPoint retailPoint,
-        LocalDateTime plannedStart,
-        LocalDateTime plannedEnd,
-        BigDecimal mileage
-    ) {
+            RetailPoint retailPoint, LocalDateTime plannedStart, LocalDateTime plannedEnd, BigDecimal mileage) {
         Vehicle vehicle = vehicleRepository.save(buildVehicle());
 
         Route route = Route.builder()
-            .vehicle(vehicle)
-            .creationTime(plannedStart.minusHours(1))
-            .plannedStartTime(plannedStart)
-            .plannedEndTime(plannedEnd)
-            .mileageInKm(mileage)
-            .build();
+                .vehicle(vehicle)
+                .creationTime(plannedStart.minusHours(1))
+                .plannedStartTime(plannedStart)
+                .plannedEndTime(plannedEnd)
+                .mileageInKm(mileage)
+                .build();
 
         RoutePoint routePoint = RoutePoint.builder()
-            .route(route)
-            .retailPoint(retailPoint)
-            .operationType(OperationType.LOAD)
-            .plannedStartTime(plannedStart)
-            .plannedEndTime(plannedEnd)
-            .orderNumber(0)
-            .build();
+                .route(route)
+                .retailPoint(retailPoint)
+                .operationType(OperationType.LOAD)
+                .plannedStartTime(plannedStart)
+                .plannedEndTime(plannedEnd)
+                .orderNumber(0)
+                .build();
         routePoint.getOrders().add(buildOrder());
         route.getRoutePoints().add(routePoint);
 
@@ -102,41 +97,40 @@ public class RouteTestDataFactory {
     }
 
     public Route persistRouteWithRepeatedRetailPoint(
-        RetailPoint retailPoint,
-        LocalDateTime firstStart,
-        LocalDateTime firstEnd,
-        LocalDateTime secondStart,
-        LocalDateTime secondEnd,
-        BigDecimal mileage
-    ) {
+            RetailPoint retailPoint,
+            LocalDateTime firstStart,
+            LocalDateTime firstEnd,
+            LocalDateTime secondStart,
+            LocalDateTime secondEnd,
+            BigDecimal mileage) {
         Vehicle vehicle = vehicleRepository.save(buildVehicle());
 
         Route route = Route.builder()
-            .vehicle(vehicle)
-            .creationTime(firstStart.minusHours(1))
-            .plannedStartTime(firstStart)
-            .plannedEndTime(secondEnd)
-            .mileageInKm(mileage)
-            .build();
+                .vehicle(vehicle)
+                .creationTime(firstStart.minusHours(1))
+                .plannedStartTime(firstStart)
+                .plannedEndTime(secondEnd)
+                .mileageInKm(mileage)
+                .build();
 
         RoutePoint firstPoint = RoutePoint.builder()
-            .route(route)
-            .retailPoint(retailPoint)
-            .operationType(OperationType.LOAD)
-            .plannedStartTime(firstStart)
-            .plannedEndTime(firstEnd)
-            .orderNumber(0)
-            .build();
+                .route(route)
+                .retailPoint(retailPoint)
+                .operationType(OperationType.LOAD)
+                .plannedStartTime(firstStart)
+                .plannedEndTime(firstEnd)
+                .orderNumber(0)
+                .build();
         firstPoint.getOrders().add(buildOrder());
 
         RoutePoint secondPoint = RoutePoint.builder()
-            .route(route)
-            .retailPoint(retailPoint)
-            .operationType(OperationType.LOAD)
-            .plannedStartTime(secondStart)
-            .plannedEndTime(secondEnd)
-            .orderNumber(1)
-            .build();
+                .route(route)
+                .retailPoint(retailPoint)
+                .operationType(OperationType.LOAD)
+                .plannedStartTime(secondStart)
+                .plannedEndTime(secondEnd)
+                .orderNumber(1)
+                .build();
         secondPoint.getOrders().add(buildOrder());
 
         route.getRoutePoints().add(firstPoint);
@@ -154,36 +148,35 @@ public class RouteTestDataFactory {
 
     private Vehicle buildVehicle() {
         return Vehicle.builder()
-            .gosNumber("GOS-" + UUID.randomUUID())
-            .tonnageInTons(new BigDecimal("5.00"))
-            .bodyHeightInMeters(new BigDecimal("2.50"))
-            .bodyWidthInMeters(new BigDecimal("2.00"))
-            .bodyLengthInCubicMeters(new BigDecimal("12.00"))
-            .build();
+                .gosNumber("GOS-" + UUID.randomUUID())
+                .tonnageInTons(new BigDecimal("5.00"))
+                .bodyHeightInMeters(new BigDecimal("2.50"))
+                .bodyWidthInMeters(new BigDecimal("2.00"))
+                .bodyLengthInCubicMeters(new BigDecimal("12.00"))
+                .build();
     }
 
     private RetailPoint buildRetailPoint() {
         return RetailPoint.builder()
-            .name("Retail-" + UUID.randomUUID())
-            .address("Address-" + UUID.randomUUID())
-            .location(createPoint(37.617494, 55.755825))
-            .type(PointType.SHOP)
-            .timezone("UTC")
-            .build();
+                .name("Retail-" + UUID.randomUUID())
+                .address("Address-" + UUID.randomUUID())
+                .location(createPoint(37.617494, 55.755825))
+                .type(PointType.SHOP)
+                .timezone("UTC")
+                .build();
     }
 
     private Order buildOrder() {
         return Order.builder()
-            .goodsType("PERISHABLE")
-            .minTemperature(2)
-            .maxTemperature(6)
-            .volumeInCubicMeters(new BigDecimal("1.500"))
-            .weightInKg(new BigDecimal("10.000"))
-            .build();
+                .goodsType("PERISHABLE")
+                .minTemperature(2)
+                .maxTemperature(6)
+                .volumeInCubicMeters(new BigDecimal("1.500"))
+                .weightInKg(new BigDecimal("10.000"))
+                .build();
     }
 
     public Point createPoint(double longitude, double latitude) {
         return GEOMETRY_FACTORY.createPoint(new Coordinate(longitude, latitude));
     }
-
 }
