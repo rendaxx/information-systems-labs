@@ -48,7 +48,7 @@ public abstract class RouteMapper {
         List<RoutePoint> routePoints = new ArrayList<>();
         for (SaveRoutePointDto routePointDto : dto.getRoutePoints()) {
             RoutePoint routePoint = routePointsById.getOrDefault(routePointDto.getId(), new RoutePoint());
-            routePointMapper.update(routePoint, routePointDto);
+            routePointMapper.update(routePoint, routePointDto, route);
             routePoints.add(routePoint);
         }
 

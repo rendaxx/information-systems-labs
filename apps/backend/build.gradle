@@ -49,6 +49,7 @@ dependencies {
     annotationProcessor 'org.mapstruct:mapstruct-processor:1.6.3'
 
     implementation 'org.locationtech.jts:jts-core:1.19.0'
+    implementation 'org.openapitools:jackson-databind-nullable:0.2.6'
 
     implementation project(':libs:api-java')
 }

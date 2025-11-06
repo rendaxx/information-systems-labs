@@ -25,6 +25,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.annotations.CreationTimestamp;
 
 @Getter
 @Setter
@@ -49,7 +50,7 @@ public class Route {
     @ManyToOne(fetch = FetchType.LAZY)
     private Vehicle vehicle;
 
-    @NotNull
+    @CreationTimestamp
     @Column(updatable = false)
     private LocalDateTime creationTime;
 

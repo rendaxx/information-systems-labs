@@ -1,3 +1,14 @@
+# TypeScript API Client
+
+The OpenAPI specification in `specs/openapi/openapi.yml` is the single source of truth for both server and client contracts. Run the following whenever the spec changes to regenerate the TypeScript SDK:
+
+```bash
+pnpm install          # installs generator tooling (runs once)
+pnpm run gen:api      # regenerates libs/api-ts/src/generated
+```
+
+Generated sources live in `libs/api-ts/src/generated` and are intentionally git‑ignored. The package `@rendaxx/api-ts` re-exports everything from that folder via `libs/api-ts/src/index.ts`. Consumers (for example `apps/web`) should call `createConfiguration` from `generated/runtime` to inject the API base URL (e.g. `VITE_API_BASE_URL`) before using the generated APIs.
+
 
 public class Route {
     private Long id; //Значение поля должно быть больше 0, Значение этого поля должно быть уникальным, Значение этого поля должно генерироваться автоматически

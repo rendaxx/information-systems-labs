@@ -1,0 +1,10 @@
+# Skip generated config/docs we manage manually
+*.md
+.DS_Store
+package.json
+README.mustache
+tsconfig.json
+.gitignore
+.npmignore
+git_push.sh
+

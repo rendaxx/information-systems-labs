@@ -2,6 +2,9 @@
   "name": "information-systems-labs",
   "version": "0.0.0",
   "private": true,
+  "scripts": {
+    "gen:api": "pnpm -F @rendaxx/api-ts run generate"
+  },
   "workspaces": [
     "apps/web",
     "libs/api-ts"

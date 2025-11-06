@@ -41,9 +41,11 @@ public abstract class RoutePointMapper {
             Set<Order> orders);
 
     public void update(RoutePoint routePoint, SaveRoutePointDto dto) {
-        Route route = routeRepository
-                .findById(dto.getRouteId())
-                .orElseThrow(() -> new NotFoundException(Route.class, dto.getRouteId()));
+        update(routePoint, dto, null);
+    }
+
+    public void update(RoutePoint routePoint, SaveRoutePointDto dto, Route parentRoute) {
+        Route route = resolveRoute(dto, parentRoute);
         RetailPoint retailPoint = retailPointRepository
                 .findById(dto.getRetailPointId())
                 .orElseThrow(() -> new NotFoundException(RetailPoint.class, dto.getRetailPointId()));
@@ -55,4 +57,17 @@ public abstract class RoutePointMapper {
     public abstract RoutePointDto toDto(RoutePoint routePoint);
 
     public abstract List<RoutePointDto> toDto(List<RoutePoint> routePoints);
+
+    private Route resolveRoute(SaveRoutePointDto dto, Route parentRoute) {
+        if (parentRoute != null) {
+            return parentRoute;
+        }
+
+        Long routeId = dto.getRouteId();
+        if (routeId == null) {
+            throw new IllegalArgumentException("Route id must be provided when parent route is not specified");
+        }
+
+        return routeRepository.findById(routeId).orElseThrow(() -> new NotFoundException(Route.class, routeId));
+    }
 }

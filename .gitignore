@@ -4,6 +4,11 @@ build/
 !gradle/wrapper/gradle-wrapper.jar
 !**/src/main/**/build/
 !**/src/test/**/build/
+libs/api-ts/src/generated/
+node_modules/
+apps/web/node_modules/
+libs/api-ts/node_modules/
+openapitools.json
 
 ### STS ###
 .apt_generated
