@@ -6,7 +6,12 @@ import { toPageResult } from '@shared/api/types';
 
 export async function fetchRoutePoints(request: PageRequest): Promise<PageResult<RoutePoint>> {
   const params = buildQueryParams(request);
-  const response = await routePointsApi.listRoutePoints(params.page, params.size, params.sort, params.filter);
+  const response = await routePointsApi.listRoutePoints({
+    page: params.page,
+    size: params.size,
+    sort: params.sort,
+    filter: params.filter
+  });
   return toPageResult<RoutePoint>(response as RawPage<RoutePoint>);
 }
 

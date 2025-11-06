@@ -6,7 +6,12 @@ import { toPageResult } from '@shared/api/types';
 
 export async function fetchVehicles(request: PageRequest): Promise<PageResult<Vehicle>> {
   const params = buildQueryParams(request);
-  const response = await vehiclesApi.listVehicles(params.page, params.size, params.sort, params.filter);
+  const response = await vehiclesApi.listVehicles({
+    page: params.page,
+    size: params.size,
+    sort: params.sort,
+    filter: params.filter
+  });
   return toPageResult<Vehicle>(response as RawPage<Vehicle>);
 }
 

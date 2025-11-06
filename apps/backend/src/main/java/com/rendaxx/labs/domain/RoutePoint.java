@@ -61,7 +61,6 @@ public class RoutePoint {
     @Enumerated(EnumType.STRING)
     private OperationType operationType;
 
-    @NotEmpty
     @Valid
     @Builder.Default
     @ManyToMany(

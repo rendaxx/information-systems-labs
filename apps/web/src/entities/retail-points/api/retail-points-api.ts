@@ -6,7 +6,12 @@ import { toPageResult } from '@shared/api/types';
 
 export async function fetchRetailPoints(request: PageRequest): Promise<PageResult<RetailPoint>> {
   const params = buildQueryParams(request);
-  const response = await retailPointsApi.listRetailPoints(params.page, params.size, params.sort, params.filter);
+  const response = await retailPointsApi.listRetailPoints({
+    page: params.page,
+    size: params.size,
+    sort: params.sort,
+    filter: params.filter
+  });
   return toPageResult<RetailPoint>(response as RawPage<RetailPoint>);
 }
 

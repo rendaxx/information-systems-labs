@@ -40,7 +40,6 @@ public class Route {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @NotEmpty
     @Valid
     @Builder.Default
     @OneToMany(mappedBy = "route", cascade = CascadeType.ALL, orphanRemoval = true)

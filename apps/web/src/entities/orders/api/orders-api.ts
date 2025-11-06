@@ -6,7 +6,12 @@ import { toPageResult } from '@shared/api/types';
 
 export async function fetchOrders(request: PageRequest): Promise<PageResult<Order>> {
   const params = buildQueryParams(request);
-  const response = await ordersApi.listOrders(params.page, params.size, params.sort, params.filter);
+  const response = await ordersApi.listOrders({
+    page: params.page,
+    size: params.size,
+    sort: params.sort,
+    filter: params.filter
+  });
   return toPageResult<Order>(response as RawPage<Order>);
 }
 

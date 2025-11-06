@@ -1,5 +1,5 @@
 import { FormProvider, useFieldArray, useForm } from 'react-hook-form';
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import { z } from 'zod';
 import type { Route, RoutePoint, SaveRoute } from '@rendaxx/api-ts';
 import { OperationType } from '@rendaxx/api-ts';
@@ -14,7 +14,7 @@ import { fetchRetailPoints } from '@entities/retail-points/api/retail-points-api
 import { fetchOrders } from '@entities/orders/api/orders-api';
 import { queryKeys } from '@shared/api/query-keys';
 import type { PageResult } from '@shared/api/types';
-import { Checkbox } from '@shared/ui/checkbox';
+import { Plus, Trash2 } from 'lucide-react';
 
 const routeSchema = z.object({
   vehicleId: z.string().min(1, 'Выберите транспортное средство'),
@@ -354,31 +354,7 @@ export function RouteForm({ initialRoute, onSubmit, onCancel, isSubmitting }: Ro
                           render={({ field }) => (
                             <FormItem className="md:col-span-2">
                               <FormLabel>Связанные заказы</FormLabel>
-                              <div className="grid gap-2">
-                                {orders.length === 0 ? (
-                                  <p className="text-sm text-muted-foreground">Доступные заказы не найдены</p>
-                                ) : (
-                                  orders.map((option) => {
-                                    const selected: string[] = field.value ?? [];
-                                    const checked = selected.includes(option.value);
-                                    return (
-                                      <label key={option.value} className="flex items-center gap-2 text-sm">
-                                        <Checkbox
-                                          checked={checked}
-                                          onCheckedChange={(isChecked) => {
-                                            if (isChecked) {
-                                              field.onChange([...selected, option.value]);
-                                            } else {
-                                              field.onChange(selected.filter((value) => value !== option.value));
-                                            }
-                                          }}
-                                        />
-                                        <span>{option.label}</span>
-                                      </label>
-                                    );
-                                  })
-                                )}
-                              </div>
+                              <OrdersPicker value={field.value ?? []} onChange={field.onChange} options={orders} />
                               <FormDescription>
                                 Выберите один или несколько заказов, связанных с точкой.
                               </FormDescription>
@@ -405,6 +381,92 @@ export function RouteForm({ initialRoute, onSubmit, onCancel, isSubmitting }: Ro
         </div>
       </form>
     </FormProvider>
+  );
+}
+
+function OrdersPicker({
+  value,
+  onChange,
+  options
+}: {
+  value: string[];
+  onChange: (next: string[]) => void;
+  options: Option<string>[];
+}) {
+  const [pending, setPending] = useState<string>('');
+  const selectedSet = new Set(value ?? []);
+  const available = options.filter((o) => !selectedSet.has(o.value));
+  const lookup = useMemo(() => new Map(options.map((o) => [o.value, o.label])), [options]);
+
+  return (
+    <div className="space-y-3">
+      <div className="flex items-center gap-2">
+        <Select value={pending} onValueChange={setPending}>
+          <SelectTrigger className="w-72">
+            <SelectValue placeholder={available.length ? 'Выберите заказ' : 'Нет доступных заказов'} />
+          </SelectTrigger>
+          <SelectContent>
+            {available.map((opt) => (
+              <SelectItem key={opt.value} value={opt.value}>
+                {opt.label}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+        <Button
+          type="button"
+          size="sm"
+          variant="secondary"
+          disabled={!pending}
+          onClick={() => {
+            if (pending && !selectedSet.has(pending)) {
+              onChange([...(value ?? []), pending]);
+              setPending('');
+            }
+          }}
+        >
+          <Plus className="h-4 w-4" />
+        </Button>
+      </div>
+
+      <div className="overflow-hidden rounded-md border border-border">
+        <table className="w-full border-collapse text-sm">
+          <thead className="bg-muted/60 text-left text-xs uppercase tracking-wide text-muted-foreground">
+            <tr>
+              <th className="px-3 py-2 font-semibold">ID</th>
+              <th className="px-3 py-2 font-semibold">Заказ</th>
+              <th className="px-3 py-2 font-semibold text-right">Действия</th>
+            </tr>
+          </thead>
+          <tbody>
+            {(value ?? []).length === 0 ? (
+              <tr>
+                <td colSpan={3} className="px-3 py-4 text-center text-muted-foreground">
+                  Заказы не выбраны
+                </td>
+              </tr>
+            ) : (
+              (value ?? []).map((id) => (
+                <tr key={id} className="border-t border-border">
+                  <td className="px-3 py-2">#{id}</td>
+                  <td className="px-3 py-2">{lookup.get(id) ?? id}</td>
+                  <td className="px-3 py-2 text-right">
+                    <Button
+                      type="button"
+                      size="sm"
+                      variant="ghost"
+                      onClick={() => onChange((value ?? []).filter((x) => x !== id))}
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </td>
+                </tr>
+              ))
+            )}
+          </tbody>
+        </table>
+      </div>
+    </div>
   );
 }
 

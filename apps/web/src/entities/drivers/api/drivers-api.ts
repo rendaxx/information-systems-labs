@@ -6,7 +6,12 @@ import { toPageResult } from '@shared/api/types';
 
 export async function fetchDrivers(request: PageRequest): Promise<PageResult<Driver>> {
   const params = buildQueryParams(request);
-  const response = await driversApi.listDrivers(params.page, params.size, params.sort, params.filter);
+  const response = await driversApi.listDrivers({
+    page: params.page,
+    size: params.size,
+    sort: params.sort,
+    filter: params.filter
+  });
   return toPageResult<Driver>(response as RawPage<Driver>);
 }
 

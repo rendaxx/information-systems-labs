@@ -82,10 +82,19 @@ public class EqualitySpecificationBuilder {
     }
 
     private Path<?> resolvePath(Root<?> root, String key) {
-        if (!StringUtils.hasText(key)) {
-            return null;
+        if (!StringUtils.hasText(key)) return null;
+
+        String[] rawParts = key.split("\\.");
+        List<String> parts = new ArrayList<>();
+        for (String p : rawParts) {
+            if (StringUtils.hasText(p) && p.endsWith("Id") && !p.equals("id")) {
+                parts.add(p.substring(0, p.length() - 2));
+                parts.add("id");
+            } else {
+                parts.add(p);
+            }
         }
-        String[] parts = key.split("\\.");
+
         Path<?> path = root;
         From<?, ?> currentFrom = root;
         Class<?> currentType = root.getJavaType();

@@ -6,7 +6,12 @@ import { toPageResult } from '@shared/api/types';
 
 export async function fetchRoutes(request: PageRequest): Promise<PageResult<Route>> {
   const params = buildQueryParams(request);
-  const response = await routesApi.listRoutes(params.page, params.size, params.sort, params.filter);
+  const response = await routesApi.listRoutes({
+    page: params.page,
+    size: params.size,
+    sort: params.sort,
+    filter: params.filter
+  });
   return toPageResult<Route>(response as RawPage<Route>);
 }
 
