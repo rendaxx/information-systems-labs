@@ -96,7 +96,7 @@ export function VehicleForm({ initialVehicle, onSubmit, onCancel, isSubmitting }
       <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
         <Card>
           <CardHeader>
-            <CardTitle>{initialVehicle ? 'Редактирование транспорта' : 'Новое транспортное средство'}</CardTitle>
+            <CardTitle>Основные сведения</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <FormField

@@ -46,20 +46,20 @@ export function RoutePointForm({ initialRoutePoint, onSubmit, onCancel, isSubmit
       return {
         routeId: '',
         retailPointId: '',
-        operationType: OperationType.Visit,
+        operationType: OperationType.VISIT,
         orderIds: [],
-        plannedStartTime: formatDateTimeInput(),
-        plannedEndTime: formatDateTimeInput(),
+        plannedStartTime: formatDateTimeInput(undefined, true),
+        plannedEndTime: formatDateTimeInput(undefined, true),
         orderNumber: '0'
       };
     }
     return {
       routeId: initialRoutePoint.routeId?.toString() ?? '',
       retailPointId: initialRoutePoint.retailPoint?.id?.toString() ?? '',
-      operationType: initialRoutePoint.operationType ?? OperationType.Visit,
+      operationType: initialRoutePoint.operationType ?? OperationType.VISIT,
       orderIds: (initialRoutePoint.orders ?? []).map((order) => order.id?.toString() ?? '').filter(Boolean),
-      plannedStartTime: formatDateTimeInput(initialRoutePoint.plannedStartTime),
-      plannedEndTime: formatDateTimeInput(initialRoutePoint.plannedEndTime),
+      plannedStartTime: formatDateTimeInput(initialRoutePoint.plannedStartTime, true),
+      plannedEndTime: formatDateTimeInput(initialRoutePoint.plannedEndTime, true),
       orderNumber: initialRoutePoint.orderNumber?.toString() ?? '0'
     };
   }, [initialRoutePoint]);
@@ -119,7 +119,7 @@ export function RoutePointForm({ initialRoutePoint, onSubmit, onCancel, isSubmit
       <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
         <Card>
           <CardHeader>
-            <CardTitle>{initialRoutePoint ? 'Редактирование точки маршрута' : 'Новая точка маршрута'}</CardTitle>
+            <CardTitle>Основные сведения</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <FormField
@@ -389,42 +389,68 @@ function parseOrderIds(values?: string[]): number[] {
   return values.map((value) => Number(value)).filter((num) => !Number.isNaN(num));
 }
 
-function formatDateTimeInput(value?: Date | string | null): string {
+function formatDateTimeInput(value?: Date | string | null, preferLocal = false): string {
+  if (typeof value === 'string') {
+    const trimmed = value.trim();
+    const match = trimmed.match(/^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}/);
+    if (match) {
+      return match[0];
+    }
+    const parsed = new Date(normalizeToUtcIso(trimmed));
+    if (!Number.isNaN(parsed.getTime())) {
+      return preferLocal ? formatLocalDateTime(parsed) : formatUtcDateTime(parsed);
+    }
+    return '';
+  }
+
   const date = value ? new Date(value) : new Date();
   if (Number.isNaN(date.getTime())) {
     return '';
   }
-  return date.toISOString().slice(0, 16);
+  return preferLocal ? formatLocalDateTime(date) : formatUtcDateTime(date);
 }
 
 function toUtcDate(value: string): Date {
   if (!value) {
     throw new Error('Дата не указана');
   }
-  const normalized = value.endsWith('Z') ? value : `${value}${value.length === 16 ? ':00' : ''}Z`;
-  const date = new Date(normalized);
+  const date = new Date(normalizeToUtcIso(value));
   if (Number.isNaN(date.getTime())) {
     throw new Error(`Некорректная дата: ${value}`);
   }
   return date;
 }
 
-function formatDateTimeLocal(value?: Date | string | null): string {
-  const date = value ? new Date(value) : new Date();
-  if (Number.isNaN(date.getTime())) {
-    return '';
+function normalizeToUtcIso(value: string): string {
+  let normalized = value.trim();
+  if (!normalized.includes('T')) {
+    normalized = `${normalized}T00:00`;
   }
-  const pad = (n: number) => n.toString().padStart(2, '0');
-  const yyyy = date.getUTCFullYear();
-  const MM = pad(date.getUTCMonth() + 1);
-  const dd = pad(date.getUTCDate());
-  const hh = pad(date.getUTCHours());
-  const mm = pad(date.getUTCMinutes());
-  return `${yyyy}-${MM}-${dd}T${hh}:${mm}`;
+  if (/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/.test(normalized)) {
+    normalized = `${normalized}:00`;
+  }
+  if (!/(Z|z|[+-]\d{2}:\d{2})$/.test(normalized)) {
+    normalized = `${normalized}Z`;
+  }
+  return normalized;
+}
+
+function formatLocalDateTime(date: Date): string {
+  const pad = (num: number) => num.toString().padStart(2, '0');
+  const year = date.getFullYear();
+  const month = pad(date.getMonth() + 1);
+  const day = pad(date.getDate());
+  const hours = pad(date.getHours());
+  const minutes = pad(date.getMinutes());
+  return `${year}-${month}-${day}T${hours}:${minutes}`;
+}
+
+function formatUtcDateTime(date: Date): string {
+  return date.toISOString().slice(0, 16);
 }
 
 const operationLabels: Record<OperationType, string> = {
-  [OperationType.Load]: 'Погрузка',
-  [OperationType.Unload]: 'Выгрузка',
-  [OperationType.Visit]: 'Посещение'
+  [OperationType.LOAD]: 'Погрузка',
+  [OperationType.UNLOAD]: 'Выгрузка',
+  [OperationType.VISIT]: 'Посещение'
 };

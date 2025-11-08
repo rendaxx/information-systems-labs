@@ -74,7 +74,7 @@ export function OrderForm({ initialOrder, onSubmit, onCancel, isSubmitting }: Or
       <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
         <Card>
           <CardHeader>
-            <CardTitle>{initialOrder ? 'Редактирование заказа' : 'Новый заказ'}</CardTitle>
+            <CardTitle>Основные сведения</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <FormField

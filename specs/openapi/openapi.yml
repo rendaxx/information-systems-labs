@@ -673,7 +673,6 @@ components:
         type: array
         items:
           type: string
-          pattern: '^[^,]+(,(?i:asc|desc))?$'
       style: form
       explode: true
       examples:
@@ -691,7 +690,6 @@ components:
         type: array
         items:
           type: string
-          pattern: '^(id|goodsType|minTemperature|maxTemperature|volumeInCubicMeters|weightInKg)(,(?i:asc|desc))?$'
       style: form
       explode: true
     DriverSort:
@@ -703,7 +701,6 @@ components:
         type: array
         items:
           type: string
-          pattern: '^(id|firstName|lastName|middleName|passport)(,(?i:asc|desc))?$'
       style: form
       explode: true
     VehicleSort:
@@ -716,7 +713,6 @@ components:
         type: array
         items:
           type: string
-          pattern: '^(id|gosNumber|tonnageInTons|bodyHeightInMeters|bodyWidthInMeters|bodyLengthInCubicMeters)(,(?i:asc|desc))?$'
       style: form
       explode: true
     RetailPointSort:
@@ -728,7 +724,6 @@ components:
         type: array
         items:
           type: string
-          pattern: '^(id|name|address|timezone|type)(,(?i:asc|desc))?$'
       style: form
       explode: true
     RoutePointSort:
@@ -740,7 +735,6 @@ components:
         type: array
         items:
           type: string
-          pattern: '^(id|orderNumber|plannedStartTime|plannedEndTime)(,(?i:asc|desc))?$'
       style: form
       explode: true
     RouteSort:
@@ -752,7 +746,6 @@ components:
         type: array
         items:
           type: string
-          pattern: '^(id|creationTime|plannedStartTime|plannedEndTime|mileageInKm)(,(?i:asc|desc))?$'
       style: form
       explode: true
     Filter:

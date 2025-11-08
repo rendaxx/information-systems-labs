@@ -70,7 +70,7 @@ export function DriverForm({ initialDriver, onSubmit, onCancel, isSubmitting }: 
       <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
         <Card>
           <CardHeader>
-            <CardTitle>{initialDriver ? 'Редактирование водителя' : 'Новый водитель'}</CardTitle>
+            <CardTitle>Основные сведения</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <FormField

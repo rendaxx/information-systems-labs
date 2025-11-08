@@ -43,9 +43,9 @@ const routeSchema = z.object({
 type RouteFormValues = z.infer<typeof routeSchema>;
 
 const operationTypeLabels: Record<OperationType, string> = {
-  [OperationType.Load]: 'Погрузка',
-  [OperationType.Unload]: 'Выгрузка',
-  [OperationType.Visit]: 'Посещение'
+  [OperationType.LOAD]: 'Погрузка',
+  [OperationType.UNLOAD]: 'Выгрузка',
+  [OperationType.VISIT]: 'Посещение'
 };
 
 interface Option<T extends string | number> {
@@ -125,7 +125,7 @@ export function RouteForm({ initialRoute, onSubmit, onCancel, isSubmitting }: Ro
       <form className="space-y-6" onSubmit={form.handleSubmit(handleSubmit)}>
         <Card>
           <CardHeader>
-            <CardTitle>{initialRoute ? 'Редактирование маршрута' : 'Создание маршрута'}</CardTitle>
+            <CardTitle>Основные сведения</CardTitle>
             <CardDescription>Заполните основные сведения о маршруте и точках посещения.</CardDescription>
           </CardHeader>
           <CardContent className="space-y-6">
@@ -221,10 +221,10 @@ export function RouteForm({ initialRoute, onSubmit, onCancel, isSubmitting }: Ro
                     append({
                       id: undefined,
                       retailPointId: '',
-                      operationType: OperationType.Load,
+                      operationType: OperationType.LOAD,
                       orderIds: [],
-                      plannedStartTime: formatDateTimeInput(),
-                      plannedEndTime: formatDateTimeInput(),
+                      plannedStartTime: formatDateTimeInput(undefined, true),
+                      plannedEndTime: formatDateTimeInput(undefined, true),
                       orderNumber: pointFields.length,
                       routeId: initialRoute?.id ?? null
                     })
@@ -475,8 +475,8 @@ function mapRouteToForm(route?: Route): RouteFormValues {
     return {
       vehicleId: '',
       creationTime: formatDateTimeInput(),
-      plannedStartTime: formatDateTimeInput(),
-      plannedEndTime: formatDateTimeInput(),
+      plannedStartTime: formatDateTimeInput(undefined, true),
+      plannedEndTime: formatDateTimeInput(undefined, true),
       mileageInKm: '',
       routePoints: []
     };
@@ -485,8 +485,8 @@ function mapRouteToForm(route?: Route): RouteFormValues {
   return {
     vehicleId: route.vehicle?.id?.toString() ?? '',
     creationTime: formatDateTimeInput(route.creationTime),
-    plannedStartTime: formatDateTimeInput(route.plannedStartTime),
-    plannedEndTime: formatDateTimeInput(route.plannedEndTime),
+    plannedStartTime: formatDateTimeInput(route.plannedStartTime, true),
+    plannedEndTime: formatDateTimeInput(route.plannedEndTime, true),
     mileageInKm: route.mileageInKm?.toString() ?? '',
     routePoints: (route.routePoints ?? []).map((point) => mapRoutePointToForm(point, route.id ?? null))
   };
@@ -496,10 +496,10 @@ function mapRoutePointToForm(point: RoutePoint, routeId: number | null): RouteFo
   return {
     id: point.id ?? undefined,
     retailPointId: point.retailPoint?.id?.toString() ?? '',
-    operationType: point.operationType ?? OperationType.Visit,
+    operationType: point.operationType ?? OperationType.VISIT,
     orderIds: (point.orders ?? []).map((order) => order.id?.toString() ?? '').filter(Boolean),
-    plannedStartTime: formatDateTimeInput(point.plannedStartTime),
-    plannedEndTime: formatDateTimeInput(point.plannedEndTime),
+    plannedStartTime: formatDateTimeInput(point.plannedStartTime, true),
+    plannedEndTime: formatDateTimeInput(point.plannedEndTime, true),
     orderNumber: point.orderNumber ?? 0,
     routeId
   };
@@ -532,24 +532,64 @@ function parseOrderIds(values: string[] | undefined): number[] {
   return values.map((value) => Number(value)).filter((num) => !Number.isNaN(num));
 }
 
-function formatDateTimeInput(value?: Date | string | null): string {
+function formatDateTimeInput(value?: Date | string | null, preferLocal = false): string {
+  if (typeof value === 'string') {
+    const trimmed = value.trim();
+    const match = trimmed.match(/^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}/);
+    if (match) {
+      return match[0];
+    }
+    const parsed = new Date(normalizeToUtcIso(trimmed));
+    if (!Number.isNaN(parsed.getTime())) {
+      return preferLocal ? formatLocalDateTime(parsed) : formatUtcDateTime(parsed);
+    }
+    return '';
+  }
+
   const date = value ? new Date(value) : new Date();
   if (Number.isNaN(date.getTime())) {
     return '';
   }
-  return date.toISOString().slice(0, 16);
+  return preferLocal ? formatLocalDateTime(date) : formatUtcDateTime(date);
 }
 
 function toUtcDate(value: string): Date {
   if (!value) {
     throw new Error('Дата не указана');
   }
-  const normalized = value.endsWith('Z') ? value : `${value}${value.length === 16 ? ':00' : ''}Z`;
-  const date = new Date(normalized);
+  const date = new Date(normalizeToUtcIso(value));
   if (Number.isNaN(date.getTime())) {
     throw new Error(`Некорректная дата: ${value}`);
   }
   return date;
+}
+
+function normalizeToUtcIso(value: string): string {
+  let normalized = value.trim();
+  if (!normalized.includes('T')) {
+    normalized = `${normalized}T00:00`;
+  }
+  if (/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/.test(normalized)) {
+    normalized = `${normalized}:00`;
+  }
+  if (!/(Z|z|[+-]\d{2}:\d{2})$/.test(normalized)) {
+    normalized = `${normalized}Z`;
+  }
+  return normalized;
+}
+
+function formatLocalDateTime(date: Date): string {
+  const pad = (num: number) => num.toString().padStart(2, '0');
+  const year = date.getFullYear();
+  const month = pad(date.getMonth() + 1);
+  const day = pad(date.getDate());
+  const hours = pad(date.getHours());
+  const minutes = pad(date.getMinutes());
+  return `${year}-${month}-${day}T${hours}:${minutes}`;
+}
+
+function formatUtcDateTime(date: Date): string {
+  return date.toISOString().slice(0, 16);
 }
 
 function toOrderOptions<T extends { id?: number | null; goodsType?: string | null }>(
