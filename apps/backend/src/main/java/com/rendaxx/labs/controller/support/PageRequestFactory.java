@@ -33,7 +33,9 @@ public class PageRequestFactory {
 
         List<String> tokens = new ArrayList<>();
         for (String v : sortValues) {
-            if (v == null) continue;
+            if (v == null) {
+                continue;
+            }
             for (String p : v.split(",")) {
                 String t = p.trim();
                 if (!t.isEmpty()) {

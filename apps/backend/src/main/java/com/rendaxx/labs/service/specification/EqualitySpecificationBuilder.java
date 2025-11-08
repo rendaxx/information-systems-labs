@@ -82,7 +82,9 @@ public class EqualitySpecificationBuilder {
     }
 
     private Path<?> resolvePath(Root<?> root, String key) {
-        if (!StringUtils.hasText(key)) return null;
+        if (!StringUtils.hasText(key)) {
+            return null;
+        }
 
         String[] rawParts = key.split("\\.");
         List<String> parts = new ArrayList<>();

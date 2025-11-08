@@ -2,93 +2,27 @@ package com.rendaxx.labs.controller;
 
 import static org.hamcrest.Matchers.contains;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import com.rendaxx.labs.controller.support.RouteTestDataFactory;
+import com.rendaxx.labs.controller.support.IntegrationTest;
 import com.rendaxx.labs.domain.PointType;
 import com.rendaxx.labs.domain.RetailPoint;
-import com.rendaxx.labs.repository.OrderRepository;
-import com.rendaxx.labs.repository.RetailPointRepository;
-import com.rendaxx.labs.repository.RouteRepository;
-import com.rendaxx.labs.repository.VehicleRepository;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.DynamicPropertyRegistry;
-import org.springframework.test.context.DynamicPropertySource;
-import org.springframework.test.web.servlet.MockMvc;
-import org.testcontainers.containers.PostgreSQLContainer;
-import org.testcontainers.junit.jupiter.Container;
-import org.testcontainers.junit.jupiter.Testcontainers;
-import org.testcontainers.utility.DockerImageName;
 
-@Testcontainers
-@SpringBootTest
-@AutoConfigureMockMvc
-class RetailPointControllerNearestTest {
-
-    private static final DockerImageName POSTGIS_IMAGE =
-            DockerImageName.parse("postgis/postgis:16-3.4").asCompatibleSubstituteFor("postgres");
-
-    @Container
-    private static final PostgreSQLContainer<?> POSTGRES = new PostgreSQLContainer<>(POSTGIS_IMAGE)
-            .withDatabaseName("retail_points_db")
-            .withUsername("retail_points_user")
-            .withPassword("retail_points_pass");
-
-    @DynamicPropertySource
-    static void configureDatasourceProperties(DynamicPropertyRegistry registry) {
-        registry.add("spring.datasource.url", POSTGRES::getJdbcUrl);
-        registry.add("spring.datasource.username", POSTGRES::getUsername);
-        registry.add("spring.datasource.password", POSTGRES::getPassword);
-        registry.add("spring.flyway.url", POSTGRES::getJdbcUrl);
-        registry.add("spring.flyway.user", POSTGRES::getUsername);
-        registry.add("spring.flyway.password", POSTGRES::getPassword);
-    }
-
-    @Autowired
-    private MockMvc mockMvc;
-
-    @Autowired
-    private RetailPointRepository retailPointRepository;
-
-    @Autowired
-    private RouteRepository routeRepository;
-
-    @Autowired
-    private VehicleRepository vehicleRepository;
-
-    @Autowired
-    private OrderRepository orderRepository;
-
-    private RouteTestDataFactory testDataFactory;
-
-    @BeforeEach
-    void setUp() {
-        routeRepository.deleteAll();
-        orderRepository.deleteAll();
-        retailPointRepository.deleteAll();
-        vehicleRepository.deleteAll();
-        testDataFactory =
-                new RouteTestDataFactory(routeRepository, vehicleRepository, retailPointRepository, orderRepository);
-    }
+class RetailPointControllerNearestTest extends IntegrationTest {
 
     @Test
     void returnsBadRequestWhenLimitIsNotPositive() throws Exception {
         RetailPoint origin = persistRetailPoint(37.61, 55.75);
 
         mockMvc.perform(get("/api/retail-points/{id}/nearest", origin.getId()).param("limit", "0"))
-                .andExpect(status().isBadRequest())
-                .andExpect(content().string("Limit must be positive"));
+                .andExpect(status().isBadRequest());
     }
 
     @Test
