@@ -38,15 +38,19 @@ public abstract class RouteMapper {
     abstract void update(@MappingTarget Route route, SaveRouteDto dto, List<RoutePoint> routePoints, Vehicle vehicle);
 
     public void update(Route route, SaveRouteDto dto) {
+        List<SaveRoutePointDto> incomingRoutePoints = dto.getRoutePoints() == null
+                ? List.of()
+                : dto.getRoutePoints().stream().filter(Objects::nonNull).toList();
+
         Map<Long, RoutePoint> routePointsById = routePointRepository
-                .findAllById(dto.getRoutePoints().stream()
+                .findAllById(incomingRoutePoints.stream()
                         .map(SaveRoutePointDto::getId)
                         .filter(Objects::nonNull)
                         .collect(Collectors.toList()))
                 .stream()
                 .collect(Collectors.toMap(RoutePoint::getId, Function.identity()));
         List<RoutePoint> routePoints = new ArrayList<>();
-        for (SaveRoutePointDto routePointDto : dto.getRoutePoints()) {
+        for (SaveRoutePointDto routePointDto : incomingRoutePoints) {
             RoutePoint routePoint = routePointsById.getOrDefault(routePointDto.getId(), new RoutePoint());
             routePointMapper.update(routePoint, routePointDto, route);
             routePoints.add(routePoint);

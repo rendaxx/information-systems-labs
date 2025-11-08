@@ -12,10 +12,12 @@ import org.springframework.util.CollectionUtils;
 public class PageRequestFactory {
     private static final int DEFAULT_PAGE = 0;
     private static final int DEFAULT_SIZE = 20;
+    private static final int MAX_SIZE = 1000;
 
     public Pageable build(Integer page, Integer size, List<String> sortValues) {
-        int resolvedPage = page != null && page >= 0 ? page : DEFAULT_PAGE;
         int resolvedSize = size != null && size > 0 ? size : DEFAULT_SIZE;
+        long requestedPage = page != null && page >= 0 ? page.longValue() : DEFAULT_PAGE;
+        int resolvedPage = Math.toIntExact(Math.min(requestedPage, MAX_SIZE));
         Sort sort = resolveSort(sortValues);
         return sort.isUnsorted()
                 ? PageRequest.of(resolvedPage, resolvedSize)

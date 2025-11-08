@@ -23,6 +23,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -44,7 +46,7 @@ public class RouteController implements RoutesApi {
     }
 
     @Override
-    public ResponseEntity<RouteApiDto> getRoute(Long id) {
+    public ResponseEntity<RouteApiDto> getRoute(@PathVariable("id") Long id) {
         return ResponseEntity.ok(routeApiMapper.toApi(routeService.getById(id)));
     }
 
@@ -53,18 +55,20 @@ public class RouteController implements RoutesApi {
             Integer page, Integer size, List<String> sort, Map<String, String> filter) {
         Pageable pageable = pageRequestFactory.build(page, size, sort);
         Page<RouteDto> result = routeService.getAll(pageable, filterParameterMapper.toFilters(filter));
-        return ResponseEntity.ok(routeApiMapper.toRoutePage(result));
+        PageRouteApiDto response = routeApiMapper.toRoutePage(result);
+        return ResponseEntity.ok(response);
     }
 
     @Override
-    public ResponseEntity<RouteApiDto> updateRoute(Long id, @Valid SaveRouteApiDto saveRouteApiDto) {
+    public ResponseEntity<RouteApiDto> updateRoute(
+            @PathVariable("id") Long id, @Valid SaveRouteApiDto saveRouteApiDto) {
         SaveRouteDto command = routeApiMapper.toDto(saveRouteApiDto);
         RouteDto updated = routeService.update(id, command);
         return ResponseEntity.ok(routeApiMapper.toApi(updated));
     }
 
     @Override
-    public ResponseEntity<Void> deleteRoute(Long id) {
+    public ResponseEntity<Void> deleteRoute(@PathVariable("id") Long id) {
         routeService.delete(id);
         return ResponseEntity.noContent().build();
     }
@@ -76,13 +80,15 @@ public class RouteController implements RoutesApi {
     }
 
     @Override
-    public ResponseEntity<List<RouteApiDto>> getRoutesWithinPeriod(LocalDateTime periodStart, LocalDateTime periodEnd) {
+    public ResponseEntity<List<RouteApiDto>> getRoutesWithinPeriod(
+            @RequestParam("periodStart") LocalDateTime periodStart,
+            @RequestParam("periodEnd") LocalDateTime periodEnd) {
         List<RouteDto> routes = routeService.getWithinPeriod(periodStart, periodEnd);
         return ResponseEntity.ok(routeApiMapper.toApi(routes));
     }
 
     @Override
-    public ResponseEntity<List<RouteApiDto>> getRoutesByRetailPoint(Long retailPointId) {
+    public ResponseEntity<List<RouteApiDto>> getRoutesByRetailPoint(@PathVariable("retailPointId") Long retailPointId) {
         List<RouteDto> routes = routeService.getByRetailPointId(retailPointId);
         return ResponseEntity.ok(routeApiMapper.toApi(routes));
     }

@@ -21,6 +21,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -43,7 +44,7 @@ public class OrderController implements OrdersApi {
     }
 
     @Override
-    public ResponseEntity<OrderApiDto> getOrder(Long id) {
+    public ResponseEntity<OrderApiDto> getOrder(@PathVariable("id") Long id) {
         OrderDto dto = orderService.getById(id);
         return ResponseEntity.ok(orderApiMapper.toApi(dto));
     }
@@ -54,18 +55,20 @@ public class OrderController implements OrdersApi {
         Pageable pageable = pageRequestFactory.build(page, size, sort);
         Map<String, String> filters = filterParameterMapper.toFilters(filter);
         Page<OrderDto> result = orderService.getAll(pageable, filters);
-        return ResponseEntity.ok(orderApiMapper.toOrderPage(result));
+        PageOrderApiDto response = orderApiMapper.toOrderPage(result);
+        return ResponseEntity.ok(response);
     }
 
     @Override
-    public ResponseEntity<OrderApiDto> updateOrder(Long id, @Valid SaveOrderApiDto saveOrderApiDto) {
+    public ResponseEntity<OrderApiDto> updateOrder(
+            @PathVariable("id") Long id, @Valid SaveOrderApiDto saveOrderApiDto) {
         SaveOrderDto command = orderApiMapper.toDto(saveOrderApiDto);
         OrderDto updated = orderService.update(id, command);
         return ResponseEntity.ok(orderApiMapper.toApi(updated));
     }
 
     @Override
-    public ResponseEntity<Void> deleteOrder(Long id) {
+    public ResponseEntity<Void> deleteOrder(@PathVariable("id") Long id) {
         orderService.delete(id);
         return ResponseEntity.noContent().build();
     }

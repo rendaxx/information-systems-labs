@@ -1,6 +1,7 @@
 package com.rendaxx.labs.service;
 
 import com.rendaxx.labs.domain.RetailPoint;
+import com.rendaxx.labs.domain.Route;
 import com.rendaxx.labs.domain.RoutePoint;
 import com.rendaxx.labs.dtos.RetailPointDto;
 import com.rendaxx.labs.dtos.RoutePointDto;
@@ -11,7 +12,10 @@ import com.rendaxx.labs.exceptions.NotFoundException;
 import com.rendaxx.labs.mappers.RetailPointMapper;
 import com.rendaxx.labs.mappers.RoutePointMapper;
 import com.rendaxx.labs.repository.RoutePointRepository;
+import com.rendaxx.labs.repository.RouteRepository;
 import com.rendaxx.labs.service.specification.EqualitySpecificationBuilder;
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -36,12 +40,14 @@ public class RoutePointService {
     RetailPointMapper retailPointMapper;
 
     RouteService routeService;
+    RouteRepository routeRepository;
     EntityChangePublisher changePublisher;
     EqualitySpecificationBuilder specificationBuilder;
 
     private static final String DESTINATION = "/topic/route-points";
 
     public RoutePointDto create(SaveRoutePointDto command) {
+        ensureRouteAssociation(command, null);
         RoutePoint routePoint = save(command, new RoutePoint());
         RoutePointDto dto = mapper.toDto(routePoint);
         changePublisher.publish(DESTINATION, routePoint.getId(), dto, EntityChangeType.CREATED);
@@ -62,6 +68,7 @@ public class RoutePointService {
 
     public RoutePointDto update(Long id, SaveRoutePointDto command) {
         RoutePoint routePoint = repository.findById(id).orElseThrow(() -> new NotFoundException(RoutePoint.class, id));
+        ensureRouteAssociation(command, routePoint.getRoute());
         RoutePoint savedRoutePoint = save(command, routePoint);
         RoutePointDto dto = mapper.toDto(savedRoutePoint);
         changePublisher.publish(DESTINATION, savedRoutePoint.getId(), dto, EntityChangeType.UPDATED);
@@ -92,5 +99,30 @@ public class RoutePointService {
     private RoutePoint save(SaveRoutePointDto command, RoutePoint routePoint) {
         mapper.update(routePoint, command);
         return repository.save(routePoint);
+    }
+
+    private void ensureRouteAssociation(SaveRoutePointDto command, Route existingRoute) {
+        if (command.getRouteId() != null) {
+            return;
+        }
+        if (existingRoute != null) {
+            command.setRouteId(existingRoute.getId());
+            return;
+        }
+        Route fallbackRoute = Route.builder()
+                .plannedStartTime(defaultTime(command.getPlannedStartTime()))
+                .plannedEndTime(defaultTime(command.getPlannedEndTime(), command.getPlannedStartTime()))
+                .mileageInKm(BigDecimal.valueOf(1L))
+                .build();
+        Route persisted = routeRepository.save(fallbackRoute);
+        command.setRouteId(persisted.getId());
+    }
+
+    private LocalDateTime defaultTime(LocalDateTime value) {
+        return defaultTime(value, LocalDateTime.now());
+    }
+
+    private LocalDateTime defaultTime(LocalDateTime value, LocalDateTime fallback) {
+        return value != null ? value : fallback;
     }
 }

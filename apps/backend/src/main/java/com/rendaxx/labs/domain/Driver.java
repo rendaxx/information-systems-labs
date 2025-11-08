@@ -1,5 +1,6 @@
 package com.rendaxx.labs.domain;
 
+import jakarta.annotation.Nullable;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -34,7 +35,7 @@ public class Driver {
     @NotBlank
     private String firstName;
 
-    @NotBlank
+    @Nullable
     private String middleName;
 
     @Size(min = 1, message = "must contain at least one non-whitespace character")

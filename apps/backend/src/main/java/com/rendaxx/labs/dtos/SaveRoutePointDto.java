@@ -17,5 +17,5 @@ public class SaveRoutePointDto {
     List<Long> orderIds;
     LocalDateTime plannedStartTime;
     LocalDateTime plannedEndTime;
-    Integer orderNumber;
+    Long orderNumber;
 }

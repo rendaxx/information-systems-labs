@@ -21,6 +21,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -42,7 +44,7 @@ public class RetailPointController implements RetailPointsApi {
     }
 
     @Override
-    public ResponseEntity<RetailPointApiDto> getRetailPoint(Long id) {
+    public ResponseEntity<RetailPointApiDto> getRetailPoint(@PathVariable("id") Long id) {
         return ResponseEntity.ok(retailPointApiMapper.toApi(retailPointService.getById(id)));
     }
 
@@ -51,25 +53,27 @@ public class RetailPointController implements RetailPointsApi {
             Integer page, Integer size, List<String> sort, Map<String, String> filter) {
         Pageable pageable = pageRequestFactory.build(page, size, sort);
         Page<RetailPointDto> result = retailPointService.getAll(pageable, filterParameterMapper.toFilters(filter));
-        return ResponseEntity.ok(retailPointApiMapper.toRetailPointPage(result));
+        PageRetailPointApiDto response = retailPointApiMapper.toRetailPointPage(result);
+        return ResponseEntity.ok(response);
     }
 
     @Override
     public ResponseEntity<RetailPointApiDto> updateRetailPoint(
-            Long id, @Valid SaveRetailPointApiDto saveRetailPointApiDto) {
+            @PathVariable("id") Long id, @Valid SaveRetailPointApiDto saveRetailPointApiDto) {
         SaveRetailPointDto command = retailPointApiMapper.toDto(saveRetailPointApiDto);
         RetailPointDto updated = retailPointService.update(id, command);
         return ResponseEntity.ok(retailPointApiMapper.toApi(updated));
     }
 
     @Override
-    public ResponseEntity<Void> deleteRetailPoint(Long id) {
+    public ResponseEntity<Void> deleteRetailPoint(@PathVariable("id") Long id) {
         retailPointService.delete(id);
         return ResponseEntity.noContent().build();
     }
 
     @Override
-    public ResponseEntity<List<RetailPointApiDto>> getNearestRetailPoints(Long id, Integer limit) {
+    public ResponseEntity<List<RetailPointApiDto>> getNearestRetailPoints(
+            @PathVariable("id") Long id, @RequestParam("limit") Integer limit) {
         List<RetailPointDto> nearest = retailPointService.getNearestRetailPoints(id, limit);
         return ResponseEntity.ok(retailPointApiMapper.toApi(nearest));
     }

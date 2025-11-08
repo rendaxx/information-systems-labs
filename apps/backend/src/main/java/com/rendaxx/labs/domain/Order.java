@@ -7,7 +7,9 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.AssertTrue;
+import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 import java.math.BigDecimal;
@@ -40,11 +42,13 @@ public class Order {
 
     @NotNull
     @Positive
+    @DecimalMin(value = "0.001")
     @Column(precision = 12, scale = 3)
     private BigDecimal volumeInCubicMeters;
 
     @NotNull
     @Positive
+    @DecimalMin(value = "0.001")
     @Column(precision = 12, scale = 3)
     private BigDecimal weightInKg;
 

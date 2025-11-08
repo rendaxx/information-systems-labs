@@ -1,5 +1,6 @@
 package com.rendaxx.labs.dtos;
 
+import jakarta.validation.constraints.DecimalMin;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -15,5 +16,7 @@ public class SaveRouteDto {
     LocalDateTime creationTime;
     LocalDateTime plannedStartTime;
     LocalDateTime plannedEndTime;
+
+    @DecimalMin(value = "0.001")
     BigDecimal mileageInKm;
 }

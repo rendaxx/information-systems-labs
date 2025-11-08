@@ -21,6 +21,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -42,7 +43,7 @@ public class DriverController implements DriversApi {
     }
 
     @Override
-    public ResponseEntity<DriverApiDto> getDriver(Long id) {
+    public ResponseEntity<DriverApiDto> getDriver(@PathVariable("id") Long id) {
         return ResponseEntity.ok(driverApiMapper.toApi(driverService.getById(id)));
     }
 
@@ -51,18 +52,20 @@ public class DriverController implements DriversApi {
             Integer page, Integer size, List<String> sort, Map<String, String> filter) {
         Pageable pageable = pageRequestFactory.build(page, size, sort);
         Page<DriverDto> result = driverService.getAll(pageable, filterParameterMapper.toFilters(filter));
-        return ResponseEntity.ok(driverApiMapper.toDriverPage(result));
+        PageDriverApiDto response = driverApiMapper.toDriverPage(result);
+        return ResponseEntity.ok(response);
     }
 
     @Override
-    public ResponseEntity<DriverApiDto> updateDriver(Long id, @Valid SaveDriverApiDto saveDriverApiDto) {
+    public ResponseEntity<DriverApiDto> updateDriver(
+            @PathVariable("id") Long id, @Valid SaveDriverApiDto saveDriverApiDto) {
         SaveDriverDto command = driverApiMapper.toDto(saveDriverApiDto);
         DriverDto updated = driverService.update(id, command);
         return ResponseEntity.ok(driverApiMapper.toApi(updated));
     }
 
     @Override
-    public ResponseEntity<Void> deleteDriver(Long id) {
+    public ResponseEntity<Void> deleteDriver(@PathVariable("id") Long id) {
         driverService.delete(id);
         return ResponseEntity.noContent().build();
     }

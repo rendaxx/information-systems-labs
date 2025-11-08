@@ -35,7 +35,7 @@ paths:
       parameters:
         - $ref: '#/components/parameters/Page'
         - $ref: '#/components/parameters/Size'
-        - $ref: '#/components/parameters/Sort'
+        - $ref: '#/components/parameters/OrderSort'
         - $ref: '#/components/parameters/Filter'
       responses:
         '200':
@@ -44,6 +44,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/PageOrder'
+        '400':
+          $ref: '#/components/responses/BadRequest'
   /api/orders/{id}:
     parameters:
       - $ref: '#/components/parameters/Id'
@@ -58,6 +60,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Order'
+        '400':
+          $ref: '#/components/responses/BadRequest'
         '404':
           $ref: '#/components/responses/NotFound'
     put:
@@ -88,6 +92,8 @@ paths:
       responses:
         '204':
           description: Order removed
+        '400':
+          $ref: '#/components/responses/BadRequest'
         '404':
           $ref: '#/components/responses/NotFound'
   /api/drivers:
@@ -117,7 +123,7 @@ paths:
       parameters:
         - $ref: '#/components/parameters/Page'
         - $ref: '#/components/parameters/Size'
-        - $ref: '#/components/parameters/Sort'
+        - $ref: '#/components/parameters/DriverSort'
         - $ref: '#/components/parameters/Filter'
       responses:
         '200':
@@ -126,6 +132,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/PageDriver'
+        '400':
+          $ref: '#/components/responses/BadRequest'
   /api/drivers/{id}:
     parameters:
       - $ref: '#/components/parameters/Id'
@@ -140,6 +148,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Driver'
+        '400':
+          $ref: '#/components/responses/BadRequest'
         '404':
           $ref: '#/components/responses/NotFound'
     put:
@@ -170,6 +180,8 @@ paths:
       responses:
         '204':
           description: Driver removed
+        '400':
+          $ref: '#/components/responses/BadRequest'
         '404':
           $ref: '#/components/responses/NotFound'
   /api/vehicles:
@@ -192,6 +204,8 @@ paths:
                 $ref: '#/components/schemas/Vehicle'
         '400':
           $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
     get:
       tags: [Vehicles]
       summary: List vehicles
@@ -199,7 +213,7 @@ paths:
       parameters:
         - $ref: '#/components/parameters/Page'
         - $ref: '#/components/parameters/Size'
-        - $ref: '#/components/parameters/Sort'
+        - $ref: '#/components/parameters/VehicleSort'
         - $ref: '#/components/parameters/Filter'
       responses:
         '200':
@@ -208,6 +222,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/PageVehicle'
+        '400':
+          $ref: '#/components/responses/BadRequest'
   /api/vehicles/{id}:
     parameters:
       - $ref: '#/components/parameters/Id'
@@ -222,6 +238,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Vehicle'
+        '400':
+          $ref: '#/components/responses/BadRequest'
         '404':
           $ref: '#/components/responses/NotFound'
     put:
@@ -252,6 +270,8 @@ paths:
       responses:
         '204':
           description: Vehicle removed
+        '400':
+          $ref: '#/components/responses/BadRequest'
         '404':
           $ref: '#/components/responses/NotFound'
   /api/retail-points:
@@ -281,7 +301,7 @@ paths:
       parameters:
         - $ref: '#/components/parameters/Page'
         - $ref: '#/components/parameters/Size'
-        - $ref: '#/components/parameters/Sort'
+        - $ref: '#/components/parameters/RetailPointSort'
         - $ref: '#/components/parameters/Filter'
       responses:
         '200':
@@ -290,6 +310,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/PageRetailPoint'
+        '400':
+          $ref: '#/components/responses/BadRequest'
   /api/retail-points/{id}:
     parameters:
       - $ref: '#/components/parameters/Id'
@@ -304,6 +326,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/RetailPoint'
+        '400':
+          $ref: '#/components/responses/BadRequest'
         '404':
           $ref: '#/components/responses/NotFound'
     put:
@@ -334,6 +358,8 @@ paths:
       responses:
         '204':
           description: Retail point removed
+        '400':
+          $ref: '#/components/responses/BadRequest'
         '404':
           $ref: '#/components/responses/NotFound'
   /api/retail-points/{id}/nearest:
@@ -377,6 +403,8 @@ paths:
                 $ref: '#/components/schemas/RoutePoint'
         '400':
           $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
     get:
       tags: [Route Points]
       summary: List route points
@@ -384,7 +412,7 @@ paths:
       parameters:
         - $ref: '#/components/parameters/Page'
         - $ref: '#/components/parameters/Size'
-        - $ref: '#/components/parameters/Sort'
+        - $ref: '#/components/parameters/RoutePointSort'
         - $ref: '#/components/parameters/Filter'
       responses:
         '200':
@@ -393,6 +421,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/PageRoutePoint'
+        '400':
+          $ref: '#/components/responses/BadRequest'
   /api/route-points/{id}:
     parameters:
       - $ref: '#/components/parameters/Id'
@@ -407,6 +437,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/RoutePoint'
+        '400':
+          $ref: '#/components/responses/BadRequest'
         '404':
           $ref: '#/components/responses/NotFound'
     put:
@@ -437,6 +469,8 @@ paths:
       responses:
         '204':
           description: Route point removed
+        '400':
+          $ref: '#/components/responses/BadRequest'
         '404':
           $ref: '#/components/responses/NotFound'
   /api/route-points/top-retail-points:
@@ -477,6 +511,8 @@ paths:
                 $ref: '#/components/schemas/Route'
         '400':
           $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
     get:
       tags: [Routes]
       summary: List routes
@@ -484,7 +520,7 @@ paths:
       parameters:
         - $ref: '#/components/parameters/Page'
         - $ref: '#/components/parameters/Size'
-        - $ref: '#/components/parameters/Sort'
+        - $ref: '#/components/parameters/RouteSort'
         - $ref: '#/components/parameters/Filter'
       responses:
         '200':
@@ -493,6 +529,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/PageRoute'
+        '400':
+          $ref: '#/components/responses/BadRequest'
   /api/routes/{id}:
     parameters:
       - $ref: '#/components/parameters/Id'
@@ -507,6 +545,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Route'
+        '400':
+          $ref: '#/components/responses/BadRequest'
         '404':
           $ref: '#/components/responses/NotFound'
     put:
@@ -537,6 +577,8 @@ paths:
       responses:
         '204':
           description: Route removed
+        '400':
+          $ref: '#/components/responses/BadRequest'
         '404':
           $ref: '#/components/responses/NotFound'
   /api/routes/average-mileage:
@@ -639,6 +681,80 @@ components:
           value: [ "id,desc" ]
         multi:
           value: [ "id,desc", "name,asc" ]
+    OrderSort:
+      name: sort
+      in: query
+      description: >
+        Повторяемый параметр. Поля: id, goodsType, minTemperature, maxTemperature,
+        volumeInCubicMeters, weightInKg. Формат: "field[,asc|desc]".
+      schema:
+        type: array
+        items:
+          type: string
+          pattern: '^(id|goodsType|minTemperature|maxTemperature|volumeInCubicMeters|weightInKg)(,(?i:asc|desc))?$'
+      style: form
+      explode: true
+    DriverSort:
+      name: sort
+      in: query
+      description: >
+        Повторяемый параметр. Поля: id, firstName, lastName, middleName, passport.
+      schema:
+        type: array
+        items:
+          type: string
+          pattern: '^(id|firstName|lastName|middleName|passport)(,(?i:asc|desc))?$'
+      style: form
+      explode: true
+    VehicleSort:
+      name: sort
+      in: query
+      description: >
+        Повторяемый параметр. Поля: id, gosNumber, tonnageInTons, bodyHeightInMeters,
+        bodyWidthInMeters, bodyLengthInCubicMeters.
+      schema:
+        type: array
+        items:
+          type: string
+          pattern: '^(id|gosNumber|tonnageInTons|bodyHeightInMeters|bodyWidthInMeters|bodyLengthInCubicMeters)(,(?i:asc|desc))?$'
+      style: form
+      explode: true
+    RetailPointSort:
+      name: sort
+      in: query
+      description: >
+        Повторяемый параметр. Поля: id, name, address, timezone, type.
+      schema:
+        type: array
+        items:
+          type: string
+          pattern: '^(id|name|address|timezone|type)(,(?i:asc|desc))?$'
+      style: form
+      explode: true
+    RoutePointSort:
+      name: sort
+      in: query
+      description: >
+        Повторяемый параметр. Поля: id, orderNumber, plannedStartTime, plannedEndTime.
+      schema:
+        type: array
+        items:
+          type: string
+          pattern: '^(id|orderNumber|plannedStartTime|plannedEndTime)(,(?i:asc|desc))?$'
+      style: form
+      explode: true
+    RouteSort:
+      name: sort
+      in: query
+      description: >
+        Повторяемый параметр. Поля: id, creationTime, plannedStartTime, plannedEndTime, mileageInKm.
+      schema:
+        type: array
+        items:
+          type: string
+          pattern: '^(id|creationTime|plannedStartTime|plannedEndTime|mileageInKm)(,(?i:asc|desc))?$'
+      style: form
+      explode: true
     Filter:
       name: filter
       in: query
@@ -691,28 +807,35 @@ components:
         id:
           type: integer
           format: int64
+          minimum: 1
         firstName:
           type: string
+          minLength: 1
         middleName:
           type: string
           nullable: true
         lastName:
           type: string
+          minLength: 1
         passport:
           type: string
+          minLength: 1
     SaveDriver:
       type: object
       required: [firstName, lastName, passport]
       properties:
         firstName:
           type: string
+          minLength: 1
         middleName:
           type: string
           nullable: true
         lastName:
           type: string
+          minLength: 1
         passport:
           type: string
+          minLength: 1
     Order:
       type: object
       required: [id, goodsType, minTemperature, maxTemperature, volumeInCubicMeters, weightInKg]
@@ -720,38 +843,53 @@ components:
         id:
           type: integer
           format: int64
+          minimum: 1
         goodsType:
           type: string
+          minLength: 1
         minTemperature:
           type: integer
           format: int32
+          minimum: -2147483648
+          maximum: 2147483647
         maxTemperature:
           type: integer
           format: int32
+          minimum: -2147483648
+          maximum: 2147483647
         volumeInCubicMeters:
           type: number
           format: double
+          minimum: 0.001
         weightInKg:
           type: number
           format: double
+          minimum: 0.001
     SaveOrder:
       type: object
       required: [goodsType, minTemperature, maxTemperature, volumeInCubicMeters, weightInKg]
       properties:
         goodsType:
           type: string
+          minLength: 1
         minTemperature:
           type: integer
           format: int32
+          minimum: -2147483648
+          maximum: 2147483647
         maxTemperature:
           type: integer
           format: int32
+          minimum: -2147483648
+          maximum: 2147483647
         volumeInCubicMeters:
           type: number
           format: double
+          minimum: 0.001
         weightInKg:
           type: number
           format: double
+          minimum: 0.001
     Point:
       type: object
       required: [longitude, latitude]
@@ -769,30 +907,37 @@ components:
         id:
           type: integer
           format: int64
+          minimum: 1
         name:
           type: string
+          minLength: 1
         address:
           type: string
+          minLength: 1
         location:
           $ref: '#/components/schemas/Point'
         type:
           $ref: '#/components/schemas/PointType'
         timezone:
           type: string
+          minLength: 1
     SaveRetailPoint:
       type: object
       required: [name, address, location, type, timezone]
       properties:
         name:
           type: string
+          minLength: 1
         address:
           type: string
+          minLength: 1
         location:
           $ref: '#/components/schemas/Point'
         type:
           $ref: '#/components/schemas/PointType'
         timezone:
           type: string
+          minLength: 1
     Vehicle:
       type: object
       required: [id, driver, gosNumber, tonnageInTons, bodyHeightInMeters, bodyWidthInMeters, bodyLengthInCubicMeters]
@@ -800,22 +945,28 @@ components:
         id:
           type: integer
           format: int64
+          minimum: 1
         driver:
           $ref: '#/components/schemas/Driver'
         gosNumber:
           type: string
+          minLength: 2
         tonnageInTons:
           type: number
           format: double
+          minimum: 0.01
         bodyHeightInMeters:
           type: number
           format: double
+          minimum: 0.01
         bodyWidthInMeters:
           type: number
           format: double
+          minimum: 0.01
         bodyLengthInCubicMeters:
           type: number
           format: double
+          minimum: 0.01
     SaveVehicle:
       type: object
       required: [driverId, gosNumber, tonnageInTons, bodyHeightInMeters, bodyWidthInMeters, bodyLengthInCubicMeters]
@@ -823,20 +974,26 @@ components:
         driverId:
           type: integer
           format: int64
+          minimum: 1
         gosNumber:
           type: string
+          minLength: 1
         tonnageInTons:
           type: number
           format: double
+          minimum: 0.01
         bodyHeightInMeters:
           type: number
           format: double
+          minimum: 0.01
         bodyWidthInMeters:
           type: number
           format: double
+          minimum: 0.01
         bodyLengthInCubicMeters:
           type: number
           format: double
+          minimum: 0.01
     Route:
       type: object
       required: [id, routePoints, vehicle, creationTime, plannedStartTime, plannedEndTime, mileageInKm]
@@ -844,6 +1001,7 @@ components:
         id:
           type: integer
           format: int64
+          minimum: 1
         routePoints:
           type: array
           items:
@@ -862,6 +1020,7 @@ components:
         mileageInKm:
           type: number
           format: double
+          minimum: 0.001
     SaveRoute:
       type: object
       required: [routePoints, vehicleId, creationTime, plannedStartTime, plannedEndTime, mileageInKm]
@@ -870,9 +1029,11 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/SaveRoutePoint'
+            nullable: false
         vehicleId:
           type: integer
           format: int64
+          minimum: 1
         creationTime:
           type: string
           format: date-time
@@ -885,6 +1046,7 @@ components:
         mileageInKm:
           type: number
           format: double
+          minimum: 0.001
     RoutePoint:
       type: object
       required: [id, routeId, retailPoint, operationType, orders, plannedStartTime, plannedEndTime, orderNumber]
@@ -892,9 +1054,11 @@ components:
         id:
           type: integer
           format: int64
+          minimum: 1
         routeId:
           type: integer
           format: int64
+          minimum: 1
         retailPoint:
           $ref: '#/components/schemas/RetailPoint'
         operationType:
@@ -912,6 +1076,8 @@ components:
         orderNumber:
           type: integer
           format: int32
+          minimum: 0
+          maximum: 2147483647
     SaveRoutePoint:
       type: object
       required: [retailPointId, operationType, orderIds, plannedStartTime, plannedEndTime, orderNumber]
@@ -923,10 +1089,12 @@ components:
         routeId:
           type: integer
           format: int64
-          nullable: true
+          nullable: false
+          minimum: 1
         retailPointId:
           type: integer
           format: int64
+          minimum: 1
         operationType:
           $ref: '#/components/schemas/OperationType'
         orderIds:
@@ -934,6 +1102,7 @@ components:
           items:
             type: integer
             format: int64
+            minimum: 1
         plannedStartTime:
           type: string
           format: date-time

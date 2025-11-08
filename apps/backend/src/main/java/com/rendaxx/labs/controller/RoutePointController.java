@@ -24,6 +24,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -46,7 +48,7 @@ public class RoutePointController implements RoutePointsApi {
     }
 
     @Override
-    public ResponseEntity<RoutePointApiDto> getRoutePoint(Long id) {
+    public ResponseEntity<RoutePointApiDto> getRoutePoint(@PathVariable("id") Long id) {
         return ResponseEntity.ok(routePointApiMapper.toApi(routePointService.getById(id)));
     }
 
@@ -55,25 +57,26 @@ public class RoutePointController implements RoutePointsApi {
             Integer page, Integer size, List<String> sort, Map<String, String> filter) {
         Pageable pageable = pageRequestFactory.build(page, size, sort);
         Page<RoutePointDto> result = routePointService.getAll(pageable, filterParameterMapper.toFilters(filter));
-        return ResponseEntity.ok(routePointApiMapper.toRoutePointPage(result));
+        PageRoutePointApiDto response = routePointApiMapper.toRoutePointPage(result);
+        return ResponseEntity.ok(response);
     }
 
     @Override
     public ResponseEntity<RoutePointApiDto> updateRoutePoint(
-            Long id, @Valid SaveRoutePointApiDto saveRoutePointApiDto) {
+            @PathVariable("id") Long id, @Valid SaveRoutePointApiDto saveRoutePointApiDto) {
         SaveRoutePointDto command = routePointApiMapper.toDto(saveRoutePointApiDto);
         RoutePointDto updated = routePointService.update(id, command);
         return ResponseEntity.ok(routePointApiMapper.toApi(updated));
     }
 
     @Override
-    public ResponseEntity<Void> deleteRoutePoint(Long id) {
+    public ResponseEntity<Void> deleteRoutePoint(@PathVariable("id") Long id) {
         routePointService.delete(id);
         return ResponseEntity.noContent().build();
     }
 
     @Override
-    public ResponseEntity<List<RetailPointApiDto>> getTopRetailPoints(Integer limit) {
+    public ResponseEntity<List<RetailPointApiDto>> getTopRetailPoints(@RequestParam("limit") Integer limit) {
         List<RetailPointDto> topRetailPoints = routePointService.getTopRetailPoints(limit);
         return ResponseEntity.ok(retailPointApiMapper.toApi(topRetailPoints));
     }

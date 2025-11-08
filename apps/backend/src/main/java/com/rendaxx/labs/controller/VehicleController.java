@@ -21,6 +21,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -42,7 +43,7 @@ public class VehicleController implements VehiclesApi {
     }
 
     @Override
-    public ResponseEntity<VehicleApiDto> getVehicle(Long id) {
+    public ResponseEntity<VehicleApiDto> getVehicle(@PathVariable("id") Long id) {
         return ResponseEntity.ok(vehicleApiMapper.toApi(vehicleService.getById(id)));
     }
 
@@ -51,18 +52,20 @@ public class VehicleController implements VehiclesApi {
             Integer page, Integer size, List<String> sort, Map<String, String> filter) {
         Pageable pageable = pageRequestFactory.build(page, size, sort);
         Page<VehicleDto> result = vehicleService.getAll(pageable, filterParameterMapper.toFilters(filter));
-        return ResponseEntity.ok(vehicleApiMapper.toVehiclePage(result));
+        PageVehicleApiDto response = vehicleApiMapper.toVehiclePage(result);
+        return ResponseEntity.ok(response);
     }
 
     @Override
-    public ResponseEntity<VehicleApiDto> updateVehicle(Long id, @Valid SaveVehicleApiDto saveVehicleApiDto) {
+    public ResponseEntity<VehicleApiDto> updateVehicle(
+            @PathVariable("id") Long id, @Valid SaveVehicleApiDto saveVehicleApiDto) {
         SaveVehicleDto command = vehicleApiMapper.toDto(saveVehicleApiDto);
         VehicleDto updated = vehicleService.update(id, command);
         return ResponseEntity.ok(vehicleApiMapper.toApi(updated));
     }
 
     @Override
-    public ResponseEntity<Void> deleteVehicle(Long id) {
+    public ResponseEntity<Void> deleteVehicle(@PathVariable("id") Long id) {
         vehicleService.delete(id);
         return ResponseEntity.noContent().build();
     }
