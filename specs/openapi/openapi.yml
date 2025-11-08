@@ -624,12 +624,21 @@ components:
     Sort:
       name: sort
       in: query
+      description: >
+        Повторяемый параметр. Каждый элемент: "field[,asc|desc]".
+        Примеры: sort=id,desc&sort=name,asc
       schema:
         type: array
         items:
           type: string
+          pattern: '^[^,]+(,(?i:asc|desc))?$'
       style: form
-      explode: false
+      explode: true
+      examples:
+        single:
+          value: [ "id,desc" ]
+        multi:
+          value: [ "id,desc", "name,asc" ]
     Filter:
       name: filter
       in: query

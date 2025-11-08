@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { fetchAverageMileage, fetchRoutesByRetailPoint, fetchRoutesWithinPeriod } from '@entities/routes/api/routes-api';
 import { fetchRetailPoints } from '@entities/retail-points/api/retail-points-api';
+import { fetchTopRetailPoints } from '@entities/route-points/api/route-points-api';
 import { queryKeys } from '@shared/api/query-keys';
 import { Card, CardContent, CardHeader, CardTitle } from '@shared/ui/card';
 import { Input } from '@shared/ui/input';
@@ -15,6 +16,7 @@ export function SpecialsPage() {
   const [periodStart, setPeriodStart] = useState<string>('');
   const [periodEnd, setPeriodEnd] = useState<string>('');
   const [retailPointId, setRetailPointId] = useState<string>('');
+  const [topLimit, setTopLimit] = useState<number>(5);
 
   const avgMileageQuery = useQuery({
     queryKey: ['routes', 'averageMileage'],
@@ -39,6 +41,12 @@ export function SpecialsPage() {
     queryKey: ['routes', 'byRetailPoint', retailPointId],
     queryFn: () => fetchRoutesByRetailPoint(Number(retailPointId)),
     enabled: Boolean(retailPointId),
+    staleTime: 5_000
+  });
+
+  const topRetailPointsQuery = useQuery({
+    queryKey: queryKeys.routePoints.topRetailPoints(topLimit),
+    queryFn: () => fetchTopRetailPoints(topLimit),
     staleTime: 5_000
   });
 
@@ -179,9 +187,32 @@ export function SpecialsPage() {
             <CardTitle>Топ посещаемых торговых точек</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            <p className="text-sm text-muted-foreground">
-              Смотрите раздел «Торговые точки», где отображается рейтинг посещаемости и ближайшие точки.
-            </p>
+            <div className="flex items-center gap-3">
+              <Input
+                type="number"
+                min={1}
+                value={topLimit}
+                onChange={(event) => setTopLimit(Math.max(1, Number(event.target.value)))}
+                className="w-24"
+              />
+              <Button type="button" onClick={() => topRetailPointsQuery.refetch()}>
+                Обновить
+              </Button>
+            </div>
+            <ul className="space-y-2 text-sm">
+              {topRetailPointsQuery.isLoading ? (
+                <li className="text-muted-foreground">Загрузка…</li>
+              ) : topRetailPointsQuery.data && topRetailPointsQuery.data.length > 0 ? (
+                topRetailPointsQuery.data.map((point) => (
+                  <li key={point.id} className="rounded-md border border-border px-3 py-2">
+                    <div className="font-medium">{point.name ?? `Точка #${point.id}`}</div>
+                    <div className="text-xs text-muted-foreground">{point.address}</div>
+                  </li>
+                ))
+              ) : (
+                <li className="text-muted-foreground">Нет данных для отображения</li>
+              )}
+            </ul>
           </CardContent>
         </Card>
       </div>

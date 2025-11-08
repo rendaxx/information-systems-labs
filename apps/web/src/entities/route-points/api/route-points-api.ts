@@ -32,5 +32,5 @@ export async function deleteRoutePoint(id: number) {
 }
 
 export async function fetchTopRetailPoints(limit: number): Promise<RetailPoint[]> {
-  return routePointsApi.getTopRetailPoints(limit);
+  return routePointsApi.getTopRetailPoints({ limit });
 }
