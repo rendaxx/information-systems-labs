@@ -48,14 +48,16 @@ export function WebSocketProvider({ children }: PropsWithChildren) {
 
   useEffect(() => {
     const brokerURL = resolveWebSocketUrl();
+    const debug = (msg: string) => {
+      if (import.meta.env.DEV) {
+        console.debug('[STOMP]', msg);
+      }
+    };
+
     const client = new Client({
       brokerURL,
       reconnectDelay: 5000,
-      debug: import.meta.env.DEV
-        ? (msg) => {
-            console.debug('[STOMP]', msg);
-          }
-        : undefined
+      debug
     });
 
     client.onConnect = () => {
