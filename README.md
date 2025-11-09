@@ -1,15 +1,54 @@
-# TypeScript API Client
+# Information Systems Labs
 
-The OpenAPI specification in `specs/openapi/openapi.yml` is the single source of truth for both server and client contracts. Run the following whenever the spec changes to regenerate the TypeScript SDK:
+## Фичи
+- Spring Boot 3 (Data JPA, Validation, Web) с поддержкой WebSocket для realtime-обновлений
+- Flyway управляет схемой PostgreSQL/PostGIS, Hibernate Spatial + JTS отвечают за геоданные
+- OpenAPI-first контракт (`specs/openapi/openapi.yml`) генерирует Java API-интерфейсы и TypeScript SDK
+- MapStruct + Lombok + annotation processors автоматически собирают DTO/Entity маппинги
+- Testcontainers + JUnit 5 покрывают интеграционные тесты с живой базой
+- Docker Compose разворачивает backend, web-фронтенд и PostGIS-службу для локальной разработки
+- pnpm workspace содержит веб-приложение и общий TypeScript SDK (`@rendaxx/api-ts`)
+- Spotless, Checkstyle и dependency-management гарантируют единый стиль и воспроизводимые сборки
 
-```bash
-pnpm install          # installs generator tooling (runs once)
-pnpm run gen:api      # regenerates libs/api-ts/src/generated
-```
+## Быстрый старт
+| Действие | Команда | Комментарий |
+| --- | --- | --- |
+| Собрать все модули | `./gradlew build` | Java 17, включает Spotless/Checkstyle |
+| Запустить backend | `./gradlew :apps:backend:bootRun` | Требуется PostgreSQL (см. Docker ниже) |
+| Прогнать тесты | `./gradlew test` | Testcontainers поднимет Postgres автоматически |
+| Поднять PostGIS локально | `docker compose up -d db` | Использует `postgis/postgis:16-3.4` |
+| Настроить web-workspace | `pnpm install` | Устанавливает генератор TypeScript SDK |
 
-Generated sources live in `libs/api-ts/src/generated` and are intentionally git‑ignored. The package `@rendaxx/api-ts` re-exports everything from that folder via `libs/api-ts/src/index.ts`. Consumers (for example `apps/web`) should call `createConfiguration` from `generated/runtime` to inject the API base URL (e.g. `VITE_API_BASE_URL`) before using the generated APIs.
+> Конфигурация по умолчанию хранится в `src/main/resources/application.yaml`. Для переопределения подключите `SPRING_DATASOURCE_*` / `SPRING_FLYWAY_*` или переменные из `.env`.
 
+## OpenAPI и SDK
+- **Java API** (`libs/api-java`): задача `openApiGenerate` (плагин `org.openapi.generator`) преобразует `specs/openapi/openapi.yml` в интерфейсы `com.rendaxx.labs.api.v1.*`. Генерация запускается перед `compileJava`, вручную можно вызвать `./gradlew :libs:api-java:openApiGenerate`.
+- **TypeScript SDK** (`libs/api-ts`):
+  ```bash
+  pnpm install          # однократно устанавливает инструменты
+  pnpm run gen:api      # обновляет libs/api-ts/src/generated
+  ```
+  Пакет `@rendaxx/api-ts` реэкспортирует сгенерированный код через `libs/api-ts/src/index.ts`. Перед использованием вызовите `createConfiguration` из `generated/runtime`, чтобы передать `VITE_API_BASE_URL` или другой origin.
 
+## Docker окружение
+`docker-compose.yaml` разворачивает три сервиса:
+1. `app` — Spring Boot backend (порт `PUBLIC_PORT:8080`).
+2. `web` — фронтенд-образ (порт `WEB_PUBLIC_PORT:80`).
+3. `db` — PostGIS `postgis/postgis:16-3.4` с volume `information-systems-labs-postgres` и healthcheck.
+
+Все переменные берутся из `.env`. По умолчанию наружу открыт только backend/web; порт 5432 рекомендуется проксировать вручную при необходимости.
+
+## Структура репозитория
+- `apps/backend` — основной Spring Boot сервис.
+- `libs/api-java` — Java API, сгенерированный из OpenAPI.
+- `libs/api-ts` — TypeScript SDK (`@rendaxx/api-ts`).
+- `apps/web` — клиентское приложение (использует SDK).
+- `specs/openapi/openapi.yml` — единый контракт.
+- `src/main/java/com/rendaxx/labs/**` — доменные объекты, репозитории, сервисы, мапперы и валидации.
+- `src/main/resources/db/migration` — миграции Flyway (`V{n}__description.sql`).
+
+## Задание лабораторной
+```java
 public class Route {
     private Long id; //Значение поля должно быть больше 0, Значение этого поля должно быть уникальным, Значение этого поля должно генерироваться автоматически
     private List<RoutePoint> routePoints; // не нулл, не пустой
@@ -79,6 +118,7 @@ public enum PointType {
     WAREHOUSE,
     GARAGE
 }
+```
 
 Спецоперации
 1. Средний пробег по всем маршрутам
