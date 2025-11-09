@@ -93,7 +93,7 @@ jobs:
     name: Build & Push Image
     needs: build
     runs-on: ubuntu-latest
-    if: github.event_name != 'pull_request' && (startsWith(github.ref, 'refs/heads/main') || startsWith(github.ref, 'refs/tags/v'))
+    if: github.event_name != 'pull_request'
     permissions:
       contents: read
       packages: write
@@ -126,6 +126,7 @@ jobs:
             type=ref,event=branch
             type=ref,event=tag
             type=sha
+            type=raw,value=${{ github.sha }}
             type=raw,value=main,enable=${{ github.ref == 'refs/heads/main' }}
 
       - name: Build and push
@@ -141,7 +142,7 @@ jobs:
     name: Build & Push Web Image
     needs: build
     runs-on: ubuntu-latest
-    if: github.event_name != 'pull_request' && (startsWith(github.ref, 'refs/heads/main') || startsWith(github.ref, 'refs/tags/v'))
+    if: github.event_name != 'pull_request'
     permissions:
       contents: read
       packages: write
@@ -174,6 +175,7 @@ jobs:
             type=ref,event=branch
             type=ref,event=tag
             type=sha
+            type=raw,value=${{ github.sha }}
             type=raw,value=main,enable=${{ github.ref == 'refs/heads/main' }}
 
       - name: Build and push web image
@@ -190,7 +192,7 @@ jobs:
     needs: [docker, docker_web]
     runs-on: ubuntu-latest
     environment: production
-    if: github.event_name != 'pull_request' && (startsWith(github.ref, 'refs/heads/main') || startsWith(github.ref, 'refs/tags/v'))
+    if: github.event_name != 'pull_request'
     steps:
       - name: Start SSH agent
         uses: webfactory/ssh-agent@v0.9.0
@@ -209,13 +211,15 @@ jobs:
           USER: ${{ secrets.DEPLOY_SSH_USER }}
           REGISTRY_USERNAME: ${{ secrets.REGISTRY_USERNAME }}
           REGISTRY_PASSWORD: ${{ secrets.REGISTRY_PASSWORD }}
+          IMAGE_TAG: ${{ github.sha }}
         run: |
-          ssh -o StrictHostKeyChecking=yes "$USER@$HOST" << 'EOF'
+          ssh -o StrictHostKeyChecking=yes "$USER@$HOST" <<EOF
           set -euo pipefail
           cd /opt/information-systems-labs/compose
-          if [ -n "${REGISTRY_USERNAME:-}" ] && [ -n "${REGISTRY_PASSWORD:-}" ]; then
-            echo "$REGISTRY_PASSWORD" | docker login ghcr.io -u "$REGISTRY_USERNAME" --password-stdin || true
+          if [ -n "${REGISTRY_USERNAME}" ] && [ -n "${REGISTRY_PASSWORD}" ]; then
+            echo "${REGISTRY_PASSWORD}" | docker login ghcr.io -u "${REGISTRY_USERNAME}" --password-stdin || true
           fi
+          export IMAGE_TAG="${IMAGE_TAG}"
           docker compose pull
           docker compose up -d --remove-orphans
           docker image prune -f
