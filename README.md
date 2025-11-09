@@ -1,14 +1,18 @@
-# Information Systems Labs
+# ИС Лаба 1
 
-## Фичи
-- Spring Boot 3 (Data JPA, Validation, Web) с поддержкой WebSocket для realtime-обновлений
-- Flyway управляет схемой PostgreSQL/PostGIS, Hibernate Spatial + JTS отвечают за геоданные
-- OpenAPI-first контракт (`specs/openapi/openapi.yml`) генерирует Java API-интерфейсы и TypeScript SDK
-- MapStruct + Lombok + annotation processors автоматически собирают DTO/Entity маппинги
-- Testcontainers + JUnit 5 покрывают интеграционные тесты с живой базой
-- Docker Compose разворачивает backend, web-фронтенд и PostGIS-службу для локальной разработки
-- pnpm workspace содержит веб-приложение и общий TypeScript SDK (`@rendaxx/api-ts`)
-- Spotless, Checkstyle и dependency-management гарантируют единый стиль и воспроизводимые сборки
+## Что сделал
+| Фича | Детали                                                                           |
+| --- |----------------------------------------------------------------------------------|
+| ✅ Spring Boot 3 | Стартеры Data JPA, Validation, Web и WebSocket для realtime-обновлений           |
+| ✅ Геостек | Flyway + PostgreSQL/PostGIS, Hibernate Spatial и JTS для пространственных данных |
+| ✅ OpenAPI-first | `specs/openapi/openapi.yml` генерирует Java API и TypeScript SDK                 |
+| ✅ Маппинги | MapStruct, Lombok и annotation processors собирают DTO/Entity                    |
+| ✅ Тестирование | JUnit 5 + Testcontainers и Spring Boot test-starters                             |
+| ✅ Контейнеризация | Docker Compose разворачивает backend, frontend и PostGIS                         |
+| ✅ Monorepo JS | pnpm workspace с веб-приложением и пакетом `@rendaxx/api-ts`                     |
+| ✅ Code Style | Spotless, Checkstyle и dependency-management следят за единым стилем             |
+| ❌ Деплой на Helios | Пострис там отсутствует, поэтому автоматический деплой невозможен                |
+| ✅ Деплой на свой сервер | GitHub CI + Docker workflow выкатывает сервис на собственный хост                |
 
 ## Быстрый старт
 | Действие | Команда | Комментарий |
