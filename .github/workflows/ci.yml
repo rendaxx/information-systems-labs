@@ -4,12 +4,16 @@ on:
   push:
     branches:
       - '**'
+    tags:
+      - 'v*'
   pull_request:
     branches:
       - '**'
+  workflow_dispatch:
 
 permissions:
   contents: read
+  packages: write
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -22,6 +26,36 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'pnpm'
+
+      - name: Set up pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
+      - name: Install Node dependencies
+        run: pnpm install
+
+      - name: Generate TypeScript API client
+        run: pnpm -F @rendaxx/api-ts run generate
+
+      - name: Build web frontend
+        env:
+          VITE_API_BASE_URL: ${{ vars.VITE_API_BASE_URL }}
+        run: pnpm -F @rendaxx/web run build
+
+      - name: Upload web dist
+        if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: web-dist
+          path: apps/web/dist
+          if-no-files-found: error
 
       - name: Set up JDK 17
         uses: actions/setup-java@v4
@@ -40,7 +74,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: jar
-          path: build/libs/*.jar
+          path: apps/backend/build/libs/*-SNAPSHOT.jar
           if-no-files-found: warn
 
       - name: Upload test reports
@@ -52,3 +86,135 @@ jobs:
             **/build/test-results/test/*.xml
             **/build/reports/tests/test/
           if-no-files-found: warn
+
+  docker:
+    name: Build & Push Image
+    needs: build
+    runs-on: ubuntu-latest
+    if: github.event_name != 'pull_request' && (startsWith(github.ref, 'refs/heads/main') || startsWith(github.ref, 'refs/tags/v'))
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Download jar artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: jar
+          path: apps/backend/build/libs
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract Docker metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ghcr.io/${{ github.repository }}
+          tags: |
+            type=ref,event=branch
+            type=ref,event=tag
+            type=sha
+            type=raw,value=main,enable=${{ github.ref == 'refs/heads/main' }}
+
+      - name: Build and push
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: ./Dockerfile
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+
+  docker_web:
+    name: Build & Push Web Image
+    needs: build
+    runs-on: ubuntu-latest
+    if: github.event_name != 'pull_request' && (startsWith(github.ref, 'refs/heads/main') || startsWith(github.ref, 'refs/tags/v'))
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Download web dist artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: web-dist
+          path: apps/web/dist
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract Docker metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ghcr.io/${{ github.repository }}-web
+          tags: |
+            type=ref,event=branch
+            type=ref,event=tag
+            type=sha
+            type=raw,value=main,enable=${{ github.ref == 'refs/heads/main' }}
+
+      - name: Build and push web image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: apps/web/deploy/Dockerfile
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+
+  deploy:
+    name: Deploy to Server
+    needs: [docker, docker_web]
+    runs-on: ubuntu-latest
+    environment: production
+    if: github.event_name != 'pull_request' && (startsWith(github.ref, 'refs/heads/main') || startsWith(github.ref, 'refs/tags/v'))
+    steps:
+      - name: Start SSH agent
+        uses: webfactory/ssh-agent@v0.9.0
+        with:
+          ssh-private-key: ${{ secrets.DEPLOY_SSH_KEY }}
+
+      - name: Add known_hosts
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.DEPLOY_SSH_KNOWN_HOSTS }}" >> ~/.ssh/known_hosts
+          chmod 644 ~/.ssh/known_hosts
+
+      - name: Deploy via SSH
+        env:
+          HOST: ${{ secrets.DEPLOY_SSH_HOST }}
+          USER: ${{ secrets.DEPLOY_SSH_USER }}
+          REGISTRY_USERNAME: ${{ secrets.REGISTRY_USERNAME }}
+          REGISTRY_PASSWORD: ${{ secrets.REGISTRY_PASSWORD }}
+        run: |
+          ssh -o StrictHostKeyChecking=yes "$USER@$HOST" << 'EOF'
+          set -euo pipefail
+          cd /opt/information-systems-labs/compose
+          if [ -n "${REGISTRY_USERNAME:-}" ] && [ -n "${REGISTRY_PASSWORD:-}" ]; then
+            echo "$REGISTRY_PASSWORD" | docker login ghcr.io -u "$REGISTRY_USERNAME" --password-stdin || true
+          fi
+          docker compose pull
+          docker compose up -d --remove-orphans
+          docker image prune -f
+          EOF
