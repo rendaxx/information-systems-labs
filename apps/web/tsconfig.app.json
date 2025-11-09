@@ -4,7 +4,7 @@
     "useDefineForClassFields": true,
     "module": "ESNext",
     "lib": ["ES2020", "DOM", "DOM.Iterable"],
-    "moduleResolution": "Node",
+    "moduleResolution": "Bundler",
     "resolveJsonModule": true,
     "isolatedModules": true,
     "esModuleInterop": true,
@@ -14,7 +14,8 @@
     "strict": true,
     "skipLibCheck": true,
     "baseUrl": "./src",
-    "types": ["node"],
+    "types": ["vite/client", "node"],
+    "tsBuildInfoFile": "./node_modules/.cache/tsconfig.app.tsbuildinfo",
     "paths": {
       "@/*": ["./*"],
       "@app/*": ["app/*"],
@@ -25,6 +26,5 @@
       "@widgets/*": ["widgets/*"]
     }
   },
-  "include": ["src"],
-  "references": [{ "path": "./tsconfig.node.json" }]
+  "include": ["src"]
 }

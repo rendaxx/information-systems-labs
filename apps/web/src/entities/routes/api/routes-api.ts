@@ -35,8 +35,12 @@ export async function fetchAverageMileage() {
   return routesApi.getAverageRouteMileage();
 }
 
-export async function fetchRoutesWithinPeriod(periodStart: string, periodEnd: string) {
-  return routesApi.getRoutesWithinPeriod({ periodStart, periodEnd });
+function toDate(value: string | Date): Date {
+  return typeof value === 'string' ? new Date(value) : value;
+}
+
+export async function fetchRoutesWithinPeriod(periodStart: string | Date, periodEnd: string | Date) {
+  return routesApi.getRoutesWithinPeriod({ periodStart: toDate(periodStart), periodEnd: toDate(periodEnd) });
 }
 
 export async function fetchRoutesByRetailPoint(retailPointId: number) {

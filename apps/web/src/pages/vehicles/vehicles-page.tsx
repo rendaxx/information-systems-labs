@@ -1,6 +1,6 @@
 import { useCallback, useMemo, useState } from 'react';
 import type { ColumnDef } from '@tanstack/react-table';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useServerTable } from '@shared/lib/server-table';
 import { DataTable } from '@shared/ui/data-table';
 import { Button } from '@shared/ui/button';
@@ -45,7 +45,7 @@ export function VehiclesPage() {
   const vehiclesQuery = useQuery({
     queryKey: queryKeys.vehicles.list(request),
     queryFn: () => fetchVehicles(request),
-    keepPreviousData: true,
+    placeholderData: keepPreviousData,
     staleTime: 5_000
   });
 
@@ -224,7 +224,7 @@ export function VehiclesPage() {
             <DialogTitle>Новое транспортное средство</DialogTitle>
           </DialogHeader>
           <VehicleForm
-            onSubmit={(payload) => createMutation.mutateAsync(payload)}
+            onSubmit={(payload) => createMutation.mutateAsync(payload).then(() => undefined)}
             onCancel={() => setCreateOpen(false)}
             isSubmitting={createMutation.isPending}
           />
@@ -243,7 +243,9 @@ export function VehiclesPage() {
             <VehicleForm
               initialVehicle={editingVehicle}
               onSubmit={(payload) =>
-                editingVehicle?.id ? updateMutation.mutateAsync({ id: editingVehicle.id, payload }) : Promise.resolve()
+                editingVehicle?.id
+                  ? updateMutation.mutateAsync({ id: editingVehicle.id, payload }).then(() => undefined)
+                  : Promise.resolve()
               }
               onCancel={closeEdit}
               isSubmitting={updateMutation.isPending}

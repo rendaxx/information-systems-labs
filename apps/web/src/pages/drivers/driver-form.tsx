@@ -10,7 +10,7 @@ import { useMemo } from 'react';
 const schema = z.object({
   firstName: z.string().min(1, 'Введите имя'),
   middleName: z.string().optional(),
-  lastName: z.string().optional(),
+  lastName: z.string().min(1, 'Введите фамилию'),
   passport: z.string().min(1, 'Укажите паспортные данные')
 });
 
@@ -57,8 +57,8 @@ export function DriverForm({ initialDriver, onSubmit, onCancel, isSubmitting }: 
 
     const payload: SaveDriver = {
       firstName: parsed.data.firstName,
-      middleName: parsed.data.middleName || null,
-      lastName: parsed.data.lastName || null,
+      middleName: parsed.data.middleName ?? null,
+      lastName: parsed.data.lastName,
       passport: parsed.data.passport
     };
 

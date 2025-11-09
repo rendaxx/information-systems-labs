@@ -1,6 +1,6 @@
 import { useCallback, useMemo, useState } from 'react';
 import type { ColumnDef } from '@tanstack/react-table';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useServerTable } from '@shared/lib/server-table';
 import { DataTable } from '@shared/ui/data-table';
 import { Button } from '@shared/ui/button';
@@ -45,7 +45,7 @@ export function DriversPage() {
   const driversQuery = useQuery({
     queryKey: queryKeys.drivers.list(request),
     queryFn: () => fetchDrivers(request),
-    keepPreviousData: true,
+    placeholderData: keepPreviousData,
     staleTime: 5_000
   });
 
@@ -208,7 +208,7 @@ export function DriversPage() {
             <DialogTitle>Новый водитель</DialogTitle>
           </DialogHeader>
           <DriverForm
-            onSubmit={(payload) => createMutation.mutateAsync(payload)}
+            onSubmit={(payload) => createMutation.mutateAsync(payload).then(() => undefined)}
             onCancel={() => setCreateOpen(false)}
             isSubmitting={createMutation.isPending}
           />
@@ -227,7 +227,9 @@ export function DriversPage() {
             <DriverForm
               initialDriver={editingDriver}
               onSubmit={(payload) =>
-                editingDriver?.id ? updateMutation.mutateAsync({ id: editingDriver.id, payload }) : Promise.resolve()
+                editingDriver?.id
+                  ? updateMutation.mutateAsync({ id: editingDriver.id, payload }).then(() => undefined)
+                  : Promise.resolve()
               }
               onCancel={closeEdit}
               isSubmitting={updateMutation.isPending}

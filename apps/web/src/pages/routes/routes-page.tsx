@@ -1,7 +1,7 @@
 import { useCallback, useMemo, useState } from 'react';
 import type { ColumnDef } from '@tanstack/react-table';
 import type { IMessage } from '@stomp/stompjs';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useServerTable } from '@shared/lib/server-table';
 import { DataTable } from '@shared/ui/data-table';
 import { Button } from '@shared/ui/button';
@@ -47,7 +47,7 @@ export function RoutesPage() {
   const routesQuery = useQuery({
     queryKey: queryKeys.routes.list(request),
     queryFn: () => fetchRoutes(request),
-    keepPreviousData: true,
+    placeholderData: keepPreviousData,
     staleTime: 5_000
   });
 
@@ -272,7 +272,7 @@ export function RoutesPage() {
             <DialogTitle>Создание маршрута</DialogTitle>
           </DialogHeader>
           <RouteForm
-            onSubmit={(payload) => createMutation.mutateAsync(payload)}
+            onSubmit={(payload) => createMutation.mutateAsync(payload).then(() => undefined)}
             onCancel={() => setCreateOpen(false)}
             isSubmitting={createMutation.isPending}
           />
@@ -291,7 +291,9 @@ export function RoutesPage() {
             <RouteForm
               initialRoute={editingPayload}
               onSubmit={(payload) =>
-                editingPayload?.id ? updateMutation.mutateAsync({ id: editingPayload.id, payload }) : Promise.resolve()
+                editingPayload?.id
+                  ? updateMutation.mutateAsync({ id: editingPayload.id, payload }).then(() => undefined)
+                  : Promise.resolve()
               }
               onCancel={handleCloseEdit}
               isSubmitting={updateMutation.isPending}

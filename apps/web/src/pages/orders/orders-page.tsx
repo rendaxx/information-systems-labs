@@ -1,6 +1,6 @@
 import { useCallback, useMemo, useState } from 'react';
 import type { ColumnDef } from '@tanstack/react-table';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useServerTable } from '@shared/lib/server-table';
 import { DataTable } from '@shared/ui/data-table';
 import { Button } from '@shared/ui/button';
@@ -45,7 +45,7 @@ export function OrdersPage() {
   const ordersQuery = useQuery({
     queryKey: queryKeys.orders.list(request),
     queryFn: () => fetchOrders(request),
-    keepPreviousData: true,
+    placeholderData: keepPreviousData,
     staleTime: 5_000
   });
 
@@ -226,7 +226,7 @@ export function OrdersPage() {
             <DialogTitle>Создание заказа</DialogTitle>
           </DialogHeader>
           <OrderForm
-            onSubmit={(payload) => createMutation.mutateAsync(payload)}
+            onSubmit={(payload) => createMutation.mutateAsync(payload).then(() => undefined)}
             onCancel={() => setCreateOpen(false)}
             isSubmitting={createMutation.isPending}
           />
@@ -245,7 +245,9 @@ export function OrdersPage() {
             <OrderForm
               initialOrder={editingOrder}
               onSubmit={(payload) =>
-                editingOrder?.id ? updateMutation.mutateAsync({ id: editingOrder.id, payload }) : Promise.resolve()
+                editingOrder?.id
+                  ? updateMutation.mutateAsync({ id: editingOrder.id, payload }).then(() => undefined)
+                  : Promise.resolve()
               }
               onCancel={closeEdit}
               isSubmitting={updateMutation.isPending}

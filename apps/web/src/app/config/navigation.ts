@@ -7,13 +7,12 @@ import {
   Route as RoutePointsIcon,
   Activity as SpecialsIcon
 } from 'lucide-react';
-import type { ComponentType } from 'react';
-import type { IconProps } from 'lucide-react';
+import type { LucideIcon } from 'lucide-react';
 
 export interface NavItem {
   label: string;
   path: string;
-  icon: ComponentType<IconProps>;
+  icon: LucideIcon;
 }
 
 export const NAV_ITEMS: NavItem[] = [

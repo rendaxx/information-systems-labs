@@ -1,6 +1,6 @@
 import { useCallback, useMemo, useState } from 'react';
 import type { ColumnDef } from '@tanstack/react-table';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useServerTable } from '@shared/lib/server-table';
 import { DataTable } from '@shared/ui/data-table';
 import { Button } from '@shared/ui/button';
@@ -51,7 +51,7 @@ export function RoutePointsPage() {
   const pointsQuery = useQuery({
     queryKey: queryKeys.routePoints.list(request),
     queryFn: () => fetchRoutePoints(request),
-    keepPreviousData: true,
+    placeholderData: keepPreviousData,
     staleTime: 5_000
   });
 
@@ -247,7 +247,7 @@ export function RoutePointsPage() {
             <DialogTitle>Новая точка маршрута</DialogTitle>
           </DialogHeader>
           <RoutePointForm
-            onSubmit={(payload) => createMutation.mutateAsync(payload)}
+            onSubmit={(payload) => createMutation.mutateAsync(payload).then(() => undefined)}
             onCancel={() => setCreateOpen(false)}
             isSubmitting={createMutation.isPending}
           />
@@ -266,7 +266,9 @@ export function RoutePointsPage() {
             <RoutePointForm
               initialRoutePoint={editingPoint}
               onSubmit={(payload) =>
-                editingPoint?.id ? updateMutation.mutateAsync({ id: editingPoint.id, payload }) : Promise.resolve()
+                editingPoint?.id
+                  ? updateMutation.mutateAsync({ id: editingPoint.id, payload }).then(() => undefined)
+                  : Promise.resolve()
               }
               onCancel={closeEdit}
               isSubmitting={updateMutation.isPending}

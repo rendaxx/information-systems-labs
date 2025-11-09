@@ -1,6 +1,6 @@
 import { useCallback, useMemo, useState } from 'react';
 import type { ColumnDef } from '@tanstack/react-table';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useServerTable } from '@shared/lib/server-table';
 import { DataTable } from '@shared/ui/data-table';
 import { Button } from '@shared/ui/button';
@@ -60,7 +60,7 @@ export function RetailPointsPage() {
   const pointsQuery = useQuery({
     queryKey: queryKeys.retailPoints.list(request),
     queryFn: () => fetchRetailPoints(request),
-    keepPreviousData: true,
+    placeholderData: keepPreviousData,
     staleTime: 5_000
   });
 
@@ -188,6 +188,9 @@ export function RetailPointsPage() {
     staleTime: 5_000
   });
 
+  const nearestPoints = nearestQuery.data ?? [];
+  const topRetailPoints = topQuery.data ?? [];
+
   const openEdit = async (id: number) => {
     try {
       setEditingId(id);
@@ -290,8 +293,8 @@ export function RetailPointsPage() {
             <ul className="space-y-2 text-sm">
               {nearestQuery.isLoading ? (
                 <li className="text-muted-foreground">Загрузка…</li>
-              ) : nearestQuery.data && nearestQuery.data.length > 0 ? (
-                nearestQuery.data.map((point) => (
+              ) : nearestPoints.length > 0 ? (
+                nearestPoints.map((point) => (
                   <li key={point.id} className="rounded-md border border-border px-3 py-2">
                     <div className="font-medium">{point.name ?? `Точка #${point.id}`}</div>
                     <div className="text-xs text-muted-foreground">{point.address}</div>
@@ -324,8 +327,8 @@ export function RetailPointsPage() {
             <ul className="space-y-2 text-sm">
               {topQuery.isLoading ? (
                 <li className="text-muted-foreground">Загрузка…</li>
-              ) : topQuery.data && topQuery.data.length > 0 ? (
-                topQuery.data.map((point) => (
+              ) : topRetailPoints.length > 0 ? (
+                topRetailPoints.map((point) => (
                   <li key={point.id} className="rounded-md border border-border px-3 py-2">
                     <div className="font-medium">{point.name ?? `Точка #${point.id}`}</div>
                     <div className="text-xs text-muted-foreground">{point.address}</div>
@@ -345,7 +348,7 @@ export function RetailPointsPage() {
             <DialogTitle>Новая торговая точка</DialogTitle>
           </DialogHeader>
           <RetailPointForm
-            onSubmit={(payload) => createMutation.mutateAsync(payload)}
+            onSubmit={(payload) => createMutation.mutateAsync(payload).then(() => undefined)}
             onCancel={() => setCreateOpen(false)}
             isSubmitting={createMutation.isPending}
           />
@@ -364,7 +367,9 @@ export function RetailPointsPage() {
             <RetailPointForm
               initialRetailPoint={editingPoint}
               onSubmit={(payload) =>
-                editingPoint?.id ? updateMutation.mutateAsync({ id: editingPoint.id, payload }) : Promise.resolve()
+                editingPoint?.id
+                  ? updateMutation.mutateAsync({ id: editingPoint.id, payload }).then(() => undefined)
+                  : Promise.resolve()
               }
               onCancel={closeEdit}
               isSubmitting={updateMutation.isPending}

@@ -7,12 +7,18 @@ import { Input } from '@shared/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@shared/ui/card';
 import { useMemo } from 'react';
 
+const numericField = (message: string) =>
+  z
+    .string()
+    .min(1, message)
+    .refine((value) => !Number.isNaN(Number(value)), 'Введите число');
+
 const schema = z.object({
   goodsType: z.string().min(1, 'Укажите тип товара'),
-  minTemperature: z.string().optional(),
-  maxTemperature: z.string().optional(),
-  volumeInCubicMeters: z.string().min(1, 'Укажите объём'),
-  weightInKg: z.string().min(1, 'Укажите вес')
+  minTemperature: numericField('Укажите мин. температуру'),
+  maxTemperature: numericField('Укажите макс. температуру'),
+  volumeInCubicMeters: numericField('Укажите объём'),
+  weightInKg: numericField('Укажите вес')
 });
 
 type OrderFormValues = z.infer<typeof schema>;
@@ -60,8 +66,8 @@ export function OrderForm({ initialOrder, onSubmit, onCancel, isSubmitting }: Or
 
     const payload: SaveOrder = {
       goodsType: parsed.data.goodsType,
-      minTemperature: toNumberOrNull(parsed.data.minTemperature),
-      maxTemperature: toNumberOrNull(parsed.data.maxTemperature),
+      minTemperature: Number(parsed.data.minTemperature),
+      maxTemperature: Number(parsed.data.maxTemperature),
       volumeInCubicMeters: Number(parsed.data.volumeInCubicMeters),
       weightInKg: Number(parsed.data.weightInKg)
     };
@@ -168,12 +174,4 @@ export function OrderForm({ initialOrder, onSubmit, onCancel, isSubmitting }: Or
 
 function toInput(value: number | null | undefined): string {
   return value != null ? value.toString() : '';
-}
-
-function toNumberOrNull(value?: string): number | null {
-  if (!value) {
-    return null;
-  }
-  const parsed = Number(value);
-  return Number.isNaN(parsed) ? null : parsed;
 }
