@@ -14,6 +14,7 @@ import { queryKeys } from '@shared/api/query-keys';
 import type { PageMetadata } from '@shared/api/types';
 import { parseApiError } from '@shared/api/errors';
 import { VehicleForm } from './vehicle-form';
+import { FilterPopover, type FilterField } from '@shared/ui/filter-popover';
 
 const defaultMeta: PageMetadata = {
   page: 0,
@@ -199,6 +200,13 @@ export function VehiclesPage() {
         </Button>
       </div>
 
+      <FilterPopover
+        fields={vehicleFilterFields}
+        values={state.filters}
+        onFilterChange={(key, value) => handlers.onFilterChange(key, value)}
+        onReset={() => handlers.resetFilters()}
+      />
+
       <DataTable
         data={vehicles}
         columns={columns}
@@ -246,6 +254,16 @@ export function VehiclesPage() {
     </div>
   );
 }
+
+const vehicleFilterFields: FilterField[] = [
+  { key: 'id', label: 'ID', type: 'number' },
+  { key: 'gosNumber', label: 'Гос. номер' },
+  { key: 'driverId', label: 'ID водителя', type: 'number' },
+  { key: 'tonnageInTons', label: 'Грузоподъёмность, т', type: 'number' },
+  { key: 'bodyHeightInMeters', label: 'Высота, м', type: 'number' },
+  { key: 'bodyWidthInMeters', label: 'Ширина, м', type: 'number' },
+  { key: 'bodyLengthInCubicMeters', label: 'Длина кузова, м³', type: 'number' }
+];
 
 function formatNumber(value?: number | null) {
   if (value == null) {

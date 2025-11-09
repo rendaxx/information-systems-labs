@@ -5,7 +5,6 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useServerTable } from '@shared/lib/server-table';
 import { DataTable } from '@shared/ui/data-table';
 import { Button } from '@shared/ui/button';
-import { Input } from '@shared/ui/input';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@shared/ui/dialog';
 import { useToastHelpers } from '@app/providers/toast-provider';
 import { useWebSocketSubscription } from '@app/providers/websocket-provider';
@@ -17,6 +16,7 @@ import { formatDistanceToNowStrict } from 'date-fns';
 import { ru } from 'date-fns/locale';
 import { RouteForm } from './route-form';
 import { parseApiError } from '@shared/api/errors';
+import { FilterPopover, type FilterField } from '@shared/ui/filter-popover';
 
 interface EntityChange<T> {
   id: number;
@@ -241,29 +241,16 @@ export function RoutesPage() {
         </Button>
       </div>
 
-      <div className="flex flex-wrap items-end gap-4 rounded-lg border border-border bg-card px-4 py-3">
-        <div className="flex flex-col">
-          <label className="text-xs font-medium text-muted-foreground" htmlFor="vehicleFilter">
-            Фильтр по ID транспорта
-          </label>
-          <Input
-            id="vehicleFilter"
-            type="number"
-            value={state.filters.vehicleId ?? ''}
-            onChange={(event) => handlers.onFilterChange('vehicleId', event.target.value)}
-            placeholder="Например 12"
-            className="w-48"
-          />
-        </div>
-        <div className="flex items-center gap-2">
-          <span className="text-xs text-muted-foreground">Сортировка</span>
-          <Button type="button" size="sm" variant="ghost" onClick={() => handlers.onSortingChange([])}>
-            Сбросить
-          </Button>
-          <Button type="button" size="sm" variant="ghost" onClick={() => handlers.resetFilters()}>
-            Очистить фильтры
-          </Button>
-        </div>
+      <div className="flex flex-wrap items-center gap-3">
+        <FilterPopover
+          fields={routeFilterFields}
+          values={state.filters}
+          onFilterChange={(key, value) => handlers.onFilterChange(key, value)}
+          onReset={() => handlers.resetFilters()}
+        />
+        <Button type="button" size="sm" variant="ghost" onClick={() => handlers.onSortingChange([])}>
+          Сбросить сортировку
+        </Button>
       </div>
 
       <DataTable
@@ -320,6 +307,17 @@ export function RoutesPage() {
     setEditingPayload(null);
   }
 }
+
+const routeFilterFields: FilterField[] = [
+  { key: 'id', label: 'ID', type: 'number' },
+  { key: 'vehicleId', label: 'ID транспорта', type: 'number' },
+  { key: 'vehicle.driverId', label: 'ID водителя', type: 'number' },
+  { key: 'vehicle.gosNumber', label: 'Гос. номер', type: 'text' },
+  { key: 'mileageInKm', label: 'Пробег, км', type: 'number' },
+  { key: 'creationTime', label: 'Дата создания (UTC)', type: 'datetime' },
+  { key: 'plannedStartTime', label: 'Плановое начало (UTC)', type: 'datetime' },
+  { key: 'plannedEndTime', label: 'Плановое окончание (UTC)', type: 'datetime' }
+];
 
 function formatDateParts(value?: Date) {
   if (!value) {

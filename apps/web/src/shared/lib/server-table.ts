@@ -34,7 +34,18 @@ export function useServerTable(initial?: Partial<ServerTableState>) {
         setPage(0);
       },
       onFilterChange: (key, value) => {
-        setFilters((prev) => ({ ...prev, [key]: value }));
+        setFilters((prev) => {
+          if (!key) {
+            return prev;
+          }
+          const next = { ...prev };
+          if (!value) {
+            delete next[key];
+          } else {
+            next[key] = value;
+          }
+          return next;
+        });
         setPage(0);
       },
       resetFilters: () => {

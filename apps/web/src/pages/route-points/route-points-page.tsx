@@ -7,7 +7,7 @@ import { Button } from '@shared/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@shared/ui/dialog';
 import { useToastHelpers } from '@app/providers/toast-provider';
 import { useWebSocketSubscription } from '@app/providers/websocket-provider';
-import type { RoutePoint, SaveRoutePoint } from '@rendaxx/api-ts';
+import { OperationType, type RoutePoint, type SaveRoutePoint } from '@rendaxx/api-ts';
 import type { IMessage } from '@stomp/stompjs';
 import {
   createRoutePoint,
@@ -20,6 +20,7 @@ import { queryKeys } from '@shared/api/query-keys';
 import type { PageMetadata } from '@shared/api/types';
 import { parseApiError } from '@shared/api/errors';
 import { RoutePointForm } from './route-point-form';
+import { FilterPopover, type FilterField } from '@shared/ui/filter-popover';
 
 const defaultMeta: PageMetadata = {
   page: 0,
@@ -222,6 +223,13 @@ export function RoutePointsPage() {
         </Button>
       </div>
 
+      <FilterPopover
+        fields={routePointFilterFields}
+        values={state.filters}
+        onFilterChange={(key, value) => handlers.onFilterChange(key, value)}
+        onReset={() => handlers.resetFilters()}
+      />
+
       <DataTable
         data={routePoints}
         columns={columns}
@@ -269,6 +277,31 @@ export function RoutePointsPage() {
     </div>
   );
 }
+
+const routePointOperationLabels: Record<OperationType, string> = {
+  [OperationType.LOAD]: 'Погрузка',
+  [OperationType.UNLOAD]: 'Выгрузка',
+  [OperationType.VISIT]: 'Посещение'
+};
+
+const routePointFilterFields: FilterField[] = [
+  { key: 'id', label: 'ID', type: 'number' },
+  { key: 'routeId', label: 'ID маршрута', type: 'number' },
+  { key: 'retailPointId', label: 'ID торговой точки', type: 'number' },
+  {
+    key: 'operationType',
+    label: 'Тип операции',
+    type: 'select',
+    options: [
+      { value: OperationType.LOAD, label: routePointOperationLabels[OperationType.LOAD] },
+      { value: OperationType.UNLOAD, label: routePointOperationLabels[OperationType.UNLOAD] },
+      { value: OperationType.VISIT, label: routePointOperationLabels[OperationType.VISIT] }
+    ]
+  },
+  { key: 'orderNumber', label: 'Порядковый номер', type: 'number' },
+  { key: 'plannedStartTime', label: 'Окно начала (UTC)', type: 'datetime' },
+  { key: 'plannedEndTime', label: 'Окно окончания (UTC)', type: 'datetime' }
+];
 
 function formatDate(value?: Date) {
   if (!value) {

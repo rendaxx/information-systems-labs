@@ -14,6 +14,7 @@ import { queryKeys } from '@shared/api/query-keys';
 import type { PageMetadata } from '@shared/api/types';
 import { OrderForm } from './order-form';
 import { parseApiError } from '@shared/api/errors';
+import { FilterPopover, type FilterField } from '@shared/ui/filter-popover';
 
 const defaultMeta: PageMetadata = {
   page: 0,
@@ -201,6 +202,13 @@ export function OrdersPage() {
         </Button>
       </div>
 
+      <FilterPopover
+        fields={orderFilterFields}
+        values={state.filters}
+        onFilterChange={(key, value) => handlers.onFilterChange(key, value)}
+        onReset={() => handlers.resetFilters()}
+      />
+
       <DataTable
         data={orders}
         columns={columns}
@@ -248,3 +256,12 @@ export function OrdersPage() {
     </div>
   );
 }
+
+const orderFilterFields: FilterField[] = [
+  { key: 'id', label: 'ID', type: 'number' },
+  { key: 'goodsType', label: 'Тип товара' },
+  { key: 'weightInKg', label: 'Вес, кг', type: 'number' },
+  { key: 'volumeInCubicMeters', label: 'Объём, м³', type: 'number' },
+  { key: 'minTemperature', label: 'Мин. температура', type: 'number' },
+  { key: 'maxTemperature', label: 'Макс. температура', type: 'number' }
+];

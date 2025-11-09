@@ -14,6 +14,7 @@ import { queryKeys } from '@shared/api/query-keys';
 import type { PageMetadata } from '@shared/api/types';
 import { parseApiError } from '@shared/api/errors';
 import { DriverForm } from './driver-form';
+import { FilterPopover, type FilterField } from '@shared/ui/filter-popover';
 
 const defaultMeta: PageMetadata = {
   page: 0,
@@ -183,6 +184,13 @@ export function DriversPage() {
         </Button>
       </div>
 
+      <FilterPopover
+        fields={driverFilterFields}
+        values={state.filters}
+        onFilterChange={(key, value) => handlers.onFilterChange(key, value)}
+        onReset={() => handlers.resetFilters()}
+      />
+
       <DataTable
         data={drivers}
         columns={columns}
@@ -230,3 +238,11 @@ export function DriversPage() {
     </div>
   );
 }
+
+const driverFilterFields: FilterField[] = [
+  { key: 'id', label: 'ID', type: 'number' },
+  { key: 'firstName', label: 'Имя' },
+  { key: 'lastName', label: 'Фамилия' },
+  { key: 'middleName', label: 'Отчество' },
+  { key: 'passport', label: 'Паспорт' }
+];

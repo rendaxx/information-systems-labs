@@ -25,6 +25,7 @@ import { Input } from '@shared/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@shared/ui/select';
 import { Card, CardContent, CardHeader, CardTitle } from '@shared/ui/card';
 import { fetchTopRetailPoints } from '@entities/route-points/api/route-points-api';
+import { FilterPopover, type FilterField } from '@shared/ui/filter-popover';
 
 const defaultMeta: PageMetadata = {
   page: 0,
@@ -226,6 +227,13 @@ export function RetailPointsPage() {
         </Button>
       </div>
 
+      <FilterPopover
+        fields={retailPointFilterFields}
+        values={state.filters}
+        onFilterChange={(key, value) => handlers.onFilterChange(key, value)}
+        onReset={() => handlers.resetFilters()}
+      />
+
       <DataTable
         data={retailPoints}
         columns={columns}
@@ -373,3 +381,20 @@ const pointTypeLabels: Record<PointType, string> = {
   [PointType.WAREHOUSE]: 'Склад',
   [PointType.GARAGE]: 'Гараж'
 };
+
+const retailPointFilterFields: FilterField[] = [
+  { key: 'id', label: 'ID', type: 'number' },
+  { key: 'name', label: 'Название' },
+  { key: 'address', label: 'Адрес' },
+  { key: 'timezone', label: 'Часовой пояс' },
+  {
+    key: 'type',
+    label: 'Тип точки',
+    type: 'select',
+    options: [
+      { value: PointType.SHOP, label: pointTypeLabels[PointType.SHOP] },
+      { value: PointType.WAREHOUSE, label: pointTypeLabels[PointType.WAREHOUSE] },
+      { value: PointType.GARAGE, label: pointTypeLabels[PointType.GARAGE] }
+    ]
+  }
+];
