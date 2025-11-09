@@ -191,7 +191,7 @@ jobs:
     name: Deploy to Server
     needs: [docker, docker_web]
     runs-on: ubuntu-latest
-    environment: production
+    environment: prod
     if: github.event_name != 'pull_request'
     steps:
       - name: Start SSH agent
