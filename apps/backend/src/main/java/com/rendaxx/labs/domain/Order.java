@@ -8,8 +8,11 @@ import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.AssertTrue;
 import jakarta.validation.constraints.DecimalMin;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Positive;
 import java.math.BigDecimal;
 import lombok.AccessLevel;
@@ -33,10 +36,17 @@ public class Order {
     private Long id;
 
     @NotBlank
+    @Pattern(regexp = "^(?!.*\\u0000).+$", message = "must not contain null characters")
     private String goodsType;
 
+    @NotNull
+    @Min(value = -100, message = "must not be lower than -100°C")
+    @Max(value = 200, message = "must not exceed 200°C")
     private Integer minTemperature;
 
+    @NotNull
+    @Min(value = -100, message = "must not be lower than -100°C")
+    @Max(value = 200, message = "must not exceed 200°C")
     private Integer maxTemperature;
 
     @NotNull

@@ -9,7 +9,6 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
-import jakarta.persistence.UniqueConstraint;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.AccessLevel;
@@ -27,12 +26,7 @@ import org.locationtech.jts.geom.Point;
 @NoArgsConstructor
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 @Entity
-@Table(
-        name = "retail_points",
-        uniqueConstraints = {
-            @UniqueConstraint(name = "uk_retail_points_name", columnNames = "name"),
-            @UniqueConstraint(name = "uk_retail_points_address", columnNames = "address")
-        })
+@Table(name = "retail_points")
 public class RetailPoint {
 
     @Id

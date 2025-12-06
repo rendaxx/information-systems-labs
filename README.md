@@ -11,7 +11,7 @@
 | ✅ Контейнеризация | Docker Compose разворачивает backend, frontend и PostGIS                         |
 | ✅ Monorepo JS | pnpm workspace с веб-приложением и пакетом `@rendaxx/api-ts`                     |
 | ✅ Code Style | Spotless, Checkstyle и dependency-management следят за единым стилем             |
-| ❌ Деплой на Helios | Пострис там отсутствует, поэтому автоматический деплой невозможен                |
+| ❌ Деплой на Helios | Постгис там отсутствует, поэтому автоматический деплой невозможен                |
 | ✅ Деплой на свой сервер | GitHub CI + Docker workflow выкатывает сервис на собственный хост                |
 
 ## Быстрый старт

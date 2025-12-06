@@ -23,9 +23,19 @@ public class FilterParameterMapper {
                 .map(e -> new AbstractMap.SimpleEntry<>(normalizeKey(e.getKey()), e.getValue()))
                 .filter(e -> StringUtils.hasText(e.getKey()) && StringUtils.hasText(e.getValue()))
                 .filter(e -> !isReserved(e.getKey()))
-                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (a, b) -> a, LinkedHashMap::new));
+                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (a, _) -> a, LinkedHashMap::new));
     }
 
+    /**
+     * Normalizes raw request parameter names into filter-friendly keys.
+     * Accepts patterns like {@code filter[field]} or {@code filter.field} and
+     * returns the inner portion without surrounding notation, or {@code null}
+     * when the input is blank or matches the root {@code filter} key.
+     *
+     * @param key raw query parameter key from the HTTP request
+     * @return normalized key name ready for downstream filtering, or {@code null}
+     *     when the key should be ignored
+     */
     private String normalizeKey(String key) {
         if (!StringUtils.hasText(key)) {
             return null;

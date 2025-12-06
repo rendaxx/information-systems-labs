@@ -8,6 +8,7 @@ import com.rendaxx.labs.events.EntityChangeType;
 import com.rendaxx.labs.exceptions.NotFoundException;
 import com.rendaxx.labs.mappers.OrderMapper;
 import com.rendaxx.labs.repository.OrderRepository;
+import com.rendaxx.labs.repository.support.RepositoryGuard;
 import com.rendaxx.labs.service.specification.EqualitySpecificationBuilder;
 import java.util.Map;
 import lombok.AccessLevel;
@@ -29,6 +30,7 @@ public class OrderService {
     OrderRepository repository;
     EntityChangePublisher changePublisher;
     EqualitySpecificationBuilder specificationBuilder;
+    RepositoryGuard repositoryGuard;
 
     private static final String DESTINATION = "/topic/orders";
 
@@ -41,18 +43,21 @@ public class OrderService {
 
     @Transactional(readOnly = true)
     public OrderDto getById(Long id) {
-        Order order = repository.findById(id).orElseThrow(() -> new NotFoundException(Order.class, id));
+        Order order = repositoryGuard.execute(
+                () -> repository.findById(id).orElseThrow(() -> new NotFoundException(Order.class, id)));
         return mapper.toDto(order);
     }
 
     @Transactional(readOnly = true)
     public Page<OrderDto> getAll(Pageable pageable, Map<String, String> filters) {
         Specification<Order> specification = specificationBuilder.build(filters);
-        return repository.findAll(specification, pageable).map(mapper::toDto);
+        Page<Order> result = repositoryGuard.execute(() -> repository.findAll(specification, pageable));
+        return result.map(mapper::toDto);
     }
 
     public OrderDto update(Long id, SaveOrderDto command) {
-        Order order = repository.findById(id).orElseThrow(() -> new NotFoundException(Order.class, id));
+        Order order = repositoryGuard.execute(
+                () -> repository.findById(id).orElseThrow(() -> new NotFoundException(Order.class, id)));
         Order savedOrder = save(command, order);
         OrderDto dto = mapper.toDto(savedOrder);
         changePublisher.publish(DESTINATION, savedOrder.getId(), dto, EntityChangeType.UPDATED);
@@ -60,13 +65,14 @@ public class OrderService {
     }
 
     public void delete(Long id) {
-        Order order = repository.findById(id).orElseThrow(() -> new NotFoundException(Order.class, id));
-        repository.delete(order);
+        Order order = repositoryGuard.execute(
+                () -> repository.findById(id).orElseThrow(() -> new NotFoundException(Order.class, id)));
+        repositoryGuard.execute(() -> repository.delete(order));
         changePublisher.publish(DESTINATION, order.getId(), null, EntityChangeType.DELETED);
     }
 
     private Order save(SaveOrderDto command, Order order) {
         mapper.update(order, command);
-        return repository.save(order);
+        return repositoryGuard.execute(() -> repository.save(order));
     }
 }

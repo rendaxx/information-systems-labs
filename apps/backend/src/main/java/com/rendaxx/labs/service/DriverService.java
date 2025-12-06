@@ -8,6 +8,7 @@ import com.rendaxx.labs.events.EntityChangeType;
 import com.rendaxx.labs.exceptions.NotFoundException;
 import com.rendaxx.labs.mappers.DriverMapper;
 import com.rendaxx.labs.repository.DriverRepository;
+import com.rendaxx.labs.repository.support.RepositoryGuard;
 import com.rendaxx.labs.service.specification.EqualitySpecificationBuilder;
 import java.util.Map;
 import lombok.AccessLevel;
@@ -29,6 +30,7 @@ public class DriverService {
     DriverRepository repository;
     EntityChangePublisher changePublisher;
     EqualitySpecificationBuilder specificationBuilder;
+    RepositoryGuard repositoryGuard;
 
     private static final String DESTINATION = "/topic/drivers";
 
@@ -41,18 +43,21 @@ public class DriverService {
 
     @Transactional(readOnly = true)
     public DriverDto getById(Long id) {
-        Driver driver = repository.findById(id).orElseThrow(() -> new NotFoundException(Driver.class, id));
+        Driver driver = repositoryGuard.execute(
+                () -> repository.findById(id).orElseThrow(() -> new NotFoundException(Driver.class, id)));
         return mapper.toDto(driver);
     }
 
     @Transactional(readOnly = true)
     public Page<DriverDto> getAll(Pageable pageable, Map<String, String> filters) {
         Specification<Driver> specification = specificationBuilder.build(filters);
-        return repository.findAll(specification, pageable).map(mapper::toDto);
+        Page<Driver> drivers = repositoryGuard.execute(() -> repository.findAll(specification, pageable));
+        return drivers.map(mapper::toDto);
     }
 
     public DriverDto update(Long id, SaveDriverDto command) {
-        Driver driver = repository.findById(id).orElseThrow(() -> new NotFoundException(Driver.class, id));
+        Driver driver = repositoryGuard.execute(
+                () -> repository.findById(id).orElseThrow(() -> new NotFoundException(Driver.class, id)));
         Driver savedDriver = save(command, driver);
         DriverDto dto = mapper.toDto(savedDriver);
         changePublisher.publish(DESTINATION, savedDriver.getId(), dto, EntityChangeType.UPDATED);
@@ -60,13 +65,14 @@ public class DriverService {
     }
 
     public void delete(Long id) {
-        Driver driver = repository.findById(id).orElseThrow(() -> new NotFoundException(Driver.class, id));
-        repository.delete(driver);
+        Driver driver = repositoryGuard.execute(
+                () -> repository.findById(id).orElseThrow(() -> new NotFoundException(Driver.class, id)));
+        repositoryGuard.execute(() -> repository.delete(driver));
         changePublisher.publish(DESTINATION, driver.getId(), null, EntityChangeType.DELETED);
     }
 
     private Driver save(SaveDriverDto command, Driver driver) {
         mapper.update(driver, command);
-        return repository.save(driver);
+        return repositoryGuard.execute(() -> repository.save(driver));
     }
 }

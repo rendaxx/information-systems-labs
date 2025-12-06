@@ -1,10 +1,21 @@
+frontend:
+  origin: http://localhost:5173
+
+labs:
+  paging:
+    default-page: 0
+    default-size: 20
+    max-size: 1000
+  retail-points:
+    max-nearest-limit: 1000
+
 spring:
   application:
     name: information-systems-labs
   datasource:
-    url: jdbc:postgresql://localhost:5432/mydatabase
-    username: myuser
-    password: secret
+    url: ${SPRING_DATASOURCE_URL}
+    username: ${SPRING_DATASOURCE_USERNAME}
+    password: ${SPRING_DATASOURCE_PASSWORD}
     driver-class-name: org.postgresql.Driver
   jpa:
     open-in-view: false

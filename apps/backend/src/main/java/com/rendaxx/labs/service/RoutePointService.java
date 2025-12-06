@@ -1,5 +1,6 @@
 package com.rendaxx.labs.service;
 
+import com.rendaxx.labs.domain.Order;
 import com.rendaxx.labs.domain.RetailPoint;
 import com.rendaxx.labs.domain.Route;
 import com.rendaxx.labs.domain.RoutePoint;
@@ -8,17 +9,24 @@ import com.rendaxx.labs.dtos.RoutePointDto;
 import com.rendaxx.labs.dtos.SaveRoutePointDto;
 import com.rendaxx.labs.events.EntityChangePublisher;
 import com.rendaxx.labs.events.EntityChangeType;
+import com.rendaxx.labs.exceptions.BadRequestException;
 import com.rendaxx.labs.exceptions.NotFoundException;
 import com.rendaxx.labs.mappers.RetailPointMapper;
 import com.rendaxx.labs.mappers.RoutePointMapper;
+import com.rendaxx.labs.repository.OrderRepository;
+import com.rendaxx.labs.repository.RetailPointRepository;
 import com.rendaxx.labs.repository.RoutePointRepository;
 import com.rendaxx.labs.repository.RouteRepository;
+import com.rendaxx.labs.repository.support.RepositoryGuard;
 import com.rendaxx.labs.service.specification.EqualitySpecificationBuilder;
 import java.math.BigDecimal;
+import java.time.Clock;
 import java.time.LocalDateTime;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -41,8 +49,12 @@ public class RoutePointService {
 
     RouteService routeService;
     RouteRepository routeRepository;
+    RetailPointRepository retailPointRepository;
+    OrderRepository orderRepository;
     EntityChangePublisher changePublisher;
     EqualitySpecificationBuilder specificationBuilder;
+    RepositoryGuard repositoryGuard;
+    Clock clock;
 
     private static final String DESTINATION = "/topic/route-points";
 
@@ -56,18 +68,21 @@ public class RoutePointService {
 
     @Transactional(readOnly = true)
     public RoutePointDto getById(Long id) {
-        RoutePoint routePoint = repository.findById(id).orElseThrow(() -> new NotFoundException(RoutePoint.class, id));
+        RoutePoint routePoint = repositoryGuard.execute(
+                () -> repository.findById(id).orElseThrow(() -> new NotFoundException(RoutePoint.class, id)));
         return mapper.toDto(routePoint);
     }
 
     @Transactional(readOnly = true)
     public Page<RoutePointDto> getAll(Pageable pageable, Map<String, String> filters) {
         Specification<RoutePoint> specification = specificationBuilder.build(filters);
-        return repository.findAll(specification, pageable).map(mapper::toDto);
+        Page<RoutePoint> routePoints = repositoryGuard.execute(() -> repository.findAll(specification, pageable));
+        return routePoints.map(mapper::toDto);
     }
 
     public RoutePointDto update(Long id, SaveRoutePointDto command) {
-        RoutePoint routePoint = repository.findById(id).orElseThrow(() -> new NotFoundException(RoutePoint.class, id));
+        RoutePoint routePoint = repositoryGuard.execute(
+                () -> repository.findById(id).orElseThrow(() -> new NotFoundException(RoutePoint.class, id)));
         ensureRouteAssociation(command, routePoint.getRoute());
         RoutePoint savedRoutePoint = save(command, routePoint);
         RoutePointDto dto = mapper.toDto(savedRoutePoint);
@@ -76,20 +91,22 @@ public class RoutePointService {
     }
 
     public void delete(Long id) {
-        RoutePoint routePoint = repository.findById(id).orElseThrow(() -> new NotFoundException(RoutePoint.class, id));
+        RoutePoint routePoint = repositoryGuard.execute(
+                () -> repository.findById(id).orElseThrow(() -> new NotFoundException(RoutePoint.class, id)));
         Long routePointId = routePoint.getId();
         routePoint.getRoute().getRoutePoints().removeIf(rp -> rp.getId().equals(routePointId));
         routeService.recalculateRoutePointOrderNumber(routePoint.getRoute());
-        repository.delete(routePoint);
+        repositoryGuard.execute(() -> repository.delete(routePoint));
         changePublisher.publish(DESTINATION, routePointId, null, EntityChangeType.DELETED);
     }
 
     @Transactional(readOnly = true)
     public List<RetailPointDto> getTopRetailPoints(int limit) {
         if (limit <= 0) {
-            throw new IllegalArgumentException("Limit must be positive");
+            throw new BadRequestException("Limit must be positive");
         }
-        List<RetailPoint> retailPoints = repository.findMostVisitedRetailPoints(PageRequest.of(0, limit));
+        List<RetailPoint> retailPoints =
+                repositoryGuard.execute(() -> repository.findMostVisitedRetailPoints(PageRequest.of(0, limit)));
         if (retailPoints.isEmpty()) {
             return Collections.emptyList();
         }
@@ -97,8 +114,14 @@ public class RoutePointService {
     }
 
     private RoutePoint save(SaveRoutePointDto command, RoutePoint routePoint) {
-        mapper.update(routePoint, command);
-        return repository.save(routePoint);
+        Route route = resolveRoute(command, routePoint.getRoute());
+        RetailPoint retailPoint = repositoryGuard.execute(() -> retailPointRepository
+                .findById(command.getRetailPointId())
+                .orElseThrow(() -> new NotFoundException(RetailPoint.class, command.getRetailPointId())));
+        Set<Order> orders =
+                new HashSet<>(repositoryGuard.execute(() -> orderRepository.findAllById(command.getOrderIds())));
+        mapper.update(routePoint, command, route, retailPoint, orders);
+        return repositoryGuard.execute(() -> repository.save(routePoint));
     }
 
     private void ensureRouteAssociation(SaveRoutePointDto command, Route existingRoute) {
@@ -114,15 +137,29 @@ public class RoutePointService {
                 .plannedEndTime(defaultTime(command.getPlannedEndTime(), command.getPlannedStartTime()))
                 .mileageInKm(BigDecimal.valueOf(1L))
                 .build();
-        Route persisted = routeRepository.save(fallbackRoute);
+        Route persisted = repositoryGuard.execute(() -> routeRepository.save(fallbackRoute));
         command.setRouteId(persisted.getId());
     }
 
     private LocalDateTime defaultTime(LocalDateTime value) {
-        return defaultTime(value, LocalDateTime.now());
+        return defaultTime(value, LocalDateTime.now(clock));
     }
 
     private LocalDateTime defaultTime(LocalDateTime value, LocalDateTime fallback) {
         return value != null ? value : fallback;
+    }
+
+    private Route resolveRoute(SaveRoutePointDto dto, Route parentRoute) {
+        if (parentRoute != null) {
+            return parentRoute;
+        }
+
+        Long routeId = dto.getRouteId();
+        if (routeId == null) {
+            throw new BadRequestException("Route id must be provided when parent route is not specified");
+        }
+
+        return repositoryGuard.execute(
+                () -> routeRepository.findById(routeId).orElseThrow(() -> new NotFoundException(Route.class, routeId)));
     }
 }

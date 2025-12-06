@@ -34,13 +34,7 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 @Entity
-@Table(
-        name = "route_points",
-        uniqueConstraints = {
-            @UniqueConstraint(
-                    name = "uk_route_points_route_order",
-                    columnNames = {"route_id", "order_number"})
-        })
+@Table(name = "route_points")
 public class RoutePoint {
 
     @Id

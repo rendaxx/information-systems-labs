@@ -49,9 +49,8 @@ services:
       interval: 10s
       timeout: 5s
       retries: 10
-    # Откройте порт БД наружу только при необходимости:
-    # ports:
-    #   - "5432:5432"
+    ports:
+      - "5432:5432"
 
 volumes:
   db_data:

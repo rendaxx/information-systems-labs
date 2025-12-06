@@ -1,11 +1,9 @@
 package com.rendaxx.labs.controller.advice;
 
-import com.rendaxx.labs.exceptions.NotFoundException;
+import com.rendaxx.labs.exceptions.BusinessException;
 import jakarta.validation.ConstraintViolationException;
 import java.util.Objects;
 import java.util.stream.Collectors;
-import org.springframework.dao.DataIntegrityViolationException;
-import org.springframework.data.mapping.PropertyReferenceException;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -23,18 +21,29 @@ import org.springframework.web.method.annotation.MethodArgumentTypeMismatchExcep
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
-    @ExceptionHandler(NotFoundException.class)
-    public ResponseEntity<String> handleNotFoundException(NotFoundException exception) {
-        return plainText(HttpStatus.NOT_FOUND, exception.getMessage());
+    @ExceptionHandler(BusinessException.class)
+    public ResponseEntity<String> handleBusinessException(BusinessException exception) {
+        HttpStatus status = exception.getErrorCode().getStatus();
+        return plainText(status, exception.getMessage());
     }
 
-    @ExceptionHandler(IllegalArgumentException.class)
-    public ResponseEntity<String> handleBadRequest(RuntimeException exception) {
-        return plainText(HttpStatus.BAD_REQUEST, exception.getMessage());
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity<String> handleBindingErrors(MethodArgumentNotValidException exception) {
+        String message = exception.getBindingResult().getFieldErrors().stream()
+                .map(error -> error.getField() + ": " + error.getDefaultMessage())
+                .collect(Collectors.joining("; "));
+        if (message.isBlank()) {
+            message = "Validation failed";
+        }
+        return plainText(HttpStatus.BAD_REQUEST, message);
     }
 
     @ExceptionHandler(ConstraintViolationException.class)
     public ResponseEntity<String> handleConstraintViolation(ConstraintViolationException exception) {
+        if (exception.getConstraintViolations() == null
+                || exception.getConstraintViolations().isEmpty()) {
+            return plainText(HttpStatus.BAD_REQUEST, "Validation failed");
+        }
         String message = exception.getConstraintViolations().stream()
                 .map(cv -> {
                     String path =
@@ -44,17 +53,7 @@ public class GlobalExceptionHandler {
                     }
                     return cv.getMessage();
                 })
-                .collect(Collectors.joining("; "));
-        if (message.isBlank()) {
-            message = "Validation failed";
-        }
-        return plainText(HttpStatus.BAD_REQUEST, message);
-    }
-
-    @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<String> handleBindingErrors(MethodArgumentNotValidException exception) {
-        String message = exception.getBindingResult().getFieldErrors().stream()
-                .map(error -> error.getField() + ": " + error.getDefaultMessage())
+                .filter(Objects::nonNull)
                 .collect(Collectors.joining("; "));
         if (message.isBlank()) {
             message = "Validation failed";
@@ -80,19 +79,6 @@ public class GlobalExceptionHandler {
             message = "Resource not found";
         }
         return plainText(status, message);
-    }
-
-    @ExceptionHandler(PropertyReferenceException.class)
-    public ResponseEntity<String> handleInvalidSort(PropertyReferenceException exception) {
-        String message = String.format(
-                "Cannot sort by '%s' for resource '%s'",
-                exception.getPropertyName(), exception.getType().getType().getSimpleName());
-        return plainText(HttpStatus.BAD_REQUEST, message);
-    }
-
-    @ExceptionHandler(DataIntegrityViolationException.class)
-    public ResponseEntity<String> handleIntegrityViolation(DataIntegrityViolationException exception) {
-        return plainText(HttpStatus.BAD_REQUEST, extractMessage(exception));
     }
 
     @ExceptionHandler(HttpRequestMethodNotSupportedException.class)

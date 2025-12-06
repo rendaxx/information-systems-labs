@@ -76,7 +76,7 @@ public class RouteController implements RoutesApi {
     @Override
     public ResponseEntity<Double> getAverageRouteMileage() {
         BigDecimal average = routeService.getAverageMileageInKm();
-        return ResponseEntity.ok(average == null ? null : average.doubleValue());
+        return ResponseEntity.ok(average.doubleValue());
     }
 
     @Override

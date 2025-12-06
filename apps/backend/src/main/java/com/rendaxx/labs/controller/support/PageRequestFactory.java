@@ -2,6 +2,7 @@ package com.rendaxx.labs.controller.support;
 
 import java.util.ArrayList;
 import java.util.List;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -10,14 +11,23 @@ import org.springframework.util.CollectionUtils;
 
 @Component
 public class PageRequestFactory {
-    private static final int DEFAULT_PAGE = 0;
-    private static final int DEFAULT_SIZE = 20;
-    private static final int MAX_SIZE = 1000;
+    private final int defaultPage;
+    private final int defaultSize;
+    private final int maxSize;
+
+    public PageRequestFactory(
+            @Value("${labs.paging.default-page:0}") int defaultPage,
+            @Value("${labs.paging.default-size:20}") int defaultSize,
+            @Value("${labs.paging.max-size:1000}") int maxSize) {
+        this.defaultPage = defaultPage;
+        this.defaultSize = defaultSize;
+        this.maxSize = maxSize;
+    }
 
     public Pageable build(Integer page, Integer size, List<String> sortValues) {
-        int resolvedSize = size != null && size > 0 ? size : DEFAULT_SIZE;
-        long requestedPage = page != null && page >= 0 ? page.longValue() : DEFAULT_PAGE;
-        int resolvedPage = Math.toIntExact(Math.min(requestedPage, MAX_SIZE));
+        int resolvedSize = size != null && size > 0 ? size : defaultSize;
+        long requestedPage = page != null && page >= 0 ? page.longValue() : defaultPage;
+        int resolvedPage = Math.toIntExact(Math.min(requestedPage, maxSize));
         Sort sort = resolveSort(sortValues);
         return sort.isUnsorted()
                 ? PageRequest.of(resolvedPage, resolvedSize)
