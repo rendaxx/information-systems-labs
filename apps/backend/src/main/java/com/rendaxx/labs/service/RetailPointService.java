@@ -62,7 +62,8 @@ public class RetailPointService {
                 .findViewById(Objects.requireNonNull(retailPoint.getId()))
                 .map(mapper::toDto)
                 .orElseThrow(() -> new NotFoundException(RetailPoint.class, retailPoint.getId())));
-        changePublisher.publish(DESTINATION, Objects.requireNonNull(retailPoint.getId()), dto, EntityChangeType.CREATED);
+        changePublisher.publish(
+                DESTINATION, Objects.requireNonNull(retailPoint.getId()), dto, EntityChangeType.CREATED);
         return dto;
     }
 
