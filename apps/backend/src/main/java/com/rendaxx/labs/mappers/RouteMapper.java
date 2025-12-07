@@ -17,7 +17,10 @@ public abstract class RouteMapper {
     @Mapping(target = "creationTime", ignore = true)
     @Mapping(target = "routePoints", source = "routePoints")
     public abstract void update(
-            @MappingTarget Route route, SaveRouteDto dto, List<RoutePoint> routePoints, Vehicle vehicle);
+            @MappingTarget Route route,
+            SaveRouteDto dto,
+            List<RoutePoint> routePoints,
+            Vehicle vehicle);
 
     public abstract RouteDto toDto(Route route);
 

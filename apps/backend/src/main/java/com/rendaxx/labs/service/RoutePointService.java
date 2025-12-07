@@ -26,7 +26,10 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
+
+import jakarta.annotation.Nullable;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -62,7 +65,7 @@ public class RoutePointService {
         ensureRouteAssociation(command, null);
         RoutePoint routePoint = save(command, new RoutePoint());
         RoutePointDto dto = mapper.toDto(routePoint);
-        changePublisher.publish(DESTINATION, routePoint.getId(), dto, EntityChangeType.CREATED);
+        changePublisher.publish(DESTINATION, Objects.requireNonNull(routePoint.getId()), dto, EntityChangeType.CREATED);
         return dto;
     }
 
@@ -86,15 +89,20 @@ public class RoutePointService {
         ensureRouteAssociation(command, routePoint.getRoute());
         RoutePoint savedRoutePoint = save(command, routePoint);
         RoutePointDto dto = mapper.toDto(savedRoutePoint);
-        changePublisher.publish(DESTINATION, savedRoutePoint.getId(), dto, EntityChangeType.UPDATED);
+        changePublisher.publish(
+                DESTINATION,
+                Objects.requireNonNull(savedRoutePoint.getId()),
+                dto,
+                EntityChangeType.UPDATED
+        );
         return dto;
     }
 
     public void delete(Long id) {
         RoutePoint routePoint = repositoryGuard.execute(
                 () -> repository.findById(id).orElseThrow(() -> new NotFoundException(RoutePoint.class, id)));
-        Long routePointId = routePoint.getId();
-        routePoint.getRoute().getRoutePoints().removeIf(rp -> rp.getId().equals(routePointId));
+        Long routePointId = Objects.requireNonNull(routePoint.getId());
+        routePoint.getRoute().getRoutePoints().removeIf(rp -> Objects.equals(rp.getId(), routePointId));
         routeService.recalculateRoutePointOrderNumber(routePoint.getRoute());
         repositoryGuard.execute(() -> repository.delete(routePoint));
         changePublisher.publish(DESTINATION, routePointId, null, EntityChangeType.DELETED);
@@ -124,7 +132,7 @@ public class RoutePointService {
         return repositoryGuard.execute(() -> repository.save(routePoint));
     }
 
-    private void ensureRouteAssociation(SaveRoutePointDto command, Route existingRoute) {
+    private void ensureRouteAssociation(SaveRoutePointDto command, @Nullable Route existingRoute) {
         if (command.getRouteId() != null) {
             return;
         }
@@ -145,11 +153,11 @@ public class RoutePointService {
         return defaultTime(value, LocalDateTime.now(clock));
     }
 
-    private LocalDateTime defaultTime(LocalDateTime value, LocalDateTime fallback) {
+    private LocalDateTime defaultTime(@Nullable LocalDateTime value, LocalDateTime fallback) {
         return value != null ? value : fallback;
     }
 
-    private Route resolveRoute(SaveRoutePointDto dto, Route parentRoute) {
+    private Route resolveRoute(SaveRoutePointDto dto, @Nullable Route parentRoute) {
         if (parentRoute != null) {
             return parentRoute;
         }

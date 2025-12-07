@@ -18,6 +18,7 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.jspecify.annotations.Nullable;
 import org.locationtech.jts.geom.Point;
 
 @Getter
@@ -32,7 +33,7 @@ public class RetailPoint {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @EqualsAndHashCode.Include
-    private Long id;
+    private @Nullable Long id;
 
     @NotBlank
     private String name;

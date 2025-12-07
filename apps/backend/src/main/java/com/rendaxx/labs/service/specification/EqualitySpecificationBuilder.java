@@ -16,6 +16,7 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
+import org.jspecify.annotations.Nullable;
 import org.springframework.core.ResolvableType;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.data.jpa.domain.Specification;
@@ -30,16 +31,8 @@ public class EqualitySpecificationBuilder {
 
     private final ConversionService conversionService;
 
-    public <T> Specification<T> build(Map<String, String> rawFilters) {
-        if (rawFilters == null || rawFilters.isEmpty()) {
-            return null;
-        }
-
+    public <T> Specification<T> build(@Nullable Map<String, String> rawFilters) {
         Map<String, String> filters = sanitize(rawFilters);
-        if (filters.isEmpty()) {
-            return null;
-        }
-
         return (root, query, criteriaBuilder) -> {
             query.distinct(true);
             List<Predicate> predicates = new ArrayList<>();
@@ -61,8 +54,8 @@ public class EqualitySpecificationBuilder {
         };
     }
 
-    private Map<String, String> sanitize(Map<String, String> filters) {
-        if (filters.isEmpty()) {
+    private Map<String, String> sanitize(@Nullable Map<String, String> filters) {
+        if (filters == null || filters.isEmpty()) {
             return Collections.emptyMap();
         }
         return filters.entrySet().stream()
@@ -71,7 +64,7 @@ public class EqualitySpecificationBuilder {
                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (existing, ignored) -> existing));
     }
 
-    private boolean isReserved(String key) {
+    private boolean isReserved(@Nullable String key) {
         if (key == null) {
             return true;
         }
@@ -81,7 +74,7 @@ public class EqualitySpecificationBuilder {
         return key.startsWith("sort");
     }
 
-    private Path<?> resolvePath(Root<?> root, String key) {
+    private @Nullable Path<?> resolvePath(Root<?> root, String key) {
         if (!StringUtils.hasText(key)) {
             return null;
         }
@@ -138,7 +131,7 @@ public class EqualitySpecificationBuilder {
         return path;
     }
 
-    private Object convertValue(String rawValue, Class<?> targetType) {
+    private @Nullable Object convertValue(String rawValue, @Nullable Class<?> targetType) {
         if (!StringUtils.hasText(rawValue) || targetType == null) {
             return null;
         }
@@ -164,12 +157,11 @@ public class EqualitySpecificationBuilder {
         return null;
     }
 
-    private Field findField(Class<?> type, String name) {
+    private @Nullable Field findField(Class<?> type, String name) {
         Class<?> current = type;
         while (current != null && !Objects.equals(current, Object.class)) {
             try {
-                Field field = current.getDeclaredField(name);
-                return field;
+                return current.getDeclaredField(name);
             } catch (NoSuchFieldException ignored) {
                 current = current.getSuperclass();
             }

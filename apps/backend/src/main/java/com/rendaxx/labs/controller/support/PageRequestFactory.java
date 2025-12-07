@@ -2,6 +2,8 @@ package com.rendaxx.labs.controller.support;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import jakarta.annotation.Nullable;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -24,7 +26,7 @@ public class PageRequestFactory {
         this.maxSize = maxSize;
     }
 
-    public Pageable build(Integer page, Integer size, List<String> sortValues) {
+    public Pageable build(@Nullable Integer page, @Nullable Integer size, @Nullable List<String> sortValues) {
         int resolvedSize = size != null && size > 0 ? size : defaultSize;
         long requestedPage = page != null && page >= 0 ? page.longValue() : defaultPage;
         int resolvedPage = Math.toIntExact(Math.min(requestedPage, maxSize));
@@ -38,16 +40,13 @@ public class PageRequestFactory {
         return "asc".equalsIgnoreCase(s) || "desc".equalsIgnoreCase(s);
     }
 
-    private Sort resolveSort(List<String> sortValues) {
+    private Sort resolveSort(@Nullable List<String> sortValues) {
         if (CollectionUtils.isEmpty(sortValues)) {
             return Sort.unsorted();
         }
 
         List<String> tokens = new ArrayList<>();
         for (String v : sortValues) {
-            if (v == null) {
-                continue;
-            }
             for (String p : v.split(",")) {
                 String t = p.trim();
                 if (!t.isEmpty()) {

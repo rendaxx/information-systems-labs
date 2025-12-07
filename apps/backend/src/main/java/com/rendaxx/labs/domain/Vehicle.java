@@ -19,6 +19,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.jspecify.annotations.Nullable;
 
 @Getter
 @Setter
@@ -31,10 +32,10 @@ public class Vehicle {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private @Nullable Long id;
 
     @ManyToOne
-    private Driver driver;
+    private @Nullable Driver driver;
 
     @NotBlank
     @Size(min = 2)

@@ -16,6 +16,7 @@ import java.util.Map;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import org.jspecify.annotations.Nullable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
@@ -51,9 +52,9 @@ public class OrderController implements OrdersApi {
 
     @Override
     public ResponseEntity<PageOrderApiDto> listOrders(
-            Integer page, Integer size, List<String> sort, Map<String, String> filter) {
+            @Nullable Integer page, @Nullable Integer size, @Nullable List<String> sort, @Nullable Map<String, String> filter) {
         Pageable pageable = pageRequestFactory.build(page, size, sort);
-        Map<String, String> filters = filterParameterMapper.toFilters(filter);
+        Map<String, String> filters = filterParameterMapper.toFilters(filter != null ? filter : Map.of());
         Page<OrderDto> result = orderService.getAll(pageable, filters);
         PageOrderApiDto response = orderApiMapper.toOrderPage(result);
         return ResponseEntity.ok(response);

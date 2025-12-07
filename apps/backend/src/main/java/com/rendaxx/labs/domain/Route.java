@@ -26,6 +26,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
+import org.jspecify.annotations.Nullable;
 
 @Getter
 @Setter
@@ -38,7 +39,7 @@ public class Route {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private @Nullable Long id;
 
     @Valid
     @Builder.Default
@@ -47,11 +48,11 @@ public class Route {
     private List<RoutePoint> routePoints = new ArrayList<>();
 
     @ManyToOne(fetch = FetchType.LAZY)
-    private Vehicle vehicle;
+    private @Nullable Vehicle vehicle;
 
     @CreationTimestamp
     @Column(updatable = false)
-    private LocalDateTime creationTime;
+    private @Nullable LocalDateTime creationTime;
 
     @NotNull
     private LocalDateTime plannedStartTime;

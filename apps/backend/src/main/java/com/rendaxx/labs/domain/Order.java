@@ -21,6 +21,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.jspecify.annotations.Nullable;
 
 @Getter
 @Setter
@@ -33,18 +34,18 @@ public class Order {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private @Nullable Long id;
 
     @NotBlank
     @Pattern(regexp = "^(?!.*\\u0000).+$", message = "must not contain null characters")
     private String goodsType;
 
-    @NotNull
+    @Nullable
     @Min(value = -100, message = "must not be lower than -100°C")
     @Max(value = 200, message = "must not exceed 200°C")
     private Integer minTemperature;
 
-    @NotNull
+    @Nullable
     @Min(value = -100, message = "must not be lower than -100°C")
     @Max(value = 200, message = "must not exceed 200°C")
     private Integer maxTemperature;

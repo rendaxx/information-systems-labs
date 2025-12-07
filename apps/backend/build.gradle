@@ -53,6 +53,7 @@ dependencies {
 
     implementation 'org.locationtech.jts:jts-core:1.20.0'
     implementation 'org.openapitools:jackson-databind-nullable:0.2.8'
+    compileOnly 'org.jspecify:jspecify:1.0.0'
 
     implementation project(':libs:api-java')
 }

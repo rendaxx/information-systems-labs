@@ -1,6 +1,5 @@
 package com.rendaxx.labs.domain;
 
-import jakarta.annotation.Nullable;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -15,6 +14,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.jspecify.annotations.Nullable;
 
 @Getter
 @Setter
@@ -28,6 +28,7 @@ public class Driver {
     private static final String HUMAN_NAME_REGEX = "^[\\p{L}]+(?:[-'\\s][\\p{L}]+)*$";
     private static final String PASSPORT_REGEX = "^\\d{4}\\s?\\d{6}$";
 
+    @Nullable
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -36,10 +37,11 @@ public class Driver {
     @Pattern(regexp = HUMAN_NAME_REGEX, message = "must contain only letters, spaces, apostrophes, or hyphens")
     private String firstName;
 
-    @Nullable
+    @NotBlank
     @Pattern(regexp = HUMAN_NAME_REGEX, message = "must contain only letters, spaces, apostrophes, or hyphens")
     private String middleName;
 
+    @Nullable
     @Size(min = 1, message = "must contain at least one non-whitespace character")
     @Pattern(regexp = HUMAN_NAME_REGEX, message = "must contain only letters, spaces, apostrophes, or hyphens")
     private String lastName;

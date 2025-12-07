@@ -10,6 +10,7 @@ import com.rendaxx.labs.mappers.OrderMapper;
 import com.rendaxx.labs.repository.OrderRepository;
 import com.rendaxx.labs.repository.support.RepositoryGuard;
 import com.rendaxx.labs.service.specification.EqualitySpecificationBuilder;
+import java.util.Objects;
 import java.util.Map;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -37,7 +38,7 @@ public class OrderService {
     public OrderDto create(SaveOrderDto command) {
         Order order = save(command, new Order());
         OrderDto dto = mapper.toDto(order);
-        changePublisher.publish(DESTINATION, order.getId(), dto, EntityChangeType.CREATED);
+        changePublisher.publish(DESTINATION, Objects.requireNonNull(order.getId()), dto, EntityChangeType.CREATED);
         return dto;
     }
 
@@ -60,7 +61,8 @@ public class OrderService {
                 () -> repository.findById(id).orElseThrow(() -> new NotFoundException(Order.class, id)));
         Order savedOrder = save(command, order);
         OrderDto dto = mapper.toDto(savedOrder);
-        changePublisher.publish(DESTINATION, savedOrder.getId(), dto, EntityChangeType.UPDATED);
+        changePublisher.publish(
+                DESTINATION, Objects.requireNonNull(savedOrder.getId()), dto, EntityChangeType.UPDATED);
         return dto;
     }
 
@@ -68,7 +70,7 @@ public class OrderService {
         Order order = repositoryGuard.execute(
                 () -> repository.findById(id).orElseThrow(() -> new NotFoundException(Order.class, id)));
         repositoryGuard.execute(() -> repository.delete(order));
-        changePublisher.publish(DESTINATION, order.getId(), null, EntityChangeType.DELETED);
+        changePublisher.publish(DESTINATION, Objects.requireNonNull(order.getId()), null, EntityChangeType.DELETED);
     }
 
     private Order save(SaveOrderDto command, Order order) {

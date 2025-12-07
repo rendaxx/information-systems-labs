@@ -27,6 +27,7 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.jspecify.annotations.Nullable;
 
 @Getter
 @Setter
@@ -37,6 +38,7 @@ import lombok.Setter;
 @Table(name = "route_points")
 public class RoutePoint {
 
+    @Nullable
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @EqualsAndHashCode.Include

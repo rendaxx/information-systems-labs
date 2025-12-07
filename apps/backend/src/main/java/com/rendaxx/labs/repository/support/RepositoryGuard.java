@@ -6,6 +6,7 @@ import jakarta.validation.ConstraintViolationException;
 import java.util.Objects;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
+import org.jspecify.annotations.Nullable;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.core.PropertyReferenceException;
@@ -14,7 +15,15 @@ import org.springframework.stereotype.Component;
 @Component
 public class RepositoryGuard {
 
-    public <T> T execute(Supplier<T> operation) {
+    public <T> T execute(Supplier<? extends T> operation) {
+        T result = executeNullable(operation);
+        if (result == null) {
+            throw new InternalServerException("Repository operation returned null");
+        }
+        return result;
+    }
+
+    public <T> @Nullable T executeNullable(Supplier<? extends T> operation) {
         try {
             return operation.get();
         } catch (ConstraintViolationException ex) {
@@ -29,7 +38,7 @@ public class RepositoryGuard {
     }
 
     public void execute(Runnable operation) {
-        execute(() -> {
+        executeNullable(() -> {
             operation.run();
             return null;
         });
@@ -60,14 +69,21 @@ public class RepositoryGuard {
         return String.format("Cannot sort by '%s' for resource '%s'", propertyName, typeName);
     }
 
-    private String extractMessage(Throwable throwable) {
+    private String extractMessage(@Nullable Throwable throwable) {
         if (throwable == null) {
-            return null;
+            return "Operation failed";
         }
         Throwable root = throwable;
         while (root.getCause() != null && root.getCause() != root) {
             root = root.getCause();
         }
-        return root.getMessage() != null ? root.getMessage() : throwable.getMessage();
+        String message = root.getMessage();
+        if (message == null || message.isBlank()) {
+            message = throwable.getMessage();
+        }
+        if (message == null || message.isBlank()) {
+            return "Operation failed";
+        }
+        return message;
     }
 }

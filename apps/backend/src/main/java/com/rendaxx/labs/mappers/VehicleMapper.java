@@ -13,7 +13,8 @@ import org.mapstruct.MappingTarget;
 public abstract class VehicleMapper {
 
     @Mapping(target = "id", ignore = true)
-    public abstract void update(@MappingTarget Vehicle vehicle, SaveVehicleDto dto, Driver driver);
+    public abstract void update(
+            @MappingTarget Vehicle vehicle, SaveVehicleDto dto, Driver driver);
 
     public abstract VehicleDto toDto(Vehicle vehicle);
 

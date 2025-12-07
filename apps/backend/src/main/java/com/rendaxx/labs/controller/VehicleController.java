@@ -16,6 +16,7 @@ import java.util.Map;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import org.jspecify.annotations.Nullable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
@@ -49,9 +50,10 @@ public class VehicleController implements VehiclesApi {
 
     @Override
     public ResponseEntity<PageVehicleApiDto> listVehicles(
-            Integer page, Integer size, List<String> sort, Map<String, String> filter) {
+            @Nullable Integer page, @Nullable Integer size, @Nullable List<String> sort, @Nullable Map<String, String> filter) {
         Pageable pageable = pageRequestFactory.build(page, size, sort);
-        Page<VehicleDto> result = vehicleService.getAll(pageable, filterParameterMapper.toFilters(filter));
+        Map<String, String> filters = filterParameterMapper.toFilters(filter != null ? filter : Map.of());
+        Page<VehicleDto> result = vehicleService.getAll(pageable, filters);
         PageVehicleApiDto response = vehicleApiMapper.toVehiclePage(result);
         return ResponseEntity.ok(response);
     }

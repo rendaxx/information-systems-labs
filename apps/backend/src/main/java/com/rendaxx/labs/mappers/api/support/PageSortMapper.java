@@ -2,11 +2,12 @@ package com.rendaxx.labs.mappers.api.support;
 
 import java.util.List;
 import java.util.stream.Collectors;
+import org.jspecify.annotations.Nullable;
 import org.springframework.data.domain.Sort;
 
 public interface PageSortMapper {
 
-    default List<String> toSortStrings(Sort sort) {
+    default List<String> toSortStrings(@Nullable Sort sort) {
         if (sort == null || sort.isUnsorted()) {
             return List.of();
         }

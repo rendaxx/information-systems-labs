@@ -1,11 +1,11 @@
 package com.rendaxx.labs.controller.support;
 
 import java.util.AbstractMap;
-import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
+import org.jspecify.annotations.Nullable;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
@@ -15,15 +15,11 @@ public class FilterParameterMapper {
     private static final Set<String> RESERVED = Set.of("page", "size", "sort");
 
     public Map<String, String> toFilters(Map<String, String> raw) {
-        if (raw == null || raw.isEmpty()) {
-            return Collections.emptyMap();
-        }
-
         return raw.entrySet().stream()
                 .map(e -> new AbstractMap.SimpleEntry<>(normalizeKey(e.getKey()), e.getValue()))
                 .filter(e -> StringUtils.hasText(e.getKey()) && StringUtils.hasText(e.getValue()))
                 .filter(e -> !isReserved(e.getKey()))
-                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (a, _) -> a, LinkedHashMap::new));
+                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (a, b) -> a, LinkedHashMap::new));
     }
 
     /**
@@ -36,7 +32,7 @@ public class FilterParameterMapper {
      * @return normalized key name ready for downstream filtering, or {@code null}
      *     when the key should be ignored
      */
-    private String normalizeKey(String key) {
+    private @Nullable String normalizeKey(@Nullable String key) {
         if (!StringUtils.hasText(key)) {
             return null;
         }

@@ -65,7 +65,7 @@ public class RouteService {
     public RouteDto create(SaveRouteDto command) {
         Route route = save(command, new Route());
         RouteDto dto = mapper.toDto(route);
-        changePublisher.publish(DESTINATION, route.getId(), dto, EntityChangeType.CREATED);
+        changePublisher.publish(DESTINATION, Objects.requireNonNull(route.getId()), dto, EntityChangeType.CREATED);
         return dto;
     }
 
@@ -88,7 +88,7 @@ public class RouteService {
                 () -> repository.findById(id).orElseThrow(() -> new NotFoundException(Route.class, id)));
         Route savedRoute = save(command, route);
         RouteDto dto = mapper.toDto(savedRoute);
-        changePublisher.publish(DESTINATION, savedRoute.getId(), dto, EntityChangeType.UPDATED);
+        changePublisher.publish(DESTINATION, Objects.requireNonNull(savedRoute.getId()), dto, EntityChangeType.UPDATED);
         return dto;
     }
 
@@ -96,7 +96,7 @@ public class RouteService {
         Route route = repositoryGuard.execute(
                 () -> repository.findById(id).orElseThrow(() -> new NotFoundException(Route.class, id)));
         repositoryGuard.execute(() -> repository.delete(route));
-        changePublisher.publish(DESTINATION, route.getId(), null, EntityChangeType.DELETED);
+        changePublisher.publish(DESTINATION, Objects.requireNonNull(route.getId()), null, EntityChangeType.DELETED);
     }
 
     public void recalculateRoutePointOrderNumber(Route route) {
@@ -108,15 +108,11 @@ public class RouteService {
     @Transactional(readOnly = true)
     public BigDecimal getAverageMileageInKm() {
         BigDecimal averageMileage = repositoryGuard.execute(repository::findAverageMileageInKm);
-        return Objects.requireNonNullElse(averageMileage, BigDecimal.ZERO)
-                .setScale(MILEAGE_SCALE, RoundingMode.HALF_UP);
+        return averageMileage.setScale(MILEAGE_SCALE, RoundingMode.HALF_UP);
     }
 
     @Transactional(readOnly = true)
     public List<RouteDto> getWithinPeriod(LocalDateTime periodStart, LocalDateTime periodEnd) {
-        if (periodStart == null || periodEnd == null) {
-            throw new BadRequestException("Period bounds must be provided");
-        }
         if (periodStart.isAfter(periodEnd)) {
             throw new BadRequestException("Period start must not be after period end");
         }
@@ -127,9 +123,6 @@ public class RouteService {
 
     @Transactional(readOnly = true)
     public List<RouteDto> getByRetailPointId(Long retailPointId) {
-        if (retailPointId == null) {
-            throw new BadRequestException("Retail point id must be provided");
-        }
         List<Route> routes = repositoryGuard.execute(() -> repository.findAllByRetailPointId(retailPointId));
         return mapper.toDto(routes);
     }
@@ -148,14 +141,12 @@ public class RouteService {
     }
 
     private List<RoutePoint> mapRoutePoints(SaveRouteDto command, Route route) {
-        List<SaveRoutePointDto> incomingRoutePoints = command.getRoutePoints() == null
-                ? List.of()
-                : command.getRoutePoints().stream().filter(Objects::nonNull).toList();
-        if (incomingRoutePoints.isEmpty()) {
+        List<SaveRoutePointDto> routePointsDto = command.getRoutePoints();
+        if (routePointsDto.isEmpty()) {
             return List.of();
         }
 
-        List<Long> existingIds = incomingRoutePoints.stream()
+        List<Long> existingIds = routePointsDto.stream()
                 .map(SaveRoutePointDto::getId)
                 .filter(Objects::nonNull)
                 .toList();
@@ -164,7 +155,7 @@ public class RouteService {
                         .collect(Collectors.toMap(RoutePoint::getId, Function.identity()));
 
         List<RoutePoint> routePoints = new ArrayList<>();
-        for (SaveRoutePointDto routePointDto : incomingRoutePoints) {
+        for (SaveRoutePointDto routePointDto : routePointsDto) {
             RoutePoint routePoint = routePointsById.getOrDefault(routePointDto.getId(), new RoutePoint());
             RetailPoint retailPoint = resolveRetailPoint(routePointDto.getRetailPointId());
             Set<Order> orders = resolveOrders(routePointDto.getOrderIds());
@@ -181,7 +172,7 @@ public class RouteService {
     }
 
     private Set<Order> resolveOrders(List<Long> orderIds) {
-        if (orderIds == null) {
+        if (orderIds.isEmpty()) {
             return Set.of();
         }
         return new HashSet<>(repositoryGuard.execute(() -> orderRepository.findAllById(orderIds)));

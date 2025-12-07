@@ -11,6 +11,7 @@ import com.rendaxx.labs.mappers.VehicleMapper;
 import com.rendaxx.labs.repository.DriverRepository;
 import com.rendaxx.labs.repository.VehicleRepository;
 import com.rendaxx.labs.repository.support.RepositoryGuard;
+import java.util.Objects;
 import com.rendaxx.labs.service.specification.EqualitySpecificationBuilder;
 import java.util.Map;
 import lombok.AccessLevel;
@@ -40,7 +41,7 @@ public class VehicleService {
     public VehicleDto create(SaveVehicleDto command) {
         Vehicle vehicle = save(command, new Vehicle());
         VehicleDto dto = mapper.toDto(vehicle);
-        changePublisher.publish(DESTINATION, vehicle.getId(), dto, EntityChangeType.CREATED);
+        changePublisher.publish(DESTINATION, Objects.requireNonNull(vehicle.getId()), dto, EntityChangeType.CREATED);
         return dto;
     }
 
@@ -63,7 +64,8 @@ public class VehicleService {
                 () -> repository.findById(id).orElseThrow(() -> new NotFoundException(Vehicle.class, id)));
         Vehicle savedVehicle = save(command, vehicle);
         VehicleDto dto = mapper.toDto(savedVehicle);
-        changePublisher.publish(DESTINATION, savedVehicle.getId(), dto, EntityChangeType.UPDATED);
+        changePublisher.publish(
+                DESTINATION, Objects.requireNonNull(savedVehicle.getId()), dto, EntityChangeType.UPDATED);
         return dto;
     }
 
@@ -71,7 +73,7 @@ public class VehicleService {
         Vehicle vehicle = repositoryGuard.execute(
                 () -> repository.findById(id).orElseThrow(() -> new NotFoundException(Vehicle.class, id)));
         repositoryGuard.execute(() -> repository.delete(vehicle));
-        changePublisher.publish(DESTINATION, vehicle.getId(), null, EntityChangeType.DELETED);
+        changePublisher.publish(DESTINATION, Objects.requireNonNull(vehicle.getId()), null, EntityChangeType.DELETED);
     }
 
     private Vehicle save(SaveVehicleDto command, Vehicle vehicle) {

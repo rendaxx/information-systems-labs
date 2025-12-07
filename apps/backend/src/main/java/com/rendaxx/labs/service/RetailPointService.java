@@ -11,6 +11,7 @@ import com.rendaxx.labs.mappers.RetailPointMapper;
 import com.rendaxx.labs.repository.RetailPointRepository;
 import com.rendaxx.labs.repository.support.RepositoryGuard;
 import com.rendaxx.labs.service.specification.EqualitySpecificationBuilder;
+import java.util.Objects;
 import java.util.List;
 import java.util.Map;
 import lombok.AccessLevel;
@@ -56,7 +57,7 @@ public class RetailPointService {
     public RetailPointDto create(SaveRetailPointDto command) {
         RetailPoint retailPoint = save(command, new RetailPoint());
         RetailPointDto dto = mapper.toDto(retailPoint);
-        changePublisher.publish(DESTINATION, retailPoint.getId(), dto, EntityChangeType.CREATED);
+        changePublisher.publish(DESTINATION, Objects.requireNonNull(retailPoint.getId()), dto, EntityChangeType.CREATED);
         return dto;
     }
 
@@ -76,9 +77,6 @@ public class RetailPointService {
 
     @Transactional(readOnly = true, propagation = Propagation.REQUIRED)
     public List<RetailPointDto> getNearestRetailPoints(Long retailPointId, int limit) {
-        if (retailPointId == null) {
-            throw new BadRequestException("Retail point id must be provided");
-        }
         if (limit <= 0) {
             throw new BadRequestException("Limit must be positive");
         }
@@ -87,8 +85,9 @@ public class RetailPointService {
                 .findById(retailPointId)
                 .orElseThrow(() -> new NotFoundException(RetailPoint.class, retailPointId)));
 
+        Long originId = Objects.requireNonNull(origin.getId());
         List<RetailPoint> nearest =
-                repositoryGuard.execute(() -> repository.findNearestRetailPoints(origin.getId(), effectiveLimit));
+                repositoryGuard.execute(() -> repository.findNearestRetailPoints(originId, effectiveLimit));
         return mapper.toDto(nearest);
     }
 
@@ -97,7 +96,8 @@ public class RetailPointService {
                 () -> repository.findById(id).orElseThrow(() -> new NotFoundException(RetailPoint.class, id)));
         RetailPoint savedRetailPoint = save(command, retailPoint);
         RetailPointDto dto = mapper.toDto(savedRetailPoint);
-        changePublisher.publish(DESTINATION, savedRetailPoint.getId(), dto, EntityChangeType.UPDATED);
+        changePublisher.publish(
+                DESTINATION, Objects.requireNonNull(savedRetailPoint.getId()), dto, EntityChangeType.UPDATED);
         return dto;
     }
 
@@ -105,7 +105,7 @@ public class RetailPointService {
         RetailPoint retailPoint = repositoryGuard.execute(
                 () -> repository.findById(id).orElseThrow(() -> new NotFoundException(RetailPoint.class, id)));
         repositoryGuard.execute(() -> repository.delete(retailPoint));
-        changePublisher.publish(DESTINATION, retailPoint.getId(), null, EntityChangeType.DELETED);
+        changePublisher.publish(DESTINATION, Objects.requireNonNull(retailPoint.getId()), null, EntityChangeType.DELETED);
     }
 
     private RetailPoint save(SaveRetailPointDto command, RetailPoint retailPoint) {

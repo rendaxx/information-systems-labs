@@ -10,6 +10,7 @@ import com.rendaxx.labs.mappers.DriverMapper;
 import com.rendaxx.labs.repository.DriverRepository;
 import com.rendaxx.labs.repository.support.RepositoryGuard;
 import com.rendaxx.labs.service.specification.EqualitySpecificationBuilder;
+import java.util.Objects;
 import java.util.Map;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -37,7 +38,7 @@ public class DriverService {
     public DriverDto create(SaveDriverDto command) {
         Driver driver = save(command, new Driver());
         DriverDto dto = mapper.toDto(driver);
-        changePublisher.publish(DESTINATION, driver.getId(), dto, EntityChangeType.CREATED);
+        changePublisher.publish(DESTINATION, Objects.requireNonNull(driver.getId()), dto, EntityChangeType.CREATED);
         return dto;
     }
 
@@ -60,7 +61,8 @@ public class DriverService {
                 () -> repository.findById(id).orElseThrow(() -> new NotFoundException(Driver.class, id)));
         Driver savedDriver = save(command, driver);
         DriverDto dto = mapper.toDto(savedDriver);
-        changePublisher.publish(DESTINATION, savedDriver.getId(), dto, EntityChangeType.UPDATED);
+        changePublisher.publish(
+                DESTINATION, Objects.requireNonNull(savedDriver.getId()), dto, EntityChangeType.UPDATED);
         return dto;
     }
 
@@ -68,7 +70,7 @@ public class DriverService {
         Driver driver = repositoryGuard.execute(
                 () -> repository.findById(id).orElseThrow(() -> new NotFoundException(Driver.class, id)));
         repositoryGuard.execute(() -> repository.delete(driver));
-        changePublisher.publish(DESTINATION, driver.getId(), null, EntityChangeType.DELETED);
+        changePublisher.publish(DESTINATION, Objects.requireNonNull(driver.getId()), null, EntityChangeType.DELETED);
     }
 
     private Driver save(SaveDriverDto command, Driver driver) {

@@ -4,6 +4,7 @@ import com.rendaxx.labs.exceptions.BusinessException;
 import jakarta.validation.ConstraintViolationException;
 import java.util.Objects;
 import java.util.stream.Collectors;
+import org.jspecify.annotations.Nullable;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -101,12 +102,12 @@ public class GlobalExceptionHandler {
         return plainText(HttpStatus.BAD_REQUEST, exception.getMessage());
     }
 
-    private ResponseEntity<String> plainText(HttpStatus status, String message) {
+    private ResponseEntity<String> plainText(HttpStatus status, @Nullable String message) {
         String body = (message == null || message.isBlank()) ? status.getReasonPhrase() : message;
         return ResponseEntity.status(status).contentType(MediaType.TEXT_PLAIN).body(body);
     }
 
-    private String extractMessage(Throwable throwable) {
+    private String extractMessage(@Nullable Throwable throwable) {
         if (throwable == null) {
             return "Bad request";
         }
@@ -114,7 +115,14 @@ public class GlobalExceptionHandler {
         while (root.getCause() != null && root.getCause() != root) {
             root = root.getCause();
         }
-        return Objects.requireNonNullElse(root.getMessage(), throwable.getMessage());
+        String message = root.getMessage();
+        if (message == null || message.isBlank()) {
+            message = throwable.getMessage();
+        }
+        if (message == null || message.isBlank()) {
+            return "Bad request";
+        }
+        return message;
     }
 
     private boolean isPathVariable(MethodArgumentTypeMismatchException exception) {
