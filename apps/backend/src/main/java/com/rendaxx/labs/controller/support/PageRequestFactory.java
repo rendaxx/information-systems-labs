@@ -1,9 +1,8 @@
 package com.rendaxx.labs.controller.support;
 
+import jakarta.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
-
-import jakarta.annotation.Nullable;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;

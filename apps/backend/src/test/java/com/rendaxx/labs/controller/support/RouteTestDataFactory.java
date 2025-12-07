@@ -40,7 +40,7 @@ public class RouteTestDataFactory {
     }
 
     public Route persistRoute(LocalDateTime plannedStart, LocalDateTime plannedEnd, BigDecimal mileage) {
-        Vehicle vehicle = vehicleRepository.save(buildVehicle());
+        Vehicle vehicle = vehicleRepository.save(newVehicle());
         RetailPoint retailPoint = retailPointRepository.save(buildRetailPoint());
         Order order = buildOrder();
 
@@ -68,7 +68,7 @@ public class RouteTestDataFactory {
 
     public Route persistRouteWithRetailPoint(
             RetailPoint retailPoint, LocalDateTime plannedStart, LocalDateTime plannedEnd, BigDecimal mileage) {
-        Vehicle vehicle = vehicleRepository.save(buildVehicle());
+        Vehicle vehicle = vehicleRepository.save(newVehicle());
 
         Route route = Route.builder()
                 .vehicle(vehicle)
@@ -103,7 +103,7 @@ public class RouteTestDataFactory {
             LocalDateTime secondStart,
             LocalDateTime secondEnd,
             BigDecimal mileage) {
-        Vehicle vehicle = vehicleRepository.save(buildVehicle());
+        Vehicle vehicle = vehicleRepository.save(newVehicle());
 
         Route route = Route.builder()
                 .vehicle(vehicle)
@@ -146,7 +146,7 @@ public class RouteTestDataFactory {
         vehicleRepository.deleteAll();
     }
 
-    private Vehicle buildVehicle() {
+    private Vehicle newVehicle() {
         return Vehicle.builder()
                 .gosNumber("GOS-" + UUID.randomUUID())
                 .tonnageInTons(new BigDecimal("5.00"))

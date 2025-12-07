@@ -50,7 +50,10 @@ public class VehicleController implements VehiclesApi {
 
     @Override
     public ResponseEntity<PageVehicleApiDto> listVehicles(
-            @Nullable Integer page, @Nullable Integer size, @Nullable List<String> sort, @Nullable Map<String, String> filter) {
+            @Nullable Integer page,
+            @Nullable Integer size,
+            @Nullable List<String> sort,
+            @Nullable Map<String, String> filter) {
         Pageable pageable = pageRequestFactory.build(page, size, sort);
         Map<String, String> filters = filterParameterMapper.toFilters(filter != null ? filter : Map.of());
         Page<VehicleDto> result = vehicleService.getAll(pageable, filters);

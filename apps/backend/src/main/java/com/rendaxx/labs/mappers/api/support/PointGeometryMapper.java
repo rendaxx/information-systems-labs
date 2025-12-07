@@ -1,11 +1,11 @@
 package com.rendaxx.labs.mappers.api.support;
 
 import com.rendaxx.labs.api.v1.model.PointApiDto;
+import org.jspecify.annotations.Nullable;
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.GeometryFactory;
 import org.locationtech.jts.geom.Point;
 import org.locationtech.jts.geom.PrecisionModel;
-import org.jspecify.annotations.Nullable;
 import org.springframework.stereotype.Component;
 
 @Component

@@ -6,6 +6,7 @@ import com.rendaxx.labs.domain.Route;
 import com.rendaxx.labs.domain.RoutePoint;
 import com.rendaxx.labs.dtos.RoutePointDto;
 import com.rendaxx.labs.dtos.SaveRoutePointDto;
+import com.rendaxx.labs.repository.view.RoutePointView;
 import java.util.List;
 import java.util.Set;
 import org.mapstruct.Mapper;
@@ -28,5 +29,10 @@ public abstract class RoutePointMapper {
     @Mapping(target = "routeId", source = "route.id")
     public abstract RoutePointDto toDto(RoutePoint routePoint);
 
+    @Mapping(target = "routeId", source = "routeId")
+    public abstract RoutePointDto toDto(RoutePointView routePoint);
+
     public abstract List<RoutePointDto> toDto(List<RoutePoint> routePoints);
+
+    public abstract List<RoutePointDto> toDtoFromView(List<RoutePointView> routePoints);
 }

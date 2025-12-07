@@ -20,6 +20,7 @@ import com.rendaxx.labs.repository.RoutePointRepository;
 import com.rendaxx.labs.repository.RouteRepository;
 import com.rendaxx.labs.repository.VehicleRepository;
 import com.rendaxx.labs.repository.support.RepositoryGuard;
+import com.rendaxx.labs.repository.view.RouteView;
 import com.rendaxx.labs.service.specification.EqualitySpecificationBuilder;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -64,22 +65,27 @@ public class RouteService {
 
     public RouteDto create(SaveRouteDto command) {
         Route route = save(command, new Route());
-        RouteDto dto = mapper.toDto(route);
+        RouteDto dto = repositoryGuard.execute(() -> repository
+                .findViewById(Objects.requireNonNull(route.getId()))
+                .map(mapper::toDto)
+                .orElseThrow(() -> new NotFoundException(Route.class, route.getId())));
         changePublisher.publish(DESTINATION, Objects.requireNonNull(route.getId()), dto, EntityChangeType.CREATED);
         return dto;
     }
 
     @Transactional(readOnly = true)
     public RouteDto getById(Long id) {
-        Route route = repositoryGuard.execute(
-                () -> repository.findById(id).orElseThrow(() -> new NotFoundException(Route.class, id)));
-        return mapper.toDto(route);
+        return repositoryGuard.execute(() -> repository
+                .findViewById(id)
+                .map(mapper::toDto)
+                .orElseThrow(() -> new NotFoundException(Route.class, id)));
     }
 
     @Transactional(readOnly = true)
     public Page<RouteDto> getAll(Pageable pageable, Map<String, String> filters) {
         Specification<Route> specification = specificationBuilder.build(filters);
-        Page<Route> result = repositoryGuard.execute(() -> repository.findAll(specification, pageable));
+        Page<RouteView> result = repositoryGuard.execute(() ->
+                repository.findBy(specification, q -> q.as(RouteView.class).page(pageable)));
         return result.map(mapper::toDto);
     }
 
@@ -87,7 +93,10 @@ public class RouteService {
         Route route = repositoryGuard.execute(
                 () -> repository.findById(id).orElseThrow(() -> new NotFoundException(Route.class, id)));
         Route savedRoute = save(command, route);
-        RouteDto dto = mapper.toDto(savedRoute);
+        RouteDto dto = repositoryGuard.execute(() -> repository
+                .findViewById(id)
+                .map(mapper::toDto)
+                .orElseThrow(() -> new NotFoundException(Route.class, id)));
         changePublisher.publish(DESTINATION, Objects.requireNonNull(savedRoute.getId()), dto, EntityChangeType.UPDATED);
         return dto;
     }
@@ -107,7 +116,8 @@ public class RouteService {
 
     @Transactional(readOnly = true)
     public BigDecimal getAverageMileageInKm() {
-        BigDecimal averageMileage = repositoryGuard.execute(repository::findAverageMileageInKm);
+        BigDecimal averageMileage =
+                repositoryGuard.execute(repository::findAverageMileageInKm).orElse(BigDecimal.ZERO);
         return averageMileage.setScale(MILEAGE_SCALE, RoundingMode.HALF_UP);
     }
 
@@ -116,15 +126,15 @@ public class RouteService {
         if (periodStart.isAfter(periodEnd)) {
             throw new BadRequestException("Period start must not be after period end");
         }
-        List<Route> routes =
-                repositoryGuard.execute(() -> repository.findWithinPeriodWithDetails(periodStart, periodEnd));
-        return mapper.toDto(routes);
+        List<RouteView> routes =
+                repositoryGuard.execute(() -> repository.findWithinPeriodWithDetailsView(periodStart, periodEnd));
+        return mapper.toDtoFromView(routes);
     }
 
     @Transactional(readOnly = true)
     public List<RouteDto> getByRetailPointId(Long retailPointId) {
-        List<Route> routes = repositoryGuard.execute(() -> repository.findAllByRetailPointId(retailPointId));
-        return mapper.toDto(routes);
+        List<RouteView> routes = repositoryGuard.execute(() -> repository.findAllByRetailPointIdView(retailPointId));
+        return mapper.toDtoFromView(routes);
     }
 
     private Route save(SaveRouteDto command, Route route) {

@@ -6,12 +6,16 @@ import java.util.Set;
 import lombok.AccessLevel;
 import lombok.Data;
 import lombok.experimental.FieldDefaults;
+import org.jspecify.annotations.Nullable;
 
 @Data
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class RoutePointDto {
     Long id;
+
+    @Nullable
     Long routeId;
+
     RetailPointDto retailPoint;
     OperationType operationType;
     Set<OrderDto> orders;

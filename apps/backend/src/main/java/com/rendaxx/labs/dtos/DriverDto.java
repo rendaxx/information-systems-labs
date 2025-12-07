@@ -10,8 +10,10 @@ import org.jspecify.annotations.Nullable;
 public class DriverDto {
     Long id;
     String firstName;
+
     @Nullable
     String middleName;
+
     String lastName;
     String passport;
 }

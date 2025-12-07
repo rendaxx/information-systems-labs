@@ -11,9 +11,10 @@ import com.rendaxx.labs.mappers.VehicleMapper;
 import com.rendaxx.labs.repository.DriverRepository;
 import com.rendaxx.labs.repository.VehicleRepository;
 import com.rendaxx.labs.repository.support.RepositoryGuard;
-import java.util.Objects;
+import com.rendaxx.labs.repository.view.VehicleView;
 import com.rendaxx.labs.service.specification.EqualitySpecificationBuilder;
 import java.util.Map;
+import java.util.Objects;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -40,30 +41,40 @@ public class VehicleService {
 
     public VehicleDto create(SaveVehicleDto command) {
         Vehicle vehicle = save(command, new Vehicle());
-        VehicleDto dto = mapper.toDto(vehicle);
+        VehicleDto dto = repositoryGuard.execute(() -> repository
+                .findViewById(Objects.requireNonNull(vehicle.getId()))
+                .map(mapper::toDto)
+                .orElseThrow(() -> new NotFoundException(Vehicle.class, vehicle.getId())));
         changePublisher.publish(DESTINATION, Objects.requireNonNull(vehicle.getId()), dto, EntityChangeType.CREATED);
         return dto;
     }
 
     @Transactional(readOnly = true)
     public VehicleDto getById(Long id) {
-        Vehicle vehicle = repositoryGuard.execute(
-                () -> repository.findById(id).orElseThrow(() -> new NotFoundException(Vehicle.class, id)));
-        return mapper.toDto(vehicle);
+        return repositoryGuard.execute(() -> repository
+                .findViewById(id)
+                .map(mapper::toDto)
+                .orElseThrow(() -> new NotFoundException(Vehicle.class, id)));
     }
 
     @Transactional(readOnly = true)
     public Page<VehicleDto> getAll(Pageable pageable, Map<String, String> filters) {
         Specification<Vehicle> specification = specificationBuilder.build(filters);
-        Page<Vehicle> vehicles = repositoryGuard.execute(() -> repository.findAll(specification, pageable));
-        return vehicles.map(mapper::toDto);
+
+        return repositoryGuard
+                .execute(() -> repository.findBy(
+                        specification, q -> q.as(VehicleView.class).page(pageable)))
+                .map(mapper::toDto);
     }
 
     public VehicleDto update(Long id, SaveVehicleDto command) {
         Vehicle vehicle = repositoryGuard.execute(
                 () -> repository.findById(id).orElseThrow(() -> new NotFoundException(Vehicle.class, id)));
         Vehicle savedVehicle = save(command, vehicle);
-        VehicleDto dto = mapper.toDto(savedVehicle);
+        VehicleDto dto = repositoryGuard.execute(() -> repository
+                .findViewById(id)
+                .map(mapper::toDto)
+                .orElseThrow(() -> new NotFoundException(Vehicle.class, id)));
         changePublisher.publish(
                 DESTINATION, Objects.requireNonNull(savedVehicle.getId()), dto, EntityChangeType.UPDATED);
         return dto;

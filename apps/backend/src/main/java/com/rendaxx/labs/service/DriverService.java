@@ -9,9 +9,10 @@ import com.rendaxx.labs.exceptions.NotFoundException;
 import com.rendaxx.labs.mappers.DriverMapper;
 import com.rendaxx.labs.repository.DriverRepository;
 import com.rendaxx.labs.repository.support.RepositoryGuard;
+import com.rendaxx.labs.repository.view.DriverView;
 import com.rendaxx.labs.service.specification.EqualitySpecificationBuilder;
-import java.util.Objects;
 import java.util.Map;
+import java.util.Objects;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -37,22 +38,27 @@ public class DriverService {
 
     public DriverDto create(SaveDriverDto command) {
         Driver driver = save(command, new Driver());
-        DriverDto dto = mapper.toDto(driver);
+        DriverDto dto = repositoryGuard.execute(() -> repository
+                .findViewById(Objects.requireNonNull(driver.getId()))
+                .map(mapper::toDto)
+                .orElseThrow(() -> new NotFoundException(Driver.class, driver.getId())));
         changePublisher.publish(DESTINATION, Objects.requireNonNull(driver.getId()), dto, EntityChangeType.CREATED);
         return dto;
     }
 
     @Transactional(readOnly = true)
     public DriverDto getById(Long id) {
-        Driver driver = repositoryGuard.execute(
-                () -> repository.findById(id).orElseThrow(() -> new NotFoundException(Driver.class, id)));
-        return mapper.toDto(driver);
+        return repositoryGuard.execute(() -> repository
+                .findViewById(id)
+                .map(mapper::toDto)
+                .orElseThrow(() -> new NotFoundException(Driver.class, id)));
     }
 
     @Transactional(readOnly = true)
     public Page<DriverDto> getAll(Pageable pageable, Map<String, String> filters) {
         Specification<Driver> specification = specificationBuilder.build(filters);
-        Page<Driver> drivers = repositoryGuard.execute(() -> repository.findAll(specification, pageable));
+        Page<DriverView> drivers = repositoryGuard.execute(() ->
+                repository.findBy(specification, q -> q.as(DriverView.class).page(pageable)));
         return drivers.map(mapper::toDto);
     }
 
@@ -60,7 +66,10 @@ public class DriverService {
         Driver driver = repositoryGuard.execute(
                 () -> repository.findById(id).orElseThrow(() -> new NotFoundException(Driver.class, id)));
         Driver savedDriver = save(command, driver);
-        DriverDto dto = mapper.toDto(savedDriver);
+        DriverDto dto = repositoryGuard.execute(() -> repository
+                .findViewById(id)
+                .map(mapper::toDto)
+                .orElseThrow(() -> new NotFoundException(Driver.class, id)));
         changePublisher.publish(
                 DESTINATION, Objects.requireNonNull(savedDriver.getId()), dto, EntityChangeType.UPDATED);
         return dto;

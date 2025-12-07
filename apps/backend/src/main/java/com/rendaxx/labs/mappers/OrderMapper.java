@@ -3,6 +3,7 @@ package com.rendaxx.labs.mappers;
 import com.rendaxx.labs.domain.Order;
 import com.rendaxx.labs.dtos.OrderDto;
 import com.rendaxx.labs.dtos.SaveOrderDto;
+import com.rendaxx.labs.repository.view.OrderView;
 import java.util.List;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
@@ -16,5 +17,9 @@ public abstract class OrderMapper {
 
     public abstract OrderDto toDto(Order order);
 
+    public abstract OrderDto toDto(OrderView order);
+
     public abstract List<OrderDto> toDto(List<Order> orders);
+
+    public abstract List<OrderDto> toDtoFromView(List<OrderView> orders);
 }

@@ -17,10 +17,7 @@ public class RepositoryGuard {
 
     public <T> T execute(Supplier<? extends T> operation) {
         T result = executeNullable(operation);
-        if (result == null) {
-            throw new InternalServerException("Repository operation returned null");
-        }
-        return result;
+        return Objects.requireNonNull(result);
     }
 
     public <T> @Nullable T executeNullable(Supplier<? extends T> operation) {

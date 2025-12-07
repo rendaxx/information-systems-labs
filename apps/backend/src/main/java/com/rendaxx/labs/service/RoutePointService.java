@@ -18,7 +18,10 @@ import com.rendaxx.labs.repository.RetailPointRepository;
 import com.rendaxx.labs.repository.RoutePointRepository;
 import com.rendaxx.labs.repository.RouteRepository;
 import com.rendaxx.labs.repository.support.RepositoryGuard;
+import com.rendaxx.labs.repository.view.RetailPointView;
+import com.rendaxx.labs.repository.view.RoutePointView;
 import com.rendaxx.labs.service.specification.EqualitySpecificationBuilder;
+import jakarta.annotation.Nullable;
 import java.math.BigDecimal;
 import java.time.Clock;
 import java.time.LocalDateTime;
@@ -28,8 +31,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
-
-import jakarta.annotation.Nullable;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -64,22 +65,26 @@ public class RoutePointService {
     public RoutePointDto create(SaveRoutePointDto command) {
         ensureRouteAssociation(command, null);
         RoutePoint routePoint = save(command, new RoutePoint());
-        RoutePointDto dto = mapper.toDto(routePoint);
+        RoutePointDto dto = repositoryGuard.execute(() -> repository
+                .findViewById(Objects.requireNonNull(routePoint.getId()))
+                .map(mapper::toDto)
+                .orElseThrow(() -> new NotFoundException(RoutePoint.class, routePoint.getId())));
         changePublisher.publish(DESTINATION, Objects.requireNonNull(routePoint.getId()), dto, EntityChangeType.CREATED);
         return dto;
     }
 
     @Transactional(readOnly = true)
     public RoutePointDto getById(Long id) {
-        RoutePoint routePoint = repositoryGuard.execute(
-                () -> repository.findById(id).orElseThrow(() -> new NotFoundException(RoutePoint.class, id)));
+        RoutePointView routePoint = repositoryGuard.execute(
+                () -> repository.findViewById(id).orElseThrow(() -> new NotFoundException(RoutePoint.class, id)));
         return mapper.toDto(routePoint);
     }
 
     @Transactional(readOnly = true)
     public Page<RoutePointDto> getAll(Pageable pageable, Map<String, String> filters) {
         Specification<RoutePoint> specification = specificationBuilder.build(filters);
-        Page<RoutePoint> routePoints = repositoryGuard.execute(() -> repository.findAll(specification, pageable));
+        Page<RoutePointView> routePoints = repositoryGuard.execute(() ->
+                repository.findBy(specification, q -> q.as(RoutePointView.class).page(pageable)));
         return routePoints.map(mapper::toDto);
     }
 
@@ -88,13 +93,12 @@ public class RoutePointService {
                 () -> repository.findById(id).orElseThrow(() -> new NotFoundException(RoutePoint.class, id)));
         ensureRouteAssociation(command, routePoint.getRoute());
         RoutePoint savedRoutePoint = save(command, routePoint);
-        RoutePointDto dto = mapper.toDto(savedRoutePoint);
+        RoutePointDto dto = repositoryGuard.execute(() -> repository
+                .findViewById(id)
+                .map(mapper::toDto)
+                .orElseThrow(() -> new NotFoundException(RoutePoint.class, id)));
         changePublisher.publish(
-                DESTINATION,
-                Objects.requireNonNull(savedRoutePoint.getId()),
-                dto,
-                EntityChangeType.UPDATED
-        );
+                DESTINATION, Objects.requireNonNull(savedRoutePoint.getId()), dto, EntityChangeType.UPDATED);
         return dto;
     }
 
@@ -113,12 +117,12 @@ public class RoutePointService {
         if (limit <= 0) {
             throw new BadRequestException("Limit must be positive");
         }
-        List<RetailPoint> retailPoints =
-                repositoryGuard.execute(() -> repository.findMostVisitedRetailPoints(PageRequest.of(0, limit)));
+        List<RetailPointView> retailPoints =
+                repositoryGuard.execute(() -> repository.findMostVisitedRetailPointsView(PageRequest.of(0, limit)));
         if (retailPoints.isEmpty()) {
             return Collections.emptyList();
         }
-        return retailPointMapper.toDto(retailPoints);
+        return retailPointMapper.toDtoFromView(retailPoints);
     }
 
     private RoutePoint save(SaveRoutePointDto command, RoutePoint routePoint) {

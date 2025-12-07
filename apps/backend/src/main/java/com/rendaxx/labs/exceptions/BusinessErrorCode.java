@@ -14,5 +14,4 @@ public enum BusinessErrorCode {
     BusinessErrorCode(HttpStatus status) {
         this.status = status;
     }
-
 }

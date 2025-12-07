@@ -5,6 +5,7 @@ import com.rendaxx.labs.domain.RoutePoint;
 import com.rendaxx.labs.domain.Vehicle;
 import com.rendaxx.labs.dtos.RouteDto;
 import com.rendaxx.labs.dtos.SaveRouteDto;
+import com.rendaxx.labs.repository.view.RouteView;
 import java.util.List;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
@@ -17,12 +18,13 @@ public abstract class RouteMapper {
     @Mapping(target = "creationTime", ignore = true)
     @Mapping(target = "routePoints", source = "routePoints")
     public abstract void update(
-            @MappingTarget Route route,
-            SaveRouteDto dto,
-            List<RoutePoint> routePoints,
-            Vehicle vehicle);
+            @MappingTarget Route route, SaveRouteDto dto, List<RoutePoint> routePoints, Vehicle vehicle);
 
     public abstract RouteDto toDto(Route route);
 
+    public abstract RouteDto toDto(RouteView route);
+
     public abstract List<RouteDto> toDto(List<Route> routes);
+
+    public abstract List<RouteDto> toDtoFromView(List<RouteView> routes);
 }
