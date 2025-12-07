@@ -2,7 +2,7 @@
 # This image expects the bootable JAR to be present in
 # apps/backend/build/libs/ before docker build (downloaded from CI artifact).
 
-FROM eclipse-temurin:17-jre-alpine
+FROM eclipse-temurin:25-jre-alpine
 
 WORKDIR /app
 
