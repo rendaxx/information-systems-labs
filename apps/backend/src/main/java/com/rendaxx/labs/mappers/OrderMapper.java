@@ -15,11 +15,7 @@ public abstract class OrderMapper {
     @Mapping(target = "id", ignore = true)
     public abstract void update(@MappingTarget Order order, SaveOrderDto dto);
 
-    public abstract OrderDto toDto(Order order);
-
     public abstract OrderDto toDto(OrderView order);
-
-    public abstract List<OrderDto> toDto(List<Order> orders);
 
     public abstract List<OrderDto> toDtoFromView(List<OrderView> orders);
 }

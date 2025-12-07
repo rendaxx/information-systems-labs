@@ -26,13 +26,8 @@ public abstract class RoutePointMapper {
             RetailPoint retailPoint,
             Set<Order> orders);
 
-    @Mapping(target = "routeId", source = "route.id")
-    public abstract RoutePointDto toDto(RoutePoint routePoint);
-
     @Mapping(target = "routeId", source = "routeId")
     public abstract RoutePointDto toDto(RoutePointView routePoint);
-
-    public abstract List<RoutePointDto> toDto(List<RoutePoint> routePoints);
 
     public abstract List<RoutePointDto> toDtoFromView(List<RoutePointView> routePoints);
 }

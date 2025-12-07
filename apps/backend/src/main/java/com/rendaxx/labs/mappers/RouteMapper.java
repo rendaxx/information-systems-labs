@@ -20,11 +20,7 @@ public abstract class RouteMapper {
     public abstract void update(
             @MappingTarget Route route, SaveRouteDto dto, List<RoutePoint> routePoints, Vehicle vehicle);
 
-    public abstract RouteDto toDto(Route route);
-
     public abstract RouteDto toDto(RouteView route);
-
-    public abstract List<RouteDto> toDto(List<Route> routes);
 
     public abstract List<RouteDto> toDtoFromView(List<RouteView> routes);
 }

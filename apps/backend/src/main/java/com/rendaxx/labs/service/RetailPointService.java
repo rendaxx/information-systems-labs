@@ -58,9 +58,11 @@ public class RetailPointService {
 
     public RetailPointDto create(SaveRetailPointDto command) {
         RetailPoint retailPoint = save(command, new RetailPoint());
-        RetailPointDto dto = mapper.toDto(retailPoint);
-        changePublisher.publish(
-                DESTINATION, Objects.requireNonNull(retailPoint.getId()), dto, EntityChangeType.CREATED);
+        RetailPointDto dto = repositoryGuard.execute(() -> repository
+                .findViewById(Objects.requireNonNull(retailPoint.getId()))
+                .map(mapper::toDto)
+                .orElseThrow(() -> new NotFoundException(RetailPoint.class, retailPoint.getId())));
+        changePublisher.publish(DESTINATION, Objects.requireNonNull(retailPoint.getId()), dto, EntityChangeType.CREATED);
         return dto;
     }
 

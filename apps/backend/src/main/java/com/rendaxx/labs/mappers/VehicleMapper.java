@@ -16,11 +16,7 @@ public abstract class VehicleMapper {
     @Mapping(target = "id", ignore = true)
     public abstract void update(@MappingTarget Vehicle vehicle, SaveVehicleDto dto, Driver driver);
 
-    public abstract VehicleDto toDto(Vehicle vehicle);
-
     public abstract VehicleDto toDto(VehicleView vehicle);
-
-    public abstract List<VehicleDto> toDto(List<Vehicle> vehicles);
 
     public abstract List<VehicleDto> toDtoFromView(List<VehicleView> vehicles);
 }

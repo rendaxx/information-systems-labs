@@ -17,11 +17,7 @@ public abstract class RetailPointMapper {
     @Mapping(target = "id", ignore = true)
     public abstract void update(@MappingTarget RetailPoint retailPoint, SaveRetailPointDto dto);
 
-    public abstract RetailPointDto toDto(RetailPoint retailPoint);
-
     public abstract RetailPointDto toDto(RetailPointView retailPoint);
-
-    public abstract List<RetailPointDto> toDto(List<RetailPoint> retailPoints);
 
     public abstract List<RetailPointDto> toDtoFromView(List<RetailPointView> retailPoints);
 

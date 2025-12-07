@@ -15,11 +15,7 @@ public abstract class DriverMapper {
     @Mapping(target = "id", ignore = true)
     public abstract void update(@MappingTarget Driver driver, SaveDriverDto dto);
 
-    public abstract DriverDto toDto(Driver driver);
-
     public abstract DriverDto toDto(DriverView driver);
-
-    public abstract List<DriverDto> toDto(List<Driver> drivers);
 
     public abstract List<DriverDto> toDtoFromView(List<DriverView> drivers);
 }
