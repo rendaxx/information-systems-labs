@@ -79,7 +79,7 @@ public class DriverService {
         Driver driver = repositoryGuard.execute(
                 () -> repository.findById(id).orElseThrow(() -> new NotFoundException(Driver.class, id)));
         repositoryGuard.execute(() -> repository.delete(driver));
-        changePublisher.publish(DESTINATION, Objects.requireNonNull(driver.getId()), null, EntityChangeType.DELETED);
+        changePublisher.publish(DESTINATION, Objects.requireNonNull(driver.getId()), EntityChangeType.DELETED);
     }
 
     private Driver save(SaveDriverDto command, Driver driver) {

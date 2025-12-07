@@ -11,6 +11,10 @@ public class EntityChangePublisher {
 
     private final ApplicationEventPublisher eventPublisher;
 
+    public void publish(String destination, Long entityId, EntityChangeType changeType) {
+        publish(destination, entityId, null, changeType);
+    }
+
     public <T> void publish(String destination, Long entityId, @Nullable T payload, EntityChangeType changeType) {
         EntityChangedEvent<T> event = new EntityChangedEvent<>(destination, entityId, payload, changeType);
         eventPublisher.publishEvent(event);

@@ -116,8 +116,7 @@ public class RetailPointService {
         RetailPoint retailPoint = repositoryGuard.execute(
                 () -> repository.findById(id).orElseThrow(() -> new NotFoundException(RetailPoint.class, id)));
         repositoryGuard.execute(() -> repository.delete(retailPoint));
-        changePublisher.publish(
-                DESTINATION, Objects.requireNonNull(retailPoint.getId()), null, EntityChangeType.DELETED);
+        changePublisher.publish(DESTINATION, Objects.requireNonNull(retailPoint.getId()), EntityChangeType.DELETED);
     }
 
     private RetailPoint save(SaveRetailPointDto command, RetailPoint retailPoint) {

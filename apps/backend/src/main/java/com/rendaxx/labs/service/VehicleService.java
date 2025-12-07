@@ -84,7 +84,7 @@ public class VehicleService {
         Vehicle vehicle = repositoryGuard.execute(
                 () -> repository.findById(id).orElseThrow(() -> new NotFoundException(Vehicle.class, id)));
         repositoryGuard.execute(() -> repository.delete(vehicle));
-        changePublisher.publish(DESTINATION, Objects.requireNonNull(vehicle.getId()), null, EntityChangeType.DELETED);
+        changePublisher.publish(DESTINATION, Objects.requireNonNull(vehicle.getId()), EntityChangeType.DELETED);
     }
 
     private Vehicle save(SaveVehicleDto command, Vehicle vehicle) {

@@ -109,7 +109,7 @@ public class RoutePointService {
         routePoint.getRoute().getRoutePoints().removeIf(rp -> Objects.equals(rp.getId(), routePointId));
         routeService.recalculateRoutePointOrderNumber(routePoint.getRoute());
         repositoryGuard.execute(() -> repository.delete(routePoint));
-        changePublisher.publish(DESTINATION, routePointId, null, EntityChangeType.DELETED);
+        changePublisher.publish(DESTINATION, routePointId, EntityChangeType.DELETED);
     }
 
     @Transactional(readOnly = true)

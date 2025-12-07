@@ -105,7 +105,7 @@ public class RouteService {
         Route route = repositoryGuard.execute(
                 () -> repository.findById(id).orElseThrow(() -> new NotFoundException(Route.class, id)));
         repositoryGuard.execute(() -> repository.delete(route));
-        changePublisher.publish(DESTINATION, Objects.requireNonNull(route.getId()), null, EntityChangeType.DELETED);
+        changePublisher.publish(DESTINATION, Objects.requireNonNull(route.getId()), EntityChangeType.DELETED);
     }
 
     public void recalculateRoutePointOrderNumber(Route route) {

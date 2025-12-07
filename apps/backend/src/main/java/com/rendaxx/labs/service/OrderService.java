@@ -78,7 +78,7 @@ public class OrderService {
         Order order = repositoryGuard.execute(
                 () -> repository.findById(id).orElseThrow(() -> new NotFoundException(Order.class, id)));
         repositoryGuard.execute(() -> repository.delete(order));
-        changePublisher.publish(DESTINATION, Objects.requireNonNull(order.getId()), null, EntityChangeType.DELETED);
+        changePublisher.publish(DESTINATION, Objects.requireNonNull(order.getId()), EntityChangeType.DELETED);
     }
 
     private Order save(SaveOrderDto command, Order order) {
