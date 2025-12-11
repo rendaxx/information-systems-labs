@@ -1,0 +1,17 @@
+generatorName: typescript-fetch
+inputSpec: ../../specs/openapi/openapi.yml
+outputDir: ./src/generated
+additionalProperties:
+  npmName: '@rendaxx/api-ts'
+  npmVersion: '0.0.0'
+  supportsES6: true
+  useSingleRequestParameter: true
+  modelPropertyNaming: original
+  enumPropertyNaming: original
+  withSeparateModelsAndApi: true
+  typescriptThreePlus: true
+  generatePackageJson: false
+  useUnionTypes: true
+  modelSuffix: Dto
+  apiSuffix: Api
+  legacyDiscriminatorBehavior: false

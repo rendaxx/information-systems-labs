@@ -1,0 +1,37 @@
+{
+  "name": "@rendaxx/api-ts",
+  "version": "0.0.0",
+  "description": "Generated TypeScript client for the information systems backend",
+  "private": false,
+  "type": "module",
+  "scripts": {
+    "clean": "rimraf src/generated",
+    "format": "prettier --log-level warn --write \"src/generated/**/*.ts\"",
+    "generate": "pnpm run clean && openapi-generator-cli generate -c ../../specs/openapi/ts-generator.yaml && pnpm run format",
+    "build": "pnpm run generate",
+    "lint": "echo \"TODO: lint TypeScript SDK\"",
+    "prepare": "pnpm run generate"
+  },
+  "files": [
+    "src"
+  ],
+  "main": "./src/index.ts",
+  "module": "./src/index.ts",
+  "types": "./src/index.ts",
+  "exports": {
+    ".": {
+      "import": "./src/index.ts",
+      "types": "./src/index.ts"
+    }
+  },
+  "sideEffects": false,
+  "engines": {
+    "node": ">=20",
+    "pnpm": ">=9"
+  },
+  "devDependencies": {
+    "@openapitools/openapi-generator-cli": "^2.25.0",
+    "prettier": "^3.3.3",
+    "rimraf": "^5.0.5"
+  }
+}

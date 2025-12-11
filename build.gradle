@@ -1,48 +1,50 @@
 plugins {
+    id 'org.springframework.boot' version '4.0.0' apply false
+    id 'io.spring.dependency-management' version '1.1.7' apply false
     id 'java'
-    id 'org.springframework.boot' version '3.5.6'
-    id 'io.spring.dependency-management' version '1.1.7'
+    id 'java-library'
+    id 'com.diffplug.spotless' version '6.25.0'
+    id 'checkstyle'
 }
 
 group = 'com.rendaxx'
 version = '0.0.1-SNAPSHOT'
 description = 'information-systems-labs'
 
-java {
-    toolchain {
-        languageVersion = JavaLanguageVersion.of(17)
+allprojects {
+    repositories {
+        mavenCentral()
     }
 }
 
-configurations {
-    compileOnly {
-        extendsFrom annotationProcessor
+subprojects {
+    pluginManager.withPlugin('java') {
+        apply plugin: 'com.diffplug.spotless'
+        apply plugin: 'checkstyle'
+
+        spotless {
+            java {
+                palantirJavaFormat('2.47.0')
+                target 'src/*/java/**/*.java'
+                targetExclude('build/**')
+            }
+        }
+
+        checkstyle {
+            toolVersion = '10.20.2'
+            config = resources.text.fromFile(rootProject.file('config/checkstyle/checkstyle.xml'))
+            configProperties = [
+                'checkstyle.suppressions.file': rootProject.file('config/checkstyle/suppressions.xml').absolutePath
+            ]
+            maxWarnings = 0
+        }
+
+        tasks.withType(Checkstyle).configureEach {
+            exclude('**/generated/**')
+            exclude('**/build/**')
+        }
+        tasks.named('check') {
+            dependsOn 'spotlessCheck'
+        }
     }
-}
-
-repositories {
-    mavenCentral()
-}
-
-dependencies {
-    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
-    implementation 'org.springframework.boot:spring-boot-starter-validation'
-    implementation 'org.springframework.boot:spring-boot-starter-web'
-    implementation 'org.springframework.boot:spring-boot-starter-websocket'
-    implementation 'org.flywaydb:flyway-core'
-    implementation 'org.flywaydb:flyway-database-postgresql'
-    compileOnly 'org.projectlombok:lombok'
-    developmentOnly 'org.springframework.boot:spring-boot-devtools'
-    runtimeOnly 'org.postgresql:postgresql'
-    annotationProcessor 'org.springframework.boot:spring-boot-configuration-processor'
-    annotationProcessor 'org.projectlombok:lombok'
-    testImplementation 'org.springframework.boot:spring-boot-starter-test'
-    testImplementation 'org.springframework.boot:spring-boot-testcontainers'
-    testImplementation 'org.testcontainers:junit-jupiter'
-    testImplementation 'org.testcontainers:postgresql'
-    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
-}
-
-tasks.named('test') {
-    useJUnitPlatform()
 }

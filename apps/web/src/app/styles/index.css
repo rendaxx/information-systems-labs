@@ -1,0 +1,101 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --font-sans: 'Inter', 'Segoe UI', system-ui;
+  --font-mono: 'JetBrains Mono', 'Fira Code', ui-monospace;
+
+  --background: 220 27% 98%;
+  --foreground: 220 30% 12%;
+
+  --card: 0 0% 100%;
+  --card-foreground: 220 30% 12%;
+
+  --primary: 221 83% 53%;
+  --primary-foreground: 0 0% 100%;
+
+  --secondary: 220 14% 95%;
+  --secondary-foreground: 220 30% 15%;
+
+  --accent: 280 61% 50%;
+  --accent-foreground: 0 0% 100%;
+
+  --muted: 220 14% 94%;
+  --muted-foreground: 220 11% 40%;
+
+  --border: 220 13% 89%;
+  --input: 220 13% 89%;
+  --ring: 221 83% 53%;
+
+  --destructive: 0 84% 60%;
+  --destructive-foreground: 0 0% 100%;
+
+  --success: 142 72% 29%;
+  --success-foreground: 0 0% 100%;
+
+  --warning: 35 92% 50%;
+  --warning-foreground: 25 95% 15%;
+
+  --radius-lg: 0.8rem;
+  --radius-md: 0.65rem;
+  --radius-sm: 0.5rem;
+}
+
+[data-theme='dark'] {
+  color-scheme: dark;
+
+  --background: 220 30% 10%;
+  --foreground: 220 20% 96%;
+
+  --card: 220 30% 12%;
+  --card-foreground: 220 20% 96%;
+
+  --primary: 221 83% 66%;
+  --primary-foreground: 223 57% 10%;
+
+  --secondary: 221 34% 17%;
+  --secondary-foreground: 220 20% 96%;
+
+  --accent: 280 61% 63%;
+  --accent-foreground: 223 57% 10%;
+
+  --muted: 221 34% 16%;
+  --muted-foreground: 220 20% 60%;
+
+  --border: 220 22% 20%;
+  --input: 220 22% 20%;
+  --ring: 221 83% 66%;
+
+  --destructive: 0 72% 50%;
+  --destructive-foreground: 0 0% 100%;
+
+  --success: 142 64% 40%;
+  --success-foreground: 142 21% 12%;
+
+  --warning: 35 92% 60%;
+  --warning-foreground: 32 100% 15%;
+}
+
+body {
+  @apply min-h-screen bg-background font-sans text-base text-foreground antialiased;
+}
+
+::selection {
+  background-color: hsl(var(--primary) / 0.25);
+}
+
+*,
+*::before,
+*::after {
+  border-color: hsl(var(--border));
+}
+
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
